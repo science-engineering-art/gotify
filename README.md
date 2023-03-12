@@ -1,2 +1,2 @@
-# spotify
+# Spotify
 Spotify implementation in Golang.
