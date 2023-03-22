@@ -12,6 +12,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func TestEndpoint(c *fiber.Ctx) error {
+	// Variable is only valid within this handler
+	result := c.Params("data")
+
+	// Make a copy
+	buffer := make([]byte, len(result))
+	copy(buffer, result)
+	resultCopy := string(buffer)
+	// Variable is now valid forever
+
+	return c.SendString(resultCopy)
+}
+
 func GetSong(c *fiber.Ctx) error {
 	collection, err := config.GetMongoDbCollection(config.DbName, config.CollectionName)
 	if err != nil {
