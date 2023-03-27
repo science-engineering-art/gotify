@@ -3,17 +3,17 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/science-engineering-art/spotify/config"
-	"github.com/science-engineering-art/spotify/controllers"
+	"github.com/science-engineering-art/spotify/routes"
 )
 
 func main() {
 	app := fiber.New()
 
-	app.Get("/test/:data", controllers.TestEndpoint)
-	// app.Get("/songs/:id?", controllers.GetSong)
-	// app.Post("/songs", controllers.CreateSong)
-	// app.Put("/songs/:id", controllers.UpdateSong)
-	// app.Delete("/songs/:id", controllers.DeleteSong)
+	//run database
+	config.ConnectDB()
 
-	app.Listen(config.Port)
+	//routes
+	routes.SongRoute(app)
+
+	app.Listen(":6000")
 }

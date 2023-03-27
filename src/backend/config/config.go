@@ -2,42 +2,45 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-const DbName = "songsdb"
-const CollectionName = "song"
-const Port = ":8000"
+// Replace the placeholder with your Atlas connection string
+const URI = "mongodb://user:pass@localhost:27017/?maxPoolSize=20&w=majority"
 
-// GetMongoDbConnection get connection of mongodb
-func GetMongoDbConnection() (*mongo.Client, error) {
+// Mongo DB Docker Image init command: docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass docker.uclv.cu/mongo
 
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
-
+func ConnectDB() *mongo.Client {
+	client, err := mongo.NewClient(options.Client().ApplyURI(URI))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = client.Ping(context.Background(), readpref.Primary())
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return client, nil
+	//ping the database
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Connected to MongoDB")
+	return client
 }
 
-func GetMongoDbCollection(DbName string, CollectionName string) (*mongo.Collection, error) {
-	client, err := GetMongoDbConnection()
+// Client instance
+var DB *mongo.Client = ConnectDB()
 
-	if err != nil {
-		return nil, err
-	}
-
-	collection := client.Database(DbName).Collection(CollectionName)
-
-	return collection, nil
+// getting database collections
+func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	collection := client.Database("admin").Collection(collectionName)
+	return collection
 }
