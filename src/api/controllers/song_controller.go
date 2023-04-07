@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -20,35 +21,43 @@ var songCollection *mongo.Collection = config.GetCollection(config.DB, "songs")
 var validate = validator.New()
 
 func CreateSong(c *fiber.Ctx) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var song models.Song
-	defer cancel()
-
-	//validate the request body
-	if err := c.BodyParser(&song); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.SongResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
-	}
-
-	//use the validator library to validate required fields
-	if validationErr := validate.Struct(&song); validationErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.SongResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
-	}
-
-	newSong := models.Song{
-		Id:       primitive.NewObjectID(),
-		Title:    song.Title,
-		Location: song.Location,
-		Genre:    song.Genre,
-		Album:    song.Album,
-		Author:   song.Author,
-	}
-
-	result, err := songCollection.InsertOne(ctx, newSong)
+	// Get first file from form field "file"
+	file, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.SongResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		return err
 	}
+	// Save file to root directory:
+	return c.SaveFile(file, fmt.Sprintf("./%s", file.Filename))
 
-	return c.Status(http.StatusCreated).JSON(responses.SongResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
+	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// var song models.Song
+	// defer cancel()
+
+	// //validate the request body
+	// if err := c.BodyParser(&song); err != nil {
+	// 	return c.Status(http.StatusBadRequest).JSON(responses.SongResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	// }
+
+	// //use the validator library to validate required fields
+	// if validationErr := validate.Struct(&song); validationErr != nil {
+	// 	return c.Status(http.StatusBadRequest).JSON(responses.SongResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
+	// }
+
+	// newSong := models.Song{
+	// 	Id:       primitive.NewObjectID(),
+	// 	Title:    song.Title,
+	// 	Location: song.Location,
+	// 	Genre:    song.Genre,
+	// 	Album:    song.Album,
+	// 	Author:   song.Author,
+	// }
+
+	// result, err := songCollection.InsertOne(ctx, newSong)
+	// if err != nil {
+	// 	return c.Status(http.StatusInternalServerError).JSON(responses.SongResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	// }
+
+	// return c.Status(http.StatusCreated).JSON(responses.SongResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
 }
 
 func GetSong(c *fiber.Ctx) error {
