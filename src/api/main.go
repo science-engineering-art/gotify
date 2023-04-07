@@ -15,5 +15,5 @@ func main() {
 	//routes
 	routes.SongRoute(app)
 
-	app.Listen(":6000")
+	app.Listen(":5000")
 }

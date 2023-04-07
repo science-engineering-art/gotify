@@ -1,21 +1,19 @@
 # Spotify
+
 Spotify implementation in Golang.
 
-## Installation
-Use the following command for downloading Golang dependencies:
+## Execution of services
+
+From the root directory execute the following commands.
+
+### Turn on
+
 ```bash
-$ go mod tidy
+cd scripts && source init.sh
 ```
 
-## Start MongoDB Service
-Install Docker and run the following commands:
-```bash
-$ docker pull docker.uclv.cu/mongo
-$ docker run docker.uclv.cu/mongo
-```
+### Turn off
 
-## Run Golang Rest-API
-Go to project main folder and run the following command:
 ```bash
-$ go run main.go
+cd scripts && source end.sh
 ```
