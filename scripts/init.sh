@@ -3,13 +3,13 @@
 source mongo.sh
 
 cd ../src/api
-go run main.go &
+nohup go run main.go 2>/dev/null &
 
 export API_PID=$!
 
 cd ../client
-npm run dev &
+nohup npm run dev 2>/dev/null &
 
 export WEB_PID=$!
 
-cd ../..
+cd ../../scripts

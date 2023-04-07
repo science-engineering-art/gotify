@@ -4,16 +4,16 @@ Spotify implementation in Golang.
 
 ## Execution of services
 
-From the root directory execute the following commands.
+From the `scripts` directory execute the following commands.
 
 ### Turn on
 
-```bash
-cd scripts && source init.sh
+```sh
+source init.sh
 ```
 
 ### Turn off
 
-```bash
-cd scripts && source end.sh
+```sh
+bash end.sh
 ```
