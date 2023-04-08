@@ -10,7 +10,7 @@ import (
 func main() {
 	// Fiber instance
 	app := fiber.New(fiber.Config{
-		BodyLimit: 40 * 1024 * 1024, // this is the default limit of 4MB
+		BodyLimit: 4000 * 1024 * 1024, // this is the default limit of 4MB
 	})
 
 	// configure CORS

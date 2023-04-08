@@ -1,12 +1,22 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/dhowden/tag"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Song struct {
-	Id       primitive.ObjectID `json:"id,omitempty"`
-	Title    string             `json:"title,omitempty" validate:"required"`
-	Genre    string             `json:"genre,omitempty" validate:"required"`
-	Author   string             `json:"author,omitempty" validate:"required"`
-	Album    string             `json:"album,omitempty" validate:"required"`
-	Location string             `json:"location,omitempty" validate:"required"`
+	Album       string             `json:"album,omitempty"`
+	AlbumArtist string             `json:"albumartist,omitempty"`
+	Artist      string             `json:"artist,omitempty"`
+	Comment     string             `json:"comment,omitempty"`
+	Composer    string             `json:"composer,omitempty"`
+	FileType    tag.FileType       `json:"filetype,omitempty"`
+	Format      tag.Format         `json:"format,omitempty"`
+	Genre       string             `json:"genre,omitempty"`
+	Id          primitive.ObjectID `bson:"_id,omitempty"`
+	Lyrics      string             `json:"lyrics,omitempty"`
+	RawSong     string             `json:"rawsong,omitempty"`
+	Title       string             `json:"title,omitempty"`
+	Year        int                `json:"year,omitempty"`
 }
