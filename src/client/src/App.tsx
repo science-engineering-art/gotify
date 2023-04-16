@@ -4,6 +4,7 @@ import { SplitScreen } from "./layouts/SplitScreen";
 import { ListRenderer } from "./layouts/ListRenderer";
 import { SongItem } from "./components/SongItem";
 import { NavBar } from "./components/NavBar";
+import { SongsList } from "./components/SongsList";
 
 const songs = [
   {
@@ -30,7 +31,9 @@ export default function App() {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   return (
     <div className="w-full h-full">
+
       <NavBar />
+
       <SplitScreen className="min-h-[600px]" leftWidth={4} rightWidth={8}>
         
         <div className="w-full h-full p-10 bg-orange-500">
@@ -53,14 +56,10 @@ export default function App() {
           </Modal>
         </div>
 
-        <div className="w-full h-full p-10 bg-gray-800">
-          <ListRenderer
-            ItemComponent={SongItem}
-            resourceName="song"
-            items={songs}
-          />
-        </div>
+        <SongsList />
+
       </SplitScreen>
+
     </div>
   );
 }

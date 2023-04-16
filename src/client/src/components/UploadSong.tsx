@@ -1,7 +1,11 @@
 import { ChangeEvent, MouseEvent, useState } from 'react';
 import { Modal } from '../layouts/Modal';
+import { useDispatch } from 'react-redux';
+import { uploadSong } from '../features/songsSlice';
+import { AppDispatch } from '../app/store';
 
 export const UploadSong = () => {  
+  const dispatch = useDispatch<AppDispatch>()
   const [song, setSong] = useState<File>();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -14,15 +18,7 @@ export const UploadSong = () => {
   const handleSubmit = async (e: MouseEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!song) return;
-
-    var form = new FormData();
-    form.append("file", song);
-
-    await fetch('http://localhost:5000/song', {
-      method: 'POST',
-      body: form
-    }).then(res => res.json())
-      .catch(e => console.log(e))
+    dispatch(uploadSong(song));
   }
 
   return (

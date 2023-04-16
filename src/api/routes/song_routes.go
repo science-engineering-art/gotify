@@ -7,9 +7,9 @@ import (
 
 func SongRoute(app *fiber.App) {
 	//All routes related to songs comes here
-	app.Post("/song", controllers.CreateSong)
-	app.Get("/song/:songId", controllers.GetSong)
-	app.Put("/song/:songId", controllers.EditSong)
-	app.Delete("/song/:songId", controllers.DeleteSong)
-	app.Get("/songs", controllers.GetSongs)
+	app.Post("/api/song", controllers.CreateSong)
+	app.Get("/api/song/:songId", controllers.GetSong)
+	app.Put("/api/song/:songId", controllers.EditSong)
+	app.Delete("/api/song/:songId", controllers.DeleteSong)
+	app.Get("/api/songs", controllers.GetSongs)
 }

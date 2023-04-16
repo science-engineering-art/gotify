@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
-import playerReducer from '../features/player/playerSlice'
+import songsReducer from '../features/songsSlice'
 
-export default configureStore({
+export const store = configureStore({
   reducer: {
-    player: playerReducer
+    songs: songsReducer
   }
 })
+
+export type AppDispatch = typeof store.dispatch;
