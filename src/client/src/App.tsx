@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Modal } from "./layout/Modal";
-import { SplitScreen } from "./layout/SplitScreen";
-import { ListRenderer } from "./layout/ListRenderer";
+import { Modal } from "./layouts/Modal";
+import { SplitScreen } from "./layouts/SplitScreen";
+import { ListRenderer } from "./layouts/ListRenderer";
+import { SongItem } from "./components/SongItem";
 
 const LeftScreen = () => (
   <div className="bg-orange-500 text-white h-full">Right Screen</div>
@@ -76,6 +77,24 @@ const products = [
   },
 ];
 
+const songs = [
+  {
+    title: "Yellow",
+    artist: "Cold Play",
+    year: 2009
+  },
+  {
+    title: "The Scientist",
+    artist: "Cold Play",
+    year: 2001
+  },
+  {
+    title: "Paradise",
+    artist: "Cold Play",
+    year: 2001
+  },
+];
+
 export default function App() {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   return (
@@ -95,9 +114,9 @@ export default function App() {
             requestToClose={() => setModalVisible(false)}
           >
             <ListRenderer
-              ItemComponent={PersonItem}
-              resourceName="person"
-              items={people}
+              ItemComponent={SongItem}
+              resourceName="song"
+              items={songs}
             />
           </Modal>
         </div>
@@ -120,5 +139,3 @@ export default function App() {
     </div>
   );
 }
-
-
