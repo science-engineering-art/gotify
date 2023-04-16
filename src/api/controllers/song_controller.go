@@ -254,7 +254,7 @@ func DeleteSong(c *fiber.Ctx) error {
 
 func GetSongs(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var songs []models.Song
+	var songs []models.SongDTO
 	defer cancel()
 
 	// get all docs of the DB
@@ -272,7 +272,7 @@ func GetSongs(c *fiber.Ctx) error {
 
 	// keep with the songs objects
 	for results.Next(ctx) {
-		var singleSong models.Song
+		var singleSong models.SongDTO
 		if err = results.Decode(&singleSong); err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(
 				responses.SongResponse{

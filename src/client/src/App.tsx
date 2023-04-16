@@ -7,16 +7,19 @@ import { NavBar } from "./components/NavBar";
 
 const songs = [
   {
+    Id: "643bee980a62fea680ada970",
     title: "Yellow",
     artist: "Cold Play",
     year: 2009
   },
   {
+    Id: "643bef5769adb538379887ad",
     title: "The Scientist",
     artist: "Cold Play",
     year: 2001
   },
   {
+    Id: "643bef5e69adb538379887ae",
     title: "Paradise",
     artist: "Cold Play",
     year: 2001
