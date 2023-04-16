@@ -18,7 +18,7 @@ export const Modal: FC<ModalPropsType> = ({
       onClick={requestToClose}
     >
       <div
-        className="relative min-w-[900px] p-5 min-h-[400px] bg-white"
+        className="relative min-w-[400px] p-5 min-h-[100px] bg-white"
         onClick={(e) => e.stopPropagation()}
       >
         <button onClick={requestToClose} className="text-red-500">Hide Modal</button>

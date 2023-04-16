@@ -1,7 +1,9 @@
 import { ChangeEvent, MouseEvent, useState } from 'react';
+import { Modal } from '../layouts/Modal';
 
 export const UploadSong = () => {  
   const [song, setSong] = useState<File>();
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files === null) 
@@ -24,15 +26,28 @@ export const UploadSong = () => {
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input 
-          title='File'
-          type='file' 
-          onChange={handleChange}
-          />
-        <input type='submit' value={'Submit'}/>
-      </form>
+    <div className="w-full h-full p-10">
+      <button
+        className="bg-green-500 hover:bg-gray-300 text-black font-bold py-1 px-2 rounded-lg"
+        onClick={() => setModalVisible(true)}
+      >
+        Add Song
+      </button>
+      <Modal
+        visible={modalVisible}
+        requestToClose={() => setModalVisible(false)}
+      >
+        <div>
+          <form onSubmit={handleSubmit}>
+            <input 
+              title='File'
+              type='file' 
+              onChange={handleChange}
+              />
+            <input type='submit' value={'Submit'}/>
+          </form>
+        </div>
+      </Modal>
     </div>
   );
 }
