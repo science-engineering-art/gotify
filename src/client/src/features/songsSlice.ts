@@ -3,10 +3,12 @@ import { client } from '../api/client'
 
 const initialState: {
   Id: string,
+  url: string,
   status: 'idle' | 'loading' | 'succeeded' | 'failed',
   error: string | null
 } = {
   Id: '',
+  url: '',
   status: 'idle',
   error: null
 };
@@ -15,9 +17,12 @@ export const songsSlice = createSlice({
   name: 'songs',
   initialState,
   reducers: {
-    selectedSong: (state, action) => {
-      state.Id = action.payload;
-    }
+    selectedSongId(state, action) {
+      state.Id = action.payload
+    },
+    selectedSongURL(state, action) {
+      state.url = action.payload
+    },
   }
 })
 
@@ -27,6 +32,6 @@ export const uploadSong = createAsyncThunk('songs/uploadSong', async (song: File
   client.post('song', form);
 });
 
-export const { selectedSong } = songsSlice.actions
+export const { selectedSongId, selectedSongURL } = songsSlice.actions
 
 export default songsSlice.reducer

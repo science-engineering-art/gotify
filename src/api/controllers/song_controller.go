@@ -135,7 +135,7 @@ func GetSong(c *fiber.Ctx) error {
 		responses.SongResponse{
 			Status:  http.StatusOK,
 			Message: "success",
-			Data:    &fiber.Map{"data": song},
+			Data:    &fiber.Map{"rawSong": song.RawSong},
 		},
 	)
 }
