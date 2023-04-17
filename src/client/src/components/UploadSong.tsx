@@ -19,6 +19,7 @@ export const UploadSong = () => {
     e.preventDefault();
     if (!song) return;
     dispatch(uploadSong(song));
+    setModalVisible(false);
   }
 
   return (
@@ -40,7 +41,11 @@ export const UploadSong = () => {
               type='file' 
               onChange={handleChange}
               />
-            <input type='submit' value={'Submit'}/>
+            <input
+              className='bg-green-500 hover:bg-gray-300 text-black font-bold py-1 px-2 rounded-lg' 
+              type='submit' 
+              value={'Submit'}
+            />
           </form>
         </div>
       </Modal>

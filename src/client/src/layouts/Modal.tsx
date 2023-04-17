@@ -18,10 +18,15 @@ export const Modal: FC<ModalPropsType> = ({
       onClick={requestToClose}
     >
       <div
-        className="relative min-w-[400px] p-5 min-h-[100px] bg-white"
+        className="relative min-w-[400px] p-5 min-h-[100px] bg-gray-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={requestToClose} className="text-red-500">Hide Modal</button>
+        <button 
+          onClick={requestToClose} 
+          className="text-red-500"
+        >
+          Hide Modal
+        </button>
         {children}
       </div>
     </div>
