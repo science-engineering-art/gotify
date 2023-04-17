@@ -51,7 +51,7 @@ export const SongItem = ({ song }: SongItemPropsType) =>{
 
   return (
     <li 
-      className="w-full p-5 bg-cyan-500 my-2" 
+      className="w-full p-5 bg-green-500 my-2 rounded-3xl hover:bg-opacity-60" 
       onClick={handleSelectedSong}
     >
       <h1 className="text-2xl"> {song?.title} </h1>

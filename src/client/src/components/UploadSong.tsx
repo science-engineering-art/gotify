@@ -25,7 +25,7 @@ export const UploadSong = () => {
   return (
     <div className="w-full h-full p-10">
       <button
-        className="bg-green-500 hover:bg-gray-300 text-black font-bold py-1 px-2 rounded-lg"
+        className="bg-green-500 hover:bg-opacity-80 text-black font-bold py-1 px-2 rounded-lg"
         onClick={() => setModalVisible(true)}
       >
         Add Song

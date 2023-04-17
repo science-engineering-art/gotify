@@ -25,7 +25,7 @@ export const SongsList = () => {
   }, [])
 
   return (
-    <div className="w-full h-full p-10 bg-gray-800">
+    <div className="w-full h-full p-10 bg-gray-500">
       {songs && <ListRenderer
         ItemComponent={SongItem}
         resourceName="song"
