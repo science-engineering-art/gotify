@@ -4,16 +4,16 @@ Spotify implementation in Golang.
 
 ## Execution of services
 
-From the `scripts` directory execute the following commands.
+From the root directory execute the following commands.
 
 ### Turn on
 
 ```sh
-source init.sh
+docker-compose up web
 ```
 
 ### Turn off
 
 ```sh
-bash end.sh
+docker-compose down
 ```
