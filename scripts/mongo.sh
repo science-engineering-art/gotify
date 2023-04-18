@@ -1,3 +1,3 @@
 #!/bin/sh
 
-export MONGODB_PID=$(docker run --rm --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass docker.uclv.cu/mongo)
+export MONGODB_PID=$(docker run --rm --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=password docker.uclv.cu/mongo)

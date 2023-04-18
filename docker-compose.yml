@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  db:
+    image: docker.uclv.cu/mongo
+    restart: always
+    env_file: ./src/api/.env
+    volumes:
+      - mongo_data:/data/db
+  api:
+    build: 
+      context: .
+      dockerfile: ./src/api/Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - ./src/api:/app
+    ports:
+      - 5000:5000
+    env_file: ./src/api/.env
+  web:
+    build:
+      context: .
+      dockerfile: ./src/client/Dockerfile
+    depends_on:
+      - api
+    volumes:
+      - ./src/client/src:/app/src
+    ports:
+      - 3000:3000
+volumes:
+  mongo_data:

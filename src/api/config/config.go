@@ -11,9 +11,9 @@ import (
 )
 
 // Replace the placeholder with your Atlas connection string
-const URI = "mongodb://user:pass@localhost:27017/?maxPoolSize=20&w=majority"
+const URI = "mongodb://user:password@db:27017/?maxPoolSize=20&w=majority"
 
-// Mongo DB Docker Image init command: docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass docker.uclv.cu/mongo
+// Mongo DB Docker Image init command: docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=password docker.uclv.cu/mongo
 
 func ConnectDB() *mongo.Client {
 	client, err := mongo.NewClient(options.Client().ApplyURI(URI))
