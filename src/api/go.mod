@@ -3,15 +3,15 @@ module github.com/science-engineering-art/spotify
 go 1.20
 
 require (
+	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
 	github.com/gofiber/fiber/v2 v2.43.0
+	github.com/google/uuid v1.3.0
 	go.mongodb.org/mongo-driver v1.11.4
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086 // direct
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect

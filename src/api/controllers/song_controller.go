@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/dhowden/tag"
+	"github.com/google/uuid"
 	"github.com/science-engineering-art/spotify/config"
 	"github.com/science-engineering-art/spotify/models"
 	"github.com/science-engineering-art/spotify/responses"
@@ -131,13 +132,31 @@ func GetSong(c *fiber.Ctx) error {
 		)
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.SongResponse{
-			Status:  http.StatusOK,
-			Message: "success",
-			Data:    &fiber.Map{"rawSong": song.RawSong},
-		},
-	)
+	songBytes, err := base64.RawStdEncoding.DecodeString(song.RawSong)
+	if err != nil {
+		return c.Status(
+			http.StatusInternalServerError).JSON(
+			responses.SongResponse{
+				Status:  http.StatusInternalServerError,
+				Message: "error",
+				Data:    &fiber.Map{"data": err.Error()},
+			},
+		)
+	}
+
+	// Get the unique identifier from the request context
+	requestId, ok := c.Context().UserValue("requestId").(uuid.UUID)
+	if !ok {
+		// Handle error if unique identifier cannot be obtained
+		return fiber.NewError(fiber.StatusInternalServerError, "Unique identifier could not be obtained")
+	}
+
+	fileName := fmt.Sprintf("./public/tmp_%s.mp3", requestId.String())
+
+	os.WriteFile(fileName, songBytes, 0600)
+	defer os.Remove(fileName)
+
+	return c.SendFile(fileName, true)
 }
 
 func EditSong(c *fiber.Ctx) error {

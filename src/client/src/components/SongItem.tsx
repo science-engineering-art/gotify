@@ -19,34 +19,7 @@ export const SongItem = ({ song }: SongItemPropsType) =>{
 
   const handleSelectedSong = async (_: MouseEvent<HTMLLIElement>) => {
     dispatch(selectedSongId(song.Id))
-
-    // get the selected song and create an URL object
-    await fetch(`http://localhost:5000/api/song/${song.Id}`)
-      .then(response => response.json())
-      .then(data => {
-        // Decodificar la cadena base64
-        const decodedString = atob(data.data.rawSong)
-
-        // Convertir la cadena decodificada en un arreglo de bytes
-        const bytes = new Uint8Array(decodedString.length)
-        for (let i = 0; i < decodedString.length; i++) {
-          bytes[i] = decodedString.charCodeAt(i)
-        }
-        
-        // Crear un objeto Blob a partir del contenido de la canción
-        const blob = new Blob([bytes], { type: "audio/mp3" })
-        
-        // Crear un objeto URL a partir del objeto Blob
-        dispatch(selectedSongURL(
-          URL.createObjectURL(blob)
-        ))
-
-        // remove the last selected song url
-        if (songUrl){
-          URL.revokeObjectURL(songUrl)
-        }
-      })
-      .catch(error => console.error(error))
+    dispatch(selectedSongURL(`http://localhost:5000/api/song/${song.Id}`))
   }
 
   return (

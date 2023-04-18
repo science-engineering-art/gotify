@@ -42,7 +42,7 @@ export const UploadSong = () => {
               onChange={handleChange}
               />
             <input
-              className='bg-green-500 hover:bg-gray-300 text-black font-bold py-1 px-2 rounded-lg' 
+              className='bg-green-500 hover:bg-opacity-80 text-black font-bold py-1 px-2 rounded-lg' 
               type='submit' 
               value={'Submit'}
             />
