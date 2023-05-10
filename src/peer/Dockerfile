@@ -1,10 +1,11 @@
-FROM docker.uclv.cu/golang:1.20-alpine
+FROM spotify-rpc:latest
 
-WORKDIR /app
-
-RUN go install github.com/cosmtrek/air@latest
+WORKDIR /app/peer
 
 COPY ./src/peer/go.mod ./
+
 RUN go mod download
+
+COPY ./src/docker/peer/go.work ../
 
 CMD ["air", "-c", ".air.toml"]

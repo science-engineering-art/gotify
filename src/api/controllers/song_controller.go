@@ -310,7 +310,7 @@ import (
 
 func GreetPeer(c *fiber.Ctx) error {
 	const (
-		defaultName = "Leandro"
+		defaultName = "world!"
 	)
 
 	var (

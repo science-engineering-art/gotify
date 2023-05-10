@@ -4,4 +4,5 @@ use(
     ./src/cli
     ./src/api
     ./src/rpc
+    ./src/peer
 )
