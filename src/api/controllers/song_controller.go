@@ -12,9 +12,9 @@ import (
 
 	"github.com/dhowden/tag"
 	"github.com/google/uuid"
-	"github.com/science-engineering-art/spotify/config"
-	"github.com/science-engineering-art/spotify/models"
-	"github.com/science-engineering-art/spotify/responses"
+	"github.com/science-engineering-art/spotify/src/api/config"
+	"github.com/science-engineering-art/spotify/src/api/models"
+	"github.com/science-engineering-art/spotify/src/api/responses"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
