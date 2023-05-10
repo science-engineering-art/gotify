@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package song;
+
+option go_package = "github.com/science-engineering-art/spotify/src/rpc";
+
+message Song {
+    string Album       = 1;
+    string AlbumArtist = 2;
+    string Artist      = 3;
+    string Comment     = 4;
+    string Composer    = 5;
+    string FileType    = 6;
+    string Format      = 7;
+    string Genre       = 8;
+    string Id          = 9;
+    string Lyrics      = 10;
+    string RawSong     = 11;
+    string Title       = 12;
+    int32  Year        = 13;
+}
+
+message CreateSongRequest {
+    string RawSong = 1;
+}
+
+message UpdateSongRequest {
+    optional string Album       = 1;
+    optional string AlbumArtist = 2;
+    optional string Artist      = 3;
+    optional string Comment     = 4;
+    optional string Composer    = 5;
+    optional string FileType    = 6;
+    optional string Format      = 7;
+    optional string Genre       = 8;
+    string          Id          = 9;
+    optional string Lyrics      = 10;
+    optional string Title       = 11;
+    optional int32  Year        = 12;
+}
+
+message SongIdRequest {
+    string Id = 1;
+}
+
+message Request { }
+
+message Response {
+    bool Success = 1;
+}
+
+service SongService {
+    rpc CreateSong(CreateSongRequest) returns (Response)    {}
+    rpc UpdateSong(UpdateSongRequest) returns (Response)    {}
+    rpc GetSongById(SongIdRequest)    returns (Song)        {}
+    rpc GetSongs(Request)             returns (stream Song) {}
+    rpc RemoveSongById(SongIdRequest) returns (Response)    {}
+}
