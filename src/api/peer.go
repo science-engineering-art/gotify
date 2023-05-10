@@ -26,7 +26,7 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/science-engineering-art/spotify/peer"
+	pb "github.com/science-engineering-art/spotify/src/api/peer"
 	"google.golang.org/grpc"
 )
 
