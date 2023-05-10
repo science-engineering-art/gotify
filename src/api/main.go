@@ -5,7 +5,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/google/uuid"
 	"github.com/science-engineering-art/spotify/config"
-	"github.com/science-engineering-art/spotify/peer"
 	"github.com/science-engineering-art/spotify/routes"
 )
 
@@ -44,12 +43,12 @@ func main() {
 	// Run the database
 	config.ConnectDB()
 
+	// Init Peer
+	go InitPeer()
+
 	// Configure the routes
 	routes.SongRoute(app)
 
 	// Enable port for listening
 	app.Listen(":5000")
-
-	// Init Peer
-	peer.InitPeer()
 }
