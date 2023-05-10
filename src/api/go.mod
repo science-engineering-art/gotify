@@ -1,4 +1,4 @@
-module github.com/science-engineering-art/spotify
+module github.com/science-engineering-art/spotify/src/api
 
 go 1.20
 

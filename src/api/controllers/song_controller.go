@@ -12,14 +12,16 @@ import (
 
 	"github.com/dhowden/tag"
 	"github.com/google/uuid"
-	"github.com/science-engineering-art/spotify/config"
-	"github.com/science-engineering-art/spotify/models"
-	pb "github.com/science-engineering-art/spotify/peer"
-	"github.com/science-engineering-art/spotify/responses"
+
+	pb "github.com/science-engineering-art/spotify/src/api/peer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"flag"
+
+	"github.com/science-engineering-art/spotify/src/api/config"
+	"github.com/science-engineering-art/spotify/src/api/models"
+	"github.com/science-engineering-art/spotify/src/api/responses"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
