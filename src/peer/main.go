@@ -26,7 +26,7 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/science-engineering-art/spotify/src/api/peer"
+	pb "github.com/science-engineering-art/spotify/src/rpc/helloworld"
 	"google.golang.org/grpc"
 )
 
@@ -49,7 +49,7 @@ func (s *server) SayHelloAgain(ctx context.Context, in *pb.HelloRequest) (*pb.He
 	return &pb.HelloReply{Message: "Hello again " + in.GetName()}, nil
 }
 
-func InitPeer() {
+func main() {
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {

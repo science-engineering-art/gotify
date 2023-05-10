@@ -11,12 +11,12 @@ services:
     build: 
       context: .
       dockerfile: ./src/api/Dockerfile
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     volumes:
-      - ./src/api:/app
-    ports:
-      - 5000:5000
+      - ./src/api:/app/api
+      - ./src/rpc:/app/rpc
+    network_mode: host
     env_file: ./src/api/.env
   web:
     build:
@@ -28,5 +28,13 @@ services:
       - ./src/client/src:/app/src
     ports:
       - 3000:3000
+  peer:
+    build: 
+      context: .
+      dockerfile: ./src/peer/Dockerfile
+    depends_on: 
+      - db
+    volumes:
+      - ./src/client:/app
 volumes:
   mongo_data:
