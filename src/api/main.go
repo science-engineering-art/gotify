@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/google/uuid"
 
+	"github.com/science-engineering-art/spotify/src/api/config"
 	"github.com/science-engineering-art/spotify/src/api/routes"
 )
 
@@ -41,7 +42,7 @@ func main() {
 	})
 
 	// Run the database
-	// config.ConnectDB()
+	config.ConnectDB()
 
 	// Init Peer
 	//go InitPeer()

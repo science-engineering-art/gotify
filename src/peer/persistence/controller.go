@@ -1,4 +1,4 @@
-package controllers
+package persistence
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	pb "github.com/science-engineering-art/spotify/src/rpc/helloworld"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -20,12 +21,11 @@ import (
 	"github.com/science-engineering-art/spotify/src/api/models"
 	"github.com/science-engineering-art/spotify/src/api/responses"
 
-	"github.com/gofiber/fiber/v2"
 )
 
 var songCollection *mongo.Collection = config.GetCollection(config.DB, "songs")
 
-func CreateSong(c *fiber.Ctx) error {
+func CreateSong() error {
 
 	// get file from the multipart-form
 	fileForm, err := c.FormFile("file")
@@ -110,39 +110,40 @@ func CreateSong(c *fiber.Ctx) error {
 	)
 }
 
-func GetSong(c *fiber.Ctx) error {
+func GetSong(songId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	// get the song ID
-	songId := c.Params("songId")
 	var song models.Song
-	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(songId)
 
 	// find the song with the ID requested
 	err := songCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&song)
 	if err != nil {
-		return c.Status(
-			http.StatusInternalServerError).JSON(
-			responses.SongResponse{
-				Status:  http.StatusInternalServerError,
-				Message: "error",
-				Data:    &fiber.Map{"data": err.Error()},
-			},
-		)
+		return err
+		// return c.Status(
+		// 	http.StatusInternalServerError).JSON(
+		// 	responses.SongResponse{
+		// 		Status:  http.StatusInternalServerError,
+		// 		Message: "error",
+		// 		Data:    &fiber.Map{"data": err.Error()},
+		// 	},
+		// )
 	}
 
 	songBytes, err := base64.RawStdEncoding.DecodeString(song.RawSong)
 	if err != nil {
-		return c.Status(
-			http.StatusInternalServerError).JSON(
-			responses.SongResponse{
-				Status:  http.StatusInternalServerError,
-				Message: "error",
-				Data:    &fiber.Map{"data": err.Error()},
-			},
-		)
+		return err
+		// return c.Status(
+		// 	http.StatusInternalServerError).JSON(
+		// 	responses.SongResponse{
+		// 		Status:  http.StatusInternalServerError,
+		// 		Message: "error",
+		// 		Data:    &fiber.Map{"data": err.Error()},
+		// 	},
+		// )
 	}
 
 	// Get the unique identifier from the request context
@@ -160,25 +161,22 @@ func GetSong(c *fiber.Ctx) error {
 	return c.SendFile(fileName, true)
 }
 
-func EditSong(c *fiber.Ctx) error {
+func EditSong(songId string, song models.Song) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-
-	songId := c.Params("songId")
-	var song models.Song
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(songId)
 
-	//validate the request body
-	if err := c.BodyParser(&song); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(
-			responses.SongResponse{
-				Status:  http.StatusBadRequest,
-				Message: "error",
-				Data:    &fiber.Map{"data": err.Error()},
-			},
-		)
-	}
+	// //validate the request body
+	// if err := c.BodyParser(&song); err != nil {
+	// 	return c.Status(http.StatusBadRequest).JSON(
+	// 		responses.SongResponse{
+	// 			Status:  http.StatusBadRequest,
+	// 			Message: "error",
+	// 			Data:    &fiber.Map{"data": err.Error()},
+	// 		},
+	// 	)
+	// }
 
 	// construct the updated song
 	update := bson.M{
@@ -234,45 +232,47 @@ func EditSong(c *fiber.Ctx) error {
 	)
 }
 
-func DeleteSong(c *fiber.Ctx) error {
+func DeleteSong(songId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	songId := c.Params("songId")
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(songId)
 
 	result, err := songCollection.DeleteOne(ctx, bson.M{"_id": objId})
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(
-			responses.SongResponse{
-				Status:  http.StatusInternalServerError,
-				Message: "error",
-				Data:    &fiber.Map{"data": err.Error()},
-			},
-		)
+		return err
+		// return c.Status(http.StatusInternalServerError).JSON(
+		// 	responses.SongResponse{
+		// 		Status:  http.StatusInternalServerError,
+		// 		Message: "error",
+		// 		Data:    &fiber.Map{"data": err.Error()},
+		// 	},
+		// )
 	}
 
 	// check that as least there are one file with the specified ID
 	if result.DeletedCount < 1 {
-		return c.Status(http.StatusNotFound).JSON(
-			responses.SongResponse{
-				Status:  http.StatusNotFound,
-				Message: "error",
-				Data:    &fiber.Map{"data": "User with specified ID not found!"},
-			},
-		)
+		return nil
+		// return c.Status(http.StatusNotFound).JSON(
+		// 	responses.SongResponse{
+		// 		Status:  http.StatusNotFound,
+		// 		Message: "error",
+		// 		Data:    &fiber.Map{"data": "User with specified ID not found!"},
+		// 	},
+		// )
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.SongResponse{
-			Status:  http.StatusOK,
-			Message: "success",
-			Data:    &fiber.Map{"data": "User successfully deleted!"},
-		},
-	)
+	return nil
+	// return c.Status(http.StatusOK).JSON(
+	// 	responses.SongResponse{
+	// 		Status:  http.StatusOK,
+	// 		Message: "success",
+	// 		Data:    &fiber.Map{"data": "User successfully deleted!"},
+	// 	},
+	// )
 }
 
-func GetSongs(c *fiber.Ctx) error {
+func GetSongs() []models.SongDTO {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var songs []models.SongDTO
 	defer cancel()
@@ -280,13 +280,14 @@ func GetSongs(c *fiber.Ctx) error {
 	// get all docs of the DB
 	results, err := songCollection.Find(ctx, bson.M{})
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(
-			responses.SongResponse{
-				Status:  http.StatusInternalServerError,
-				Message: "error",
-				Data:    &fiber.Map{"data": err.Error()},
-			},
-		)
+		return err
+		// return c.Status(http.StatusInternalServerError).JSON(
+		// 	responses.SongResponse{
+		// 		Status:  http.StatusInternalServerError,
+		// 		Message: "error",
+		// 		Data:    &fiber.Map{"data": err.Error()},
+		// 	},
+		// )
 	}
 	defer results.Close(ctx)
 
@@ -294,27 +295,29 @@ func GetSongs(c *fiber.Ctx) error {
 	for results.Next(ctx) {
 		var singleSong models.SongDTO
 		if err = results.Decode(&singleSong); err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(
-				responses.SongResponse{
-					Status:  http.StatusInternalServerError,
-					Message: "error",
-					Data:    &fiber.Map{"data": err.Error()},
-				},
-			)
+			return err
+			// return c.Status(http.StatusInternalServerError).JSON(
+			// 	responses.SongResponse{
+			// 		Status:  http.StatusInternalServerError,
+			// 		Message: "error",
+			// 		Data:    &fiber.Map{"data": err.Error()},
+			// 	},
+			// )
 		}
 		songs = append(songs, singleSong)
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.SongResponse{
-			Status:  http.StatusOK,
-			Message: "success",
-			Data:    &fiber.Map{"data": songs},
-		},
-	)
+	return songs
+	// return c.Status(http.StatusOK).JSON(
+	// 	responses.SongResponse{
+	// 		Status:  http.StatusOK,
+	// 		Message: "success",
+	// 		Data:    &fiber.Map{"data": songs},
+	// 	},
+	// )
 }
 
-func GreetPeer(c *fiber.Ctx) error {
+func GreetPeer() error {
 	const (
 		defaultName = "world!"
 	)
