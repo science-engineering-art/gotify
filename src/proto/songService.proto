@@ -13,7 +13,7 @@ message Song {
     string FileType    = 6;
     string Format      = 7;
     string Genre       = 8;
-    string Id          = 9;
+    bytes  Id          = 9;
     string Lyrics      = 10;
     string RawSong     = 11;
     string Title       = 12;
@@ -35,14 +35,14 @@ message UpdateSongRequest {
     optional string FileType    = 6;
     optional string Format      = 7;
     optional string Genre       = 8;
-    string          Id          = 9;
+    bytes           Id          = 9;
     optional string Lyrics      = 10;
     optional string Title       = 11;
     optional int32  Year        = 12;
 }
 
 message SongIdRequest {
-    string Id = 1;
+    bytes Id = 1;
 }
 
 message Request { }
