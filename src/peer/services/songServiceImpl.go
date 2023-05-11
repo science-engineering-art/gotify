@@ -3,8 +3,9 @@ package services
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/dhowden/tag"
 	"github.com/science-engineering-art/spotify/src/peer/models"
@@ -25,14 +26,8 @@ func NewSongService(songCollection *mongo.Collection, ctx context.Context) SongS
 	return &SongServiceImpl{songCollection, ctx}
 }
 
-func (s *SongServiceImpl) CreateSong(rawSong string) error {
-
-	buffer, err := base64.RawStdEncoding.DecodeString(rawSong)
-	if err != nil {
-		return err
-	}
-
-	songBytes := bytes.NewReader(buffer)
+func (s *SongServiceImpl) CreateSong(rawSong []byte) error {
+	songBytes := bytes.NewReader(rawSong)
 
 	m, err := tag.ReadFrom(songBytes)
 	if err != nil {
@@ -52,6 +47,7 @@ func (s *SongServiceImpl) CreateSong(rawSong string) error {
 		Format:      m.Format(),
 		Genre:       m.Genre(),
 		Id:          objId,
+		RawSong:     rawSong,
 		Lyrics:      m.Lyrics(),
 		Title:       m.Title(),
 		Year:        m.Year(),
@@ -125,11 +121,14 @@ func (s *SongServiceImpl) GetSongs() ([]*models.Song, error) {
 	// opt.SetLimit(int64(limit))
 	// opt.SetSkip(int64(skip))
 	// opt.SetSort(bson.M{"created_at": -1})
-
 	query := bson.M{}
 
-	cursor, err := s.songCollection.Find(s.ctx, query, &opt)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := s.songCollection.Find(ctx, query, &opt)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, err
 	}
 

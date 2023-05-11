@@ -1,11 +1,9 @@
-FROM spotify-rpc:latest
+FROM docker.uclv.cu/golang:1.20-alpine
 
-WORKDIR /app/peer
+WORKDIR /app
 
 COPY ./src/peer/go.mod ./
 
 RUN go mod download
-
-COPY ./src/docker/peer/go.work ../
 
 CMD ["air", "-c", ".air.toml"]

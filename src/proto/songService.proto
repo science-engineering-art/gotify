@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package song;
+option go_package = "github.com/science-engineering-art/spotify/src/proto/pb";
 
-option go_package = "github.com/science-engineering-art/spotify/src/rpc";
+package songs;
 
 message Song {
     string Album       = 1;
@@ -20,8 +20,10 @@ message Song {
     int32  Year        = 13;
 }
 
-message CreateSongRequest {
-    string RawSong = 1;
+message RawSongRequest {
+    int32 Init = 1;
+    int32 End = 2;
+    bytes RawSong = 3;
 }
 
 message UpdateSongRequest {
@@ -50,7 +52,7 @@ message Response {
 }
 
 service SongService {
-    rpc CreateSong(CreateSongRequest) returns (Response)    {}
+    rpc CreateSong(stream RawSongRequest) returns (Response)    {}
     rpc UpdateSong(UpdateSongRequest) returns (Response)    {}
     rpc GetSongById(SongIdRequest)    returns (Song)        {}
     rpc GetSongs(Request)             returns (stream Song) {}

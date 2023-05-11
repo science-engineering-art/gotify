@@ -1,4 +1,4 @@
-package api
+package rpc
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 
 	"github.com/dhowden/tag"
 	"github.com/science-engineering-art/spotify/src/peer/models"
+	"github.com/science-engineering-art/spotify/src/peer/pb"
 	"github.com/science-engineering-art/spotify/src/peer/services"
-	pb "github.com/science-engineering-art/spotify/src/rpc/songs"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -31,20 +31,39 @@ func NewGrpcSongServer(songCollection *mongo.Collection, songService services.So
 	return songServer, nil
 }
 
-func (songServer *SongServer) CreateSong(ctx context.Context, req *pb.CreateSongRequest) (*pb.Response, error) {
+func (songServer *SongServer) CreateSong(stream pb.SongService_CreateSongServer) error {
 
-	err := songServer.songService.CreateSong(req.GetRawSong())
-	if err != nil {
-		if strings.Contains(err.Error(), "title already exists") {
-			return nil, status.Errorf(codes.AlreadyExists, err.Error())
+	buffer := []byte{}
+	var init int32 = 0
+
+	for {
+		rawSong, err := stream.Recv()
+		if rawSong == nil {
+			break
 		}
-		return nil, status.Errorf(codes.Internal, err.Error())
+
+		if init == rawSong.Init {
+			buffer = append(buffer, rawSong.GetRawSong()...)
+			init = rawSong.End
+		} else {
+			return err
+		}
+
+		if err != nil {
+			return err
+		}
 	}
 
-	res := &pb.Response{
-		Success: true,
+	err := songServer.songService.CreateSong(buffer)
+	if err != nil {
+
+		if strings.Contains(err.Error(), "title already exists") {
+			return status.Errorf(codes.AlreadyExists, err.Error())
+		}
+		return status.Errorf(codes.Internal, err.Error())
 	}
-	return res, nil
+
+	return nil
 }
 
 func (songServer *SongServer) UpdateSong(ctx context.Context, req *pb.UpdateSongRequest) (*pb.Response, error) {

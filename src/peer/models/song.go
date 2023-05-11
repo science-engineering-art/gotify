@@ -16,7 +16,7 @@ type Song struct {
 	Genre       string             `json:"genre,omitempty" bson:"genre,omitempty"`
 	Id          primitive.ObjectID `json:"id" bson:"_id" binding:"required"`
 	Lyrics      string             `json:"lyrics,omitempty" bson:"lyrics,omitempty"`
-	RawSong     string             `json:"rawsong" bson:"rawsong" binding:"required"`
+	RawSong     []byte             `json:"rawsong" bson:"rawsong" binding:"required"`
 	Title       string             `json:"title,omitempty" bson:"title,omitempty"`
 	Year        int                `json:"year,omitempty" bson:"year,omitempty"`
 }

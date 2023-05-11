@@ -8,14 +8,6 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  rpc: 
-    build: 
-      context: .
-      dockerfile: ./src/docker/rpc/Dockerfile
-    volumes:
-      - ./src/rpc:/app/rpc
-    network_mode: host  
-
   api:
     build: 
       context: .
@@ -40,12 +32,11 @@ services:
     build: 
       context: .
       dockerfile: ./src/peer/Dockerfile
-    # depends_on: 
-    #   - db
+    depends_on: 
+      - db
     network_mode: host
     volumes:
       - ./src/peer:/app/peer
-      - ./src/rpc:/app/rpc
     env_file: ./src/peer/.env
 
 volumes:

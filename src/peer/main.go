@@ -6,9 +6,9 @@ import (
 	"log"
 	"net"
 
-	"github.com/science-engineering-art/spotify/src/peer/api"
+	"github.com/science-engineering-art/spotify/src/peer/pb"
+	"github.com/science-engineering-art/spotify/src/peer/rpc"
 	"github.com/science-engineering-art/spotify/src/peer/services"
-	pb "github.com/science-engineering-art/spotify/src/rpc/songs"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,35 +25,46 @@ var (
 	songCollection *mongo.Collection
 
 	grpcServerAddress string = "0.0.0.0:8080"
-	DBUri             string = "mongodb://user:password@db:27017/?maxPoolSize=20&w=majority"
+	URI               string = "mongodb://user:password@127.0.0.1:27017/?maxPoolSize=20&w=majority"
 )
 
 func init() {
-	ctx = context.TODO()
-
-	// Connect to MongoDB
-	mongoconn := options.Client().ApplyURI(DBUri)
-	mongoclient, err := mongo.Connect(ctx, mongoconn)
-
+	client, err := mongo.NewClient(options.Client().ApplyURI(URI))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	if err := mongoclient.Ping(ctx, readpref.Primary()); err != nil {
+	ctx = context.TODO()
+
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// ctx = context.TODO()
+
+	// // Connect to MongoDB
+	// mongoconn := options.Client().ApplyURI(DBUri)
+	// mongoclient, err := mongo.Connect(ctx, mongoconn)
+
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
 		panic(err)
 	}
 
 	fmt.Println("MongoDB successfully connected...")
 
 	// Collections
-	songCollection = mongoclient.Database("gotify").Collection("songs")
+	songCollection = client.Database("admin").Collection("songs")
 	songService = services.NewSongService(songCollection, ctx)
 }
 
 func main() {
 	defer mongoclient.Disconnect(ctx)
 
-	songServer, err := api.NewGrpcSongServer(songCollection, songService)
+	songServer, err := rpc.NewGrpcSongServer(songCollection, songService)
 	if err != nil {
 		log.Fatal("cannot create grpc postServer: ", err)
 	}
