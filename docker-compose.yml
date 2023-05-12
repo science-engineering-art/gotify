@@ -12,9 +12,10 @@ services:
     build: 
       context: .
       dockerfile: ./src/api/Dockerfile
+    depends_on: 
+      - peer 
     volumes:
-      - ./src/api:/app/api
-      - ./src/rpc:/app/rpc
+      - ./src/api:/api
     network_mode: host
   
   web:
@@ -36,7 +37,7 @@ services:
       - db
     network_mode: host
     volumes:
-      - ./src/peer:/app/peer
+      - ./src/peer:/peer
     env_file: ./src/peer/.env
 
 volumes:
