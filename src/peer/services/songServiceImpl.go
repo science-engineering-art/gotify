@@ -8,7 +8,6 @@ import (
 
 	"github.com/dhowden/tag"
 	"github.com/science-engineering-art/spotify/src/peer/models"
-	"github.com/science-engineering-art/spotify/src/peer/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -25,8 +24,8 @@ func NewSongService(songCollection *mongo.Collection, ctx context.Context) SongS
 	return &SongServiceImpl{songCollection, ctx}
 }
 
-func (s *SongServiceImpl) CreateSong(rawSong []byte) error {
-	songBytes := bytes.NewReader(rawSong)
+func (s *SongServiceImpl) CreateSong(rawSong *[]byte) error {
+	songBytes := bytes.NewReader(*rawSong)
 
 	m, err := tag.ReadFrom(songBytes)
 	if err != nil {
@@ -46,7 +45,7 @@ func (s *SongServiceImpl) CreateSong(rawSong []byte) error {
 		Format:      m.Format(),
 		Genre:       m.Genre(),
 		Id:          objId,
-		RawSong:     rawSong,
+		RawSong:     *rawSong,
 		Lyrics:      m.Lyrics(),
 		Title:       m.Title(),
 		Year:        m.Year(),
@@ -78,25 +77,7 @@ func (s *SongServiceImpl) CreateSong(rawSong []byte) error {
 	return nil
 }
 
-func (s *SongServiceImpl) UpdateSong(data *models.UpdatedSong) error {
-	doc, err := utils.ToDoc(data)
-	if err != nil {
-		return err
-	}
-
-	query := bson.D{{Key: "_id", Value: data.Id}}
-	update := bson.D{{Key: "$set", Value: doc}}
-	res := s.songCollection.FindOneAndUpdate(s.ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
-
-	var updatedPost *models.Song
-	if err := res.Decode(&updatedPost); err != nil {
-		return errors.New("no post with that Id exists")
-	}
-
-	return nil
-}
-
-func (s *SongServiceImpl) GetSongById(objID primitive.ObjectID) (*models.Song, error) {
+func (s *SongServiceImpl) GetSongById(objID *primitive.ObjectID) (*models.Song, error) {
 
 	query := bson.M{"_id": objID}
 
@@ -111,6 +92,37 @@ func (s *SongServiceImpl) GetSongById(objID primitive.ObjectID) (*models.Song, e
 	}
 
 	return song, nil
+}
+
+func (s *SongServiceImpl) UpdateSong(objID *primitive.ObjectID, updatedSong *bson.M) error {
+
+	query := bson.M{"_id": objID}
+	update := bson.M{"$set": updatedSong}
+
+	res := s.songCollection.FindOneAndUpdate(s.ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
+
+	// var updatedPost *models.Song
+	// if err := res.Decode(&updatedPost); err != nil {
+	// 	return errors.New("no post with that Id exists")
+	// }
+
+	return res.Err()
+}
+
+func (s *SongServiceImpl) RemoveSongById(objID *primitive.ObjectID) error {
+
+	query := bson.M{"_id": objID}
+
+	res, err := s.songCollection.DeleteOne(s.ctx, query)
+	if err != nil {
+		return err
+	}
+
+	if res.DeletedCount == 0 {
+		return errors.New("no document with that Id exists")
+	}
+
+	return nil
 }
 
 func (s *SongServiceImpl) FilterSongs(query *bson.M) ([]*models.Song, error) {
@@ -152,20 +164,4 @@ func (s *SongServiceImpl) FilterSongs(query *bson.M) ([]*models.Song, error) {
 	}
 
 	return songs, nil
-}
-
-func (s *SongServiceImpl) RemoveSongById(objID primitive.ObjectID) error {
-
-	query := bson.M{"_id": objID}
-
-	res, err := s.songCollection.DeleteOne(s.ctx, query)
-	if err != nil {
-		return err
-	}
-
-	if res.DeletedCount == 0 {
-		return errors.New("no document with that Id exists")
-	}
-
-	return nil
 }

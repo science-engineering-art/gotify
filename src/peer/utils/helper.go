@@ -5,7 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func ToDoc(v interface{}) (doc *bson.D, err error) {
+func ToDoc(v interface{}) (doc *bson.M, err error) {
 	data, err := bson.Marshal(v)
 	if err != nil {
 		return

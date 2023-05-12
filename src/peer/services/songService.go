@@ -7,9 +7,9 @@ import (
 )
 
 type SongService interface {
-	CreateSong([]byte) error
-	UpdateSong(*models.UpdatedSong) error
-	GetSongById(primitive.ObjectID) (*models.Song, error)
+	CreateSong(*[]byte) error
+	UpdateSong(*primitive.ObjectID, *bson.M) error
+	GetSongById(*primitive.ObjectID) (*models.Song, error)
 	FilterSongs(*bson.M) ([]*models.Song, error)
-	RemoveSongById(primitive.ObjectID) error
+	RemoveSongById(*primitive.ObjectID) error
 }

@@ -178,79 +178,90 @@ func GetSongById(c *fiber.Ctx) error {
 	return c.SendFile(fileName, true)
 }
 
-// func EditSong(c *fiber.Ctx) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func UpdateSong(c *fiber.Ctx) error {
 
-// 	songId := c.Params("songId")
-// 	var song models.Song
-// 	defer cancel()
+	songId := c.Params("songId")
+	pbSongId := &pb.SongId{Id: songId}
 
-// 	objId, _ := primitive.ObjectIDFromHex(songId)
+	pbSongMetadata := new(pb.SongMetadata)
 
-// 	//validate the request body
-// 	if err := c.BodyParser(&song); err != nil {
-// 		return c.Status(http.StatusBadRequest).JSON(
-// 			responses.SongResponse{
-// 				Status:  http.StatusBadRequest,
-// 				Message: "error",
-// 				Data:    &fiber.Map{"data": err.Error()},
-// 			},
-// 		)
-// 	}
+	if err := c.BodyParser(pbSongMetadata); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"errors": err.Error(),
+		})
+	}
 
-// 	// construct the updated song
-// 	update := bson.M{
-// 		"album":       song.Album,
-// 		"albumartist": song.AlbumArtist,
-// 		"artist":      song.Artist,
-// 		"comment":     song.Comment,
-// 		"composer":    song.Composer,
-// 		"filetype":    song.FileType,
-// 		"format":      song.Format,
-// 		"genre":       song.Genre,
-// 		"_id":         song.Id,
-// 		"lyrics":      song.Lyrics,
-// 		"rawSong":     song.RawSong,
-// 		"title":       song.Title,
-// 		"year":        song.Year,
-// 	}
+	// // construct the updated song
+	// update := bson.M{
+	// 	"album":       songMetadata.Album,
+	// 	"albumartist": songMetadata.AlbumArtist,
+	// 	"artist":      songMetadata.Artist,
+	// 	"comment":     songMetadata.Comment,
+	// 	"composer":    songMetadata.Composer,
+	// 	"filetype":    songMetadata.FileType,
+	// 	"format":      songMetadata.Format,
+	// 	"genre":       songMetadata.Genre,
+	// 	"_id":         songId,
+	// 	"lyrics":      songMetadata.Lyrics,
+	// 	"title":       songMetadata.Title,
+	// 	"year":        songMetadata.Year,
+	// }
 
-// 	// updated in the DB
-// 	result, err := songCollection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": update})
-// 	if err != nil {
-// 		return c.Status(http.StatusInternalServerError).JSON(
-// 			responses.SongResponse{
-// 				Status:  http.StatusInternalServerError,
-// 				Message: "error",
-// 				Data:    &fiber.Map{"data": err.Error()},
-// 			},
-// 		)
-// 	}
+	pbUpdatedSong := pb.UpdatedSong{
+		Id:       pbSongId,
+		Metadata: pbSongMetadata,
+	}
 
-// 	//get updated user details
-// 	var updatedSong models.Song
-// 	if result.MatchedCount == 1 {
-// 		err := songCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&updatedSong)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-// 		if err != nil {
-// 			return c.Status(http.StatusInternalServerError).JSON(
-// 				responses.SongResponse{
-// 					Status:  http.StatusInternalServerError,
-// 					Message: "error",
-// 					Data:    &fiber.Map{"data": err.Error()},
-// 				},
-// 			)
-// 		}
-// 	}
+	pbResp, err := songClient.UpdateSong(ctx, &pbUpdatedSong)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(
+			responses.SongResponse{
+				Status:  http.StatusInternalServerError,
+				Message: "error",
+				Data:    &fiber.Map{"data": err.Error()},
+			},
+		)
+	}
 
-// 	return c.Status(http.StatusOK).JSON(
-// 		responses.SongResponse{
-// 			Status:  http.StatusOK,
-// 			Message: "success",
-// 			Data:    &fiber.Map{"data": updatedSong},
-// 		},
-// 	)
-// }
+	// // updated in the DB
+	// result, err := songCollection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": update})
+
+	//get updated user details
+	// var updatedSong models.Song
+	// if result.MatchedCount == 1 {
+	// 	err := songCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&updatedSong)
+
+	// 	if err != nil {
+	// 		return c.Status(http.StatusInternalServerError).JSON(
+	// 			responses.SongResponse{
+	// 				Status:  http.StatusInternalServerError,
+	// 				Message: "error",
+	// 				Data:    &fiber.Map{"data": err.Error()},
+	// 			},
+	// 		)
+	// 	}
+	// }
+	if !pbResp.Success {
+		return c.Status(http.StatusOK).JSON(
+			responses.SongResponse{
+				Status:  http.StatusInternalServerError,
+				Message: "unsuccess",
+				Data:    &fiber.Map{},
+			},
+		)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.SongResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    &fiber.Map{},
+		},
+	)
+}
 
 func RemoveSongById(c *fiber.Ctx) error {
 
