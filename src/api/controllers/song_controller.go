@@ -3,11 +3,13 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/science-engineering-art/spotify/src/api/models"
 	"github.com/science-engineering-art/spotify/src/api/pb"
 	"github.com/science-engineering-art/spotify/src/api/responses"
@@ -66,8 +68,6 @@ func CreateSong(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// objId := primitive.NewObjectID()
-
 	// // build the Song model with all its metadata
 	// newSong := models.Song{
 	// 	Album:       m.Album(),
@@ -103,10 +103,10 @@ func CreateSong(c *fiber.Ctx) error {
 	for i := 0; i < len(buffer); i += step {
 		init, end := i, min(i+step, len(buffer))
 
-		err = stream.Send(&pb.RawSongRequest{
-			Init:    int32(init),
-			End:     int32(end),
-			RawSong: buffer[init:end],
+		err = stream.Send(&pb.RawSong{
+			Init:   int32(init),
+			End:    int32(end),
+			Buffer: buffer[init:end],
 		})
 
 		if err != nil {
@@ -124,55 +124,59 @@ func CreateSong(c *fiber.Ctx) error {
 	)
 }
 
-// func GetSong(c *fiber.Ctx) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func GetSongById(c *fiber.Ctx) error {
+	// get the song ID
+	songId := c.Params("songId")
 
-// 	// get the song ID
-// 	songId := c.Params("songId")
-// 	var song models.Song
-// 	defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-// 	objId, _ := primitive.ObjectIDFromHex(songId)
+	song, err := songClient.GetSongById(ctx, &pb.SongId{
+		Id: songId,
+	})
+	if err != nil {
+		return nil
+	}
 
-// 	// find the song with the ID requested
-// 	err := songCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&song)
-// 	if err != nil {
-// 		return c.Status(
-// 			http.StatusInternalServerError).JSON(
-// 			responses.SongResponse{
-// 				Status:  http.StatusInternalServerError,
-// 				Message: "error",
-// 				Data:    &fiber.Map{"data": err.Error()},
-// 			},
-// 		)
-// 	}
+	// // find the song with the ID requested
+	// err := songCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&song)
+	// if err != nil {
+	// 	return c.Status(
+	// 		http.StatusInternalServerError).JSON(
+	// 		responses.SongResponse{
+	// 			Status:  http.StatusInternalServerError,
+	// 			Message: "error",
+	// 			Data:    &fiber.Map{"data": err.Error()},
+	// 		},
+	// 	)
+	// }
 
-// 	songBytes, err := base64.RawStdEncoding.DecodeString(song.RawSong)
-// 	if err != nil {
-// 		return c.Status(
-// 			http.StatusInternalServerError).JSON(
-// 			responses.SongResponse{
-// 				Status:  http.StatusInternalServerError,
-// 				Message: "error",
-// 				Data:    &fiber.Map{"data": err.Error()},
-// 			},
-// 		)
-// 	}
+	// songBytes, err := base64.RawStdEncoding.DecodeString(song.RawSong)
+	// if err != nil {
+	// 	return c.Status(
+	// 		http.StatusInternalServerError).JSON(
+	// 		responses.SongResponse{
+	// 			Status:  http.StatusInternalServerError,
+	// 			Message: "error",
+	// 			Data:    &fiber.Map{"data": err.Error()},
+	// 		},
+	// 	)
+	// }
 
-// 	// Get the unique identifier from the request context
-// 	requestId, ok := c.Context().UserValue("requestId").(uuid.UUID)
-// 	if !ok {
-// 		// Handle error if unique identifier cannot be obtained
-// 		return fiber.NewError(fiber.StatusInternalServerError, "Unique identifier could not be obtained")
-// 	}
+	// Get the unique identifier from the request context
+	requestId, ok := c.Context().UserValue("requestId").(uuid.UUID)
+	if !ok {
+		// Handle error if unique identifier cannot be obtained
+		return fiber.NewError(fiber.StatusInternalServerError, "Unique identifier could not be obtained")
+	}
 
-// 	fileName := fmt.Sprintf("./public/tmp_%s.mp3", requestId.String())
+	fileName := fmt.Sprintf("./tmp_%s.mp3", requestId.String())
 
-// 	os.WriteFile(fileName, songBytes, 0600)
-// 	defer os.Remove(fileName)
+	os.WriteFile(fileName, song.RawSong.Buffer, 0600)
+	defer os.Remove(fileName)
 
-// 	return c.SendFile(fileName, true)
-// }
+	return c.SendFile(fileName, true)
+}
 
 // func EditSong(c *fiber.Ctx) error {
 // 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -286,11 +290,20 @@ func CreateSong(c *fiber.Ctx) error {
 // 	)
 // }
 
-func GetSongs(c *fiber.Ctx) error {
+func FilterSongs(c *fiber.Ctx) error {
+
+	query := new(pb.SongMetadata)
+
+	if err := c.BodyParser(query); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"errors": err.Error(),
+		})
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	stream, err := songClient.GetSongs(ctx, &pb.Request{})
+	stream, err := songClient.FilterSongs(ctx, query)
 	if err != nil {
 		return err
 	}
@@ -299,24 +312,23 @@ func GetSongs(c *fiber.Ctx) error {
 
 	for {
 		song, err := stream.Recv()
+		if err != nil && err != io.EOF {
+			return err
+		}
 		if song == nil {
 			break
 		}
-		if err != nil {
-			return err
-		}
 
-		objID, err := primitive.ObjectIDFromHex(song.Id)
+		objID, err := primitive.ObjectIDFromHex(song.Id.Id)
 		if err != nil {
-			fmt.Println("HERE", song.Id)
 			return err
 		}
 
 		songs = append(songs, models.SongDTO{
-			Artist: song.Artist,
+			Artist: *song.Metadata.Artist,
 			Id:     objID,
-			Title:  song.Title,
-			Year:   int(song.Year),
+			Title:  *song.Metadata.Title,
+			Year:   int(*song.Metadata.Year),
 		})
 	}
 
@@ -352,7 +364,7 @@ func GetSongs(c *fiber.Ctx) error {
 		responses.SongResponse{
 			Status:  http.StatusOK,
 			Message: "success",
-			Data:    &fiber.Map{"data": songs},
+			Data:    &fiber.Map{"songs": songs},
 		},
 	)
 }

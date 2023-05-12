@@ -4,29 +4,13 @@ option go_package = "github.com/science-engineering-art/spotify/src/proto/pb";
 
 package songs;
 
-message Song {
-    string Album       = 1;
-    string AlbumArtist = 2;
-    string Artist      = 3;
-    string Comment     = 4;
-    string Composer    = 5;
-    string FileType    = 6;
-    string Format      = 7;
-    string Genre       = 8;
-    bytes  Id          = 9;
-    string Lyrics      = 10;
-    string RawSong     = 11;
-    string Title       = 12;
-    int32  Year        = 13;
+message RawSong {
+    int32 Init   = 1;
+    int32 End    = 2;
+    bytes Buffer = 3;
 }
 
-message RawSongRequest {
-    int32 Init = 1;
-    int32 End = 2;
-    bytes RawSong = 3;
-}
-
-message UpdateSongRequest {
+message SongMetadata {
     optional string Album       = 1;
     optional string AlbumArtist = 2;
     optional string Artist      = 3;
@@ -35,26 +19,34 @@ message UpdateSongRequest {
     optional string FileType    = 6;
     optional string Format      = 7;
     optional string Genre       = 8;
-    bytes           Id          = 9;
     optional string Lyrics      = 10;
     optional string Title       = 11;
     optional int32  Year        = 12;
 }
 
-message SongIdRequest {
-    bytes Id = 1;
+message SongId {
+    string Id = 1;
 }
 
-message Request { }
+message Song {
+    SongId                Id = 1;
+    RawSong               RawSong  = 2;
+    optional SongMetadata Metadata = 3;
+}
+
+message UpdatedSong {
+    SongId                Id = 1;
+    optional SongMetadata Metadata = 3;
+}
 
 message Response {
     bool Success = 1;
 }
 
 service SongService {
-    rpc CreateSong(stream RawSongRequest) returns (Response)    {}
-    rpc UpdateSong(UpdateSongRequest) returns (Response)    {}
-    rpc GetSongById(SongIdRequest)    returns (Song)        {}
-    rpc GetSongs(Request)             returns (stream Song) {}
-    rpc RemoveSongById(SongIdRequest) returns (Response)    {}
+    rpc CreateSong(stream RawSong) returns (Response)    {}
+    rpc UpdateSong(UpdatedSong)   returns (Response)    {}
+    rpc GetSongById(SongId)        returns (Song)        {}
+    rpc FilterSongs(SongMetadata)  returns (stream Song) {}
+    rpc RemoveSongById(SongId)     returns (Response)    {}
 }

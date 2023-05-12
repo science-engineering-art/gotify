@@ -8,6 +8,7 @@ import (
 	"github.com/science-engineering-art/spotify/src/peer/models"
 	"github.com/science-engineering-art/spotify/src/peer/pb"
 	"github.com/science-engineering-art/spotify/src/peer/services"
+	"github.com/science-engineering-art/spotify/src/peer/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,7 +44,7 @@ func (songServer *SongServer) CreateSong(stream pb.SongService_CreateSongServer)
 		}
 
 		if init == rawSong.Init {
-			buffer = append(buffer, rawSong.GetRawSong()...)
+			buffer = append(buffer, rawSong.Buffer...)
 			init = rawSong.End
 		} else {
 			return err
@@ -56,7 +57,6 @@ func (songServer *SongServer) CreateSong(stream pb.SongService_CreateSongServer)
 
 	err := songServer.songService.CreateSong(buffer)
 	if err != nil {
-
 		if strings.Contains(err.Error(), "title already exists") {
 			return status.Errorf(codes.AlreadyExists, err.Error())
 		}
@@ -66,31 +66,29 @@ func (songServer *SongServer) CreateSong(stream pb.SongService_CreateSongServer)
 	return nil
 }
 
-func (songServer *SongServer) UpdateSong(ctx context.Context, req *pb.UpdateSongRequest) (*pb.Response, error) {
+func (songServer *SongServer) UpdateSong(ctx context.Context, req *pb.UpdatedSong) (*pb.Response, error) {
 
-	songId := req.GetId()
-
-	objID, err := primitive.ObjectIDFromHex(songId)
+	objID, err := primitive.ObjectIDFromHex(req.Id.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	song := &models.UpdateSongRequest{
-		Album:       req.GetAlbum(),
-		AlbumArtist: req.GetAlbumArtist(),
-		Artist:      req.GetArtist(),
-		Comment:     req.GetComment(),
-		Composer:    req.GetComposer(),
-		FileType:    tag.FileType(req.GetFileType()),
-		Format:      tag.Format(req.GetFormat()),
-		Genre:       req.GetGenre(),
+	updatedSong := models.UpdatedSong{
+		Album:       *req.Metadata.Album,
+		AlbumArtist: *req.Metadata.AlbumArtist,
+		Artist:      *req.Metadata.Artist,
+		Comment:     *req.Metadata.Comment,
+		Composer:    *req.Metadata.Composer,
+		FileType:    tag.FileType(*req.Metadata.FileType),
+		Format:      tag.Format(*req.Metadata.Format),
+		Genre:       *req.Metadata.Genre,
 		Id:          objID,
-		Lyrics:      req.GetLyrics(),
-		Title:       req.GetTitle(),
-		Year:        int(req.GetYear()),
+		Lyrics:      *req.Metadata.Lyrics,
+		Title:       *req.Metadata.Title,
+		Year:        int(*req.Metadata.Year),
 	}
 
-	err = songServer.songService.UpdateSong(song)
+	err = songServer.songService.UpdateSong(&updatedSong)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -99,17 +97,20 @@ func (songServer *SongServer) UpdateSong(ctx context.Context, req *pb.UpdateSong
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	res := &pb.Response{
+	resp := &pb.Response{
 		Success: true,
 	}
-	return res, nil
+	return resp, nil
 }
 
-func (songServer *SongServer) GetSongById(ctx context.Context, req *pb.SongIdRequest) (*pb.Song, error) {
+func (songServer *SongServer) GetSongById(ctx context.Context, req *pb.SongId) (*pb.Song, error) {
 
-	songId := req.GetId()
+	objID, err := primitive.ObjectIDFromHex(req.GetId())
+	if err != nil {
+		return nil, err
+	}
 
-	song, err := songServer.songService.GetSongById(songId)
+	song, err := songServer.songService.GetSongById(objID)
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
 			return nil, status.Errorf(codes.NotFound, err.Error())
@@ -117,54 +118,93 @@ func (songServer *SongServer) GetSongById(ctx context.Context, req *pb.SongIdReq
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	res := &pb.Song{
-		Album:       song.Album,
-		AlbumArtist: song.AlbumArtist,
-		Artist:      song.Artist,
-		Comment:     song.Comment,
-		Composer:    song.Composer,
-		FileType:    string(song.FileType),
-		Format:      string(song.Format),
-		Genre:       song.Genre,
-		Id:          songId,
-		Lyrics:      song.Lyrics,
-		Title:       song.Title,
-		Year:        int32(song.Year),
+	songFileType := string(song.FileType)
+	songFormat := string(song.Format)
+	songYear := int32(song.Year)
+
+	pbSong := &pb.Song{
+		Id: &pb.SongId{
+			Id: song.Id.Hex(),
+		},
+		RawSong: &pb.RawSong{
+			Init:   0,
+			End:    int32(1000024),
+			Buffer: song.RawSong[:1000024],
+		},
+		Metadata: &pb.SongMetadata{
+			Album:       &song.Album,
+			AlbumArtist: &song.AlbumArtist,
+			Artist:      &song.Artist,
+			Comment:     &song.Comment,
+			Composer:    &song.Composer,
+			FileType:    &songFileType,
+			Format:      &songFormat,
+			Genre:       &song.Genre,
+			Lyrics:      &song.Lyrics,
+			Title:       &song.Title,
+			Year:        &songYear,
+		},
 	}
-	return res, nil
+	return pbSong, nil
 }
 
-func (songServer *SongServer) GetSongs(req *pb.Request, stream pb.SongService_GetSongsServer) error {
+func (songServer *SongServer) FilterSongs(req *pb.SongMetadata, stream pb.SongService_FilterSongsServer) error {
 
-	songs, err := songServer.songService.GetSongs()
+	query := utils.BuildQuery(req)
+
+	songs, err := songServer.songService.FilterSongs(query)
 	if err != nil {
 		return status.Errorf(codes.Internal, err.Error())
 	}
 
 	for _, song := range songs {
-		stream.Send(&pb.Song{
-			Album:       song.Album,
-			AlbumArtist: song.AlbumArtist,
-			Artist:      song.Artist,
-			Comment:     song.Comment,
-			Composer:    song.Composer,
-			FileType:    string(song.FileType),
-			Format:      string(song.Format),
-			Genre:       song.Genre,
-			Id:          song.Id.String(),
-			Lyrics:      song.Lyrics,
-			Title:       song.Title,
-			Year:        int32(song.Year),
-		})
+		// objID, err := song.Id.MarshalJSON()
+		// if err != nil {
+		// 	return err
+		// }
+
+		songFileType := string(song.FileType)
+		songFormat := string(song.Format)
+		songYear := int32(song.Year)
+
+		pbSong := &pb.Song{
+			Id: &pb.SongId{
+				Id: song.Id.Hex(),
+			},
+			RawSong: &pb.RawSong{
+				Init:   0,
+				End:    int32(1024),
+				Buffer: song.RawSong[:1024],
+			},
+			Metadata: &pb.SongMetadata{
+				Album:       &song.Album,
+				AlbumArtist: &song.AlbumArtist,
+				Artist:      &song.Artist,
+				Comment:     &song.Comment,
+				Composer:    &song.Composer,
+				FileType:    &songFileType,
+				Format:      &songFormat,
+				Genre:       &song.Genre,
+				Lyrics:      &song.Lyrics,
+				Title:       &song.Title,
+				Year:        &songYear,
+			},
+		}
+
+		stream.Send(pbSong)
 	}
 
 	return nil
 }
 
-func (songServer *SongServer) RemoveSongById(ctx context.Context, req *pb.SongIdRequest) (*pb.Response, error) {
-	songId := req.GetId()
+func (songServer *SongServer) RemoveSongById(ctx context.Context, req *pb.SongId) (*pb.Response, error) {
 
-	if err := songServer.songService.DeleteSong(songId); err != nil {
+	objID, err := primitive.ObjectIDFromHex(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	if err := songServer.songService.RemoveSongById(objID); err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
 			return nil, status.Errorf(codes.NotFound, err.Error())
 		}

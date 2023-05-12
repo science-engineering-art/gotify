@@ -5,7 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type UpdateSongRequest struct {
+type UpdatedSong struct {
 	Album       string             `json:"album,omitempty" bson:"album,omitempty"`
 	AlbumArtist string             `json:"albumartist,omitempty" bson:"albumartist,omitempty"`
 	Artist      string             `json:"artist,omitempty" bson:"artist,omitempty"`

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/dhowden/tag"
@@ -79,7 +78,7 @@ func (s *SongServiceImpl) CreateSong(rawSong []byte) error {
 	return nil
 }
 
-func (s *SongServiceImpl) UpdateSong(data *models.UpdateSongRequest) error {
+func (s *SongServiceImpl) UpdateSong(data *models.UpdatedSong) error {
 	doc, err := utils.ToDoc(data)
 	if err != nil {
 		return err
@@ -97,10 +96,9 @@ func (s *SongServiceImpl) UpdateSong(data *models.UpdateSongRequest) error {
 	return nil
 }
 
-func (s *SongServiceImpl) GetSongById(id string) (*models.Song, error) {
-	obId, _ := primitive.ObjectIDFromHex(id)
+func (s *SongServiceImpl) GetSongById(objID primitive.ObjectID) (*models.Song, error) {
 
-	query := bson.M{"_id": obId}
+	query := bson.M{"_id": objID}
 
 	var song *models.Song
 
@@ -115,20 +113,18 @@ func (s *SongServiceImpl) GetSongById(id string) (*models.Song, error) {
 	return song, nil
 }
 
-func (s *SongServiceImpl) GetSongs() ([]*models.Song, error) {
+func (s *SongServiceImpl) FilterSongs(query *bson.M) ([]*models.Song, error) {
 
 	opt := options.FindOptions{}
 	// opt.SetLimit(int64(limit))
 	// opt.SetSkip(int64(skip))
 	// opt.SetSort(bson.M{"created_at": -1})
-	query := bson.M{}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cursor, err := s.songCollection.Find(ctx, query, &opt)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
 
@@ -158,9 +154,9 @@ func (s *SongServiceImpl) GetSongs() ([]*models.Song, error) {
 	return songs, nil
 }
 
-func (s *SongServiceImpl) DeleteSong(id string) error {
-	obId, _ := primitive.ObjectIDFromHex(id)
-	query := bson.M{"_id": obId}
+func (s *SongServiceImpl) RemoveSongById(objID primitive.ObjectID) error {
+
+	query := bson.M{"_id": objID}
 
 	res, err := s.songCollection.DeleteOne(s.ctx, query)
 	if err != nil {
