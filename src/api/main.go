@@ -40,12 +40,6 @@ func main() {
 		return c.Next()
 	})
 
-	// Run the database
-	//config.ConnectDB()
-
-	// Init Peer
-	//go InitPeer()
-
 	// Configure the routes
 	routes.SongRoute(app)
 

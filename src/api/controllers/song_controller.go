@@ -59,34 +59,9 @@ func CreateSong(c *fiber.Ctx) error {
 	// keep in a buffer the file information
 	file.Read(buffer)
 
-	// songBytes := bytes.NewReader(buffer)
-	// m, err := tag.ReadFrom(songBytes)
-	// if err != nil {
-	// 	return err
-	// }
-
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// // build the Song model with all its metadata
-	// newSong := models.Song{
-	// 	Album:       m.Album(),
-	// 	AlbumArtist: m.AlbumArtist(),
-	// 	Artist:      m.Artist(),
-	// 	Comment:     m.Comment(),
-	// 	Composer:    m.Composer(),
-	// 	FileType:    m.FileType(),
-	// 	Format:      m.Format(),
-	// 	Genre:       m.Genre(),
-	// 	Id:          objId,
-	// 	Lyrics:      m.Lyrics(),
-	// 	Title:       m.Title(),
-	// 	Year:        m.Year(),
-	// }
-
-	// &pb.CreateSongRequest{
-	// 	RawSong: base64.RawStdEncoding.EncodeToString(buffer),
-	// 	}
 	stream, err := songClient.CreateSong(ctx)
 	if err != nil {
 		return err
@@ -138,31 +113,6 @@ func GetSongById(c *fiber.Ctx) error {
 		return nil
 	}
 
-	// // find the song with the ID requested
-	// err := songCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&song)
-	// if err != nil {
-	// 	return c.Status(
-	// 		http.StatusInternalServerError).JSON(
-	// 		responses.SongResponse{
-	// 			Status:  http.StatusInternalServerError,
-	// 			Message: "error",
-	// 			Data:    &fiber.Map{"data": err.Error()},
-	// 		},
-	// 	)
-	// }
-
-	// songBytes, err := base64.RawStdEncoding.DecodeString(song.RawSong)
-	// if err != nil {
-	// 	return c.Status(
-	// 		http.StatusInternalServerError).JSON(
-	// 		responses.SongResponse{
-	// 			Status:  http.StatusInternalServerError,
-	// 			Message: "error",
-	// 			Data:    &fiber.Map{"data": err.Error()},
-	// 		},
-	// 	)
-	// }
-
 	// Get the unique identifier from the request context
 	requestId, ok := c.Context().UserValue("requestId").(uuid.UUID)
 	if !ok {
@@ -191,22 +141,6 @@ func UpdateSong(c *fiber.Ctx) error {
 		})
 	}
 
-	// // construct the updated song
-	// update := bson.M{
-	// 	"album":       songMetadata.Album,
-	// 	"albumartist": songMetadata.AlbumArtist,
-	// 	"artist":      songMetadata.Artist,
-	// 	"comment":     songMetadata.Comment,
-	// 	"composer":    songMetadata.Composer,
-	// 	"filetype":    songMetadata.FileType,
-	// 	"format":      songMetadata.Format,
-	// 	"genre":       songMetadata.Genre,
-	// 	"_id":         songId,
-	// 	"lyrics":      songMetadata.Lyrics,
-	// 	"title":       songMetadata.Title,
-	// 	"year":        songMetadata.Year,
-	// }
-
 	pbUpdatedSong := pb.UpdatedSong{
 		Id:       pbSongId,
 		Metadata: pbSongMetadata,
@@ -226,24 +160,6 @@ func UpdateSong(c *fiber.Ctx) error {
 		)
 	}
 
-	// // updated in the DB
-	// result, err := songCollection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": update})
-
-	//get updated user details
-	// var updatedSong models.Song
-	// if result.MatchedCount == 1 {
-	// 	err := songCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&updatedSong)
-
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).JSON(
-	// 			responses.SongResponse{
-	// 				Status:  http.StatusInternalServerError,
-	// 				Message: "error",
-	// 				Data:    &fiber.Map{"data": err.Error()},
-	// 			},
-	// 		)
-	// 	}
-	// }
 	if !pbResp.Success {
 		return c.Status(http.StatusOK).JSON(
 			responses.SongResponse{
@@ -280,17 +196,6 @@ func RemoveSongById(c *fiber.Ctx) error {
 			},
 		)
 	}
-
-	// // check that as least there are one file with the specified ID
-	// if pbResp.DeletedCount < 1 {
-	// 	return c.Status(http.StatusNotFound).JSON(
-	// 		responses.SongResponse{
-	// 			Status:  http.StatusNotFound,
-	// 			Message: "error",
-	// 			Data:    &fiber.Map{"data": "User with specified ID not found!"},
-	// 		},
-	// 	)
-	// }
 
 	if !pbResp.Success {
 		return c.Status(http.StatusOK).JSON(
@@ -353,34 +258,6 @@ func FilterSongs(c *fiber.Ctx) error {
 		})
 	}
 
-	// // get all docs of the DB
-	// results, err := songCollection.Find(ctx, bson.M{})
-	// if err != nil {
-	// 	return c.Status(http.StatusInternalServerError).JSON(
-	// 		responses.SongResponse{
-	// 			Status:  http.StatusInternalServerError,
-	// 			Message: "error",
-	// 			Data:    &fiber.Map{"data": err.Error()},
-	// 		},
-	// 	)
-	// }
-	// defer results.Close(ctx)
-
-	// // keep with the songs objects
-	// for results.Next(ctx) {
-	// 	var singleSong models.SongDTO
-	// 	if err = results.Decode(&singleSong); err != nil {
-	// 		return c.Status(http.StatusInternalServerError).JSON(
-	// 			responses.SongResponse{
-	// 				Status:  http.StatusInternalServerError,
-	// 				Message: "error",
-	// 				Data:    &fiber.Map{"data": err.Error()},
-	// 			},
-	// 		)
-	// 	}
-	// 	songs = append(songs, singleSong)
-	// }
-
 	return c.Status(http.StatusOK).JSON(
 		responses.SongResponse{
 			Status:  http.StatusOK,
@@ -389,38 +266,3 @@ func FilterSongs(c *fiber.Ctx) error {
 		},
 	)
 }
-
-// func GreetPeer(c *fiber.Ctx) error {
-// 	const (
-// 		defaultName = "world!"
-// 	)
-
-// 	var (
-// 		addr = flag.String("addr", "localhost:50051", "the address to connect to")
-// 		name = flag.String("name", defaultName, "Name to greet")
-// 	)
-// 	flag.Parse()
-// 	// Set up a connection to the server.
-// 	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-// 	if err != nil {
-// 		log.Fatalf("did not connect: %v", err)
-// 	}
-// 	defer conn.Close()
-// 	d := pb.NewGreeterClient(conn)
-
-// 	// Contact the server and print out its response.
-// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-// 	defer cancel()
-// 	r, err := d.SayHello(ctx, &pb.HelloRequest{Name: *name})
-// 	if err != nil {
-// 		log.Fatalf("could not greet: %v", err)
-// 	}
-
-// 	return c.Status(http.StatusOK).JSON(
-// 		responses.SongResponse{
-// 			Status:  http.StatusOK,
-// 			Message: "success",
-// 			Data:    &fiber.Map{"data": r.GetMessage()},
-// 		},
-// 	)
-// }
