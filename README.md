@@ -9,11 +9,13 @@ From the root directory execute the following commands.
 ### Turn on
 
 ```sh
-docker-compose up web
+docker run --rm -d --name mongodb -p 127.0.0.1:27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=password docker.uclv.cu/mongo
 ```
+
+From the `src/api` and `src/peer` execute `air` respectivaly.
 
 ### Turn off
 
 ```sh
-docker-compose down
+docker stop $(docker ps -a -q)
 ```
