@@ -252,43 +252,53 @@ func GetSongById(c *fiber.Ctx) error {
 // 	)
 // }
 
-// func DeleteSong(c *fiber.Ctx) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	songId := c.Params("songId")
-// 	defer cancel()
+func RemoveSongById(c *fiber.Ctx) error {
 
-// 	objId, _ := primitive.ObjectIDFromHex(songId)
+	songId := c.Params("songId")
 
-// 	result, err := songCollection.DeleteOne(ctx, bson.M{"_id": objId})
-// 	if err != nil {
-// 		return c.Status(http.StatusInternalServerError).JSON(
-// 			responses.SongResponse{
-// 				Status:  http.StatusInternalServerError,
-// 				Message: "error",
-// 				Data:    &fiber.Map{"data": err.Error()},
-// 			},
-// 		)
-// 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-// 	// check that as least there are one file with the specified ID
-// 	if result.DeletedCount < 1 {
-// 		return c.Status(http.StatusNotFound).JSON(
-// 			responses.SongResponse{
-// 				Status:  http.StatusNotFound,
-// 				Message: "error",
-// 				Data:    &fiber.Map{"data": "User with specified ID not found!"},
-// 			},
-// 		)
-// 	}
+	pbResp, err := songClient.RemoveSongById(ctx, &pb.SongId{Id: songId})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(
+			responses.SongResponse{
+				Status:  http.StatusInternalServerError,
+				Message: "error",
+				Data:    &fiber.Map{"data": err.Error()},
+			},
+		)
+	}
 
-// 	return c.Status(http.StatusOK).JSON(
-// 		responses.SongResponse{
-// 			Status:  http.StatusOK,
-// 			Message: "success",
-// 			Data:    &fiber.Map{"data": "User successfully deleted!"},
-// 		},
-// 	)
-// }
+	// // check that as least there are one file with the specified ID
+	// if pbResp.DeletedCount < 1 {
+	// 	return c.Status(http.StatusNotFound).JSON(
+	// 		responses.SongResponse{
+	// 			Status:  http.StatusNotFound,
+	// 			Message: "error",
+	// 			Data:    &fiber.Map{"data": "User with specified ID not found!"},
+	// 		},
+	// 	)
+	// }
+
+	if !pbResp.Success {
+		return c.Status(http.StatusOK).JSON(
+			responses.SongResponse{
+				Status:  http.StatusInternalServerError,
+				Message: "unsuccess",
+				Data:    &fiber.Map{},
+			},
+		)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.SongResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    &fiber.Map{},
+		},
+	)
+}
 
 func FilterSongs(c *fiber.Ctx) error {
 
