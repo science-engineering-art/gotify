@@ -101,11 +101,6 @@ func (s *SongServiceImpl) UpdateSong(objID *primitive.ObjectID, updatedSong *bso
 
 	res := s.songCollection.FindOneAndUpdate(s.ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
-	// var updatedPost *models.Song
-	// if err := res.Decode(&updatedPost); err != nil {
-	// 	return errors.New("no post with that Id exists")
-	// }
-
 	return res.Err()
 }
 

@@ -40,15 +40,6 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// ctx = context.TODO()
-
-	// // Connect to MongoDB
-	// mongoconn := options.Client().ApplyURI(DBUri)
-	// mongoclient, err := mongo.Connect(ctx, mongoconn)
-
-	// if err != nil {
-	// 	panic(err)
-	// }
 
 	if err := client.Ping(ctx, readpref.Primary()); err != nil {
 		panic(err)

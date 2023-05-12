@@ -117,21 +117,6 @@ func (songServer *SongServer) UpdateSong(ctx context.Context, req *pb.UpdatedSon
 		return nil, err
 	}
 
-	// updatedSong := models.UpdatedSong{
-	// 	Album:       (*priM)["A"].(string),
-	// 	AlbumArtist: *req.Metadata.AlbumArtist,
-	// 	Artist:      *req.Metadata.Artist,
-	// 	Comment:     *req.Metadata.Comment,
-	// 	Composer:    *req.Metadata.Composer,
-	// 	FileType:    tag.FileType(*req.Metadata.FileType),
-	// 	Format:      tag.Format(*req.Metadata.Format),
-	// 	Genre:       *req.Metadata.Genre,
-	// 	Id:          objID,
-	// 	Lyrics:      *req.Metadata.Lyrics,
-	// 	Title:       *req.Metadata.Title,
-	// 	Year:        int(*req.Metadata.Year),
-	// }
-
 	updatedSong := utils.BuildQuery(req.Metadata)
 
 	err = songServer.songService.UpdateSong(&objID, updatedSong)
@@ -180,10 +165,6 @@ func (songServer *SongServer) FilterSongs(req *pb.SongMetadata, stream pb.SongSe
 	}
 
 	for _, song := range songs {
-		// objID, err := song.Id.MarshalJSON()
-		// if err != nil {
-		// 	return err
-		// }
 
 		songFileType := string(song.FileType)
 		songFormat := string(song.Format)
