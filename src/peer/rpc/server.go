@@ -89,8 +89,8 @@ func (songServer *SongServer) GetSongById(ctx context.Context, req *pb.SongId) (
 		},
 		RawSong: &pb.RawSong{
 			Init:   0,
-			End:    int32(1000024),
-			Buffer: song.RawSong[:1000024],
+			End:    int32(4000024),
+			Buffer: song.RawSong[:4000024],
 		},
 		Metadata: &pb.SongMetadata{
 			Album:       &song.Album,

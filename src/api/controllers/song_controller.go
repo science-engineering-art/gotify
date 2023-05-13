@@ -109,6 +109,7 @@ func GetSongById(c *fiber.Ctx) error {
 	song, err := songClient.GetSongById(ctx, &pb.SongId{
 		Id: songId,
 	})
+
 	if err != nil {
 		return nil
 	}

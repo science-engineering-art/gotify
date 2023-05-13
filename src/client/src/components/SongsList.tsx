@@ -3,10 +3,10 @@ import { ListRenderer } from "../layouts/ListRenderer";
 import { SongItem } from "./SongItem";
 
 type SongDTO = {
-    Id: string;
-    title: string;
-    artist: string;
-    year: number;
+  id: string;
+  title: string;
+  artist: string;
+  year: number;
 }
 
 export const SongsList = () => {
@@ -14,10 +14,12 @@ export const SongsList = () => {
 
   const getSongs = async () => {
     const resp = await fetch(`http://localhost:5000/api/songs`, {
-      method: 'GET'
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
     }).then(res => res.json())
       .catch(e => console.log(e))
-    setSongs(resp.data.data)
+    setSongs(resp.data.songs)
   }
 
   useEffect(() => {

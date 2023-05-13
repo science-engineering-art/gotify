@@ -25,7 +25,7 @@ var (
 	songCollection *mongo.Collection
 
 	grpcServerAddress string = "0.0.0.0:8080"
-	URI               string = "mongodb://user:password@127.0.0.1:27017/?maxPoolSize=20&w=majority"
+	URI               string = "mongodb://user:password@db:27017/?maxPoolSize=20&w=majority"
 )
 
 func init() {

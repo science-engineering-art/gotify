@@ -2,11 +2,24 @@ version: '3'
 
 services:
   db:
+    container_name: mongodb
     image: docker.uclv.cu/mongo
     restart: always
     env_file: ./src/peer/.env
     volumes:
       - mongo_data:/data/db
+  
+  peer:
+    build: 
+      context: .
+      dockerfile: ./src/peer/Dockerfile
+    depends_on: 
+      - db
+    ports:
+      - 8080:8080
+    volumes:
+      - ./src/peer:/peer
+    env_file: ./src/peer/.env
 
   api:
     build: 
@@ -28,17 +41,6 @@ services:
       - ./src/client/src:/app/src
     ports:
       - 3000:3000
-  
-  peer:
-    build: 
-      context: .
-      dockerfile: ./src/peer/Dockerfile
-    depends_on: 
-      - db
-    network_mode: host
-    volumes:
-      - ./src/peer:/peer
-    env_file: ./src/peer/.env
 
 volumes:
   mongo_data:

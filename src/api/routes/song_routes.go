@@ -11,5 +11,5 @@ func SongRoute(app *fiber.App) {
 	app.Get("/api/song/:songId", controllers.GetSongById)
 	app.Put("/api/song/:songId", controllers.UpdateSong)
 	app.Delete("/api/song/:songId", controllers.RemoveSongById)
-	app.Get("/api/songs", controllers.FilterSongs)
+	app.Post("/api/songs", controllers.FilterSongs)
 }
