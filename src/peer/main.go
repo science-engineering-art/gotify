@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/science-engineering-art/spotify/src/peer/pb"
 	"github.com/science-engineering-art/spotify/src/peer/rpc"
@@ -25,11 +27,21 @@ var (
 	songCollection *mongo.Collection
 
 	grpcServerAddress string = "0.0.0.0:8080"
-	URI               string = "mongodb://user:password@db:27017/?maxPoolSize=20&w=majority"
+	mongoDbUri        string = "mongodb://user:password@db:27017/?maxPoolSize=20&w=majority"
 )
 
 func init() {
-	client, err := mongo.NewClient(options.Client().ApplyURI(URI))
+	// Get params from command line
+	ip := flag.String("ip", "0.0.0.0", "set ip address of the peer")
+	port := flag.Int64("port", 8080, "set port for TCP conection on GRPC server")
+	mongoUri := flag.String("mongo", "mongodb://user:password@db:27017/?maxPoolSize=20&w=majority", "Mongo DB Uri instance")
+	flag.Parse()
+
+	// Update params into global variables
+	grpcServerAddress = *ip + ":" + strconv.FormatInt(*port, 10)
+	mongoDbUri = *mongoUri
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoDbUri))
 	if err != nil {
 		log.Fatal(err)
 	}
