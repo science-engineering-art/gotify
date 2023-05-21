@@ -49,7 +49,7 @@ func (rt *RoutingTable) isAlive(b Node) bool {
 		return false
 	}
 
-	if !rt.NodeInfo.equal(Node{ID: pbNode.ID, IP: pbNode.IP, Port: int(pbNode.Port)}) {
+	if !rt.NodeInfo.Equal(Node{ID: pbNode.ID, IP: pbNode.IP, Port: int(pbNode.Port)}) {
 		return false
 	}
 
@@ -69,7 +69,7 @@ func (rt *RoutingTable) AddNode(b Node) error {
 	// update the node position in the case of it already
 	// belongs to the bucket
 	for i := 0; i < len(bucket); i++ {
-		if bucket[i].equal(b) {
+		if bucket[i].Equal(b) {
 			bucket = append(bucket[:i], bucket[i+1:]...)
 			bucket = append(bucket, b)
 			goto RETURN
