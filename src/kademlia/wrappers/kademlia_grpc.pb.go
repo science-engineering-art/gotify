@@ -10,7 +10,7 @@ type KademliaProtocol struct {
 	pb.UnimplementedKademliaProtocolServer
 }
 
-func (kp *KademliaProtocol) Ping(context.Context, *pb.Bucket) (*pb.Bucket, error) {
+func (kp *KademliaProtocol) Ping(context.Context, *pb.Node) (*pb.Node, error) {
 	return nil, nil
 }
 

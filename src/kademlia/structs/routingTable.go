@@ -37,28 +37,55 @@ func (rt *RoutingTable) init(b Node) {
 	rt.mutex = &sync.Mutex{}
 }
 
-func (rt *RoutingTable) stillAlive(b Node) bool {
+func (rt *RoutingTable) isAlive(b Node) bool {
 	address := fmt.Sprintf("%s:%d", rt.NodeInfo.IP, rt.NodeInfo.Port)
 	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+
 	client := pb.NewKademliaProtocolClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client.Ping(ctx, &pb.Bucket{})
+	pbNode, err := client.Ping(ctx, &pb.Node{})
+	if err != nil {
+		return false
+	}
+
+	if !rt.NodeInfo.Equal(Node{ID: pbNode.ID, IP: pbNode.IP, Port: int(pbNode.Port)}) {
+		return false
+	}
 
 	return true
 }
 
+// Función que se encarga de añadir un nodo a la tabla de
+// rutas con las restricciones pertinentes del protocolo
 func (rt *RoutingTable) AddNode(b Node) error {
-	bIndex := getBucketIndex(rt.NodeInfo.ID, b.ID)
+	rt.mutex.Lock()
+	defer rt.mutex.Unlock()
 
-	if len(rt.KBuckets[bIndex]) < k {
-		rt.KBuckets[bIndex] = append(rt.KBuckets[bIndex], b)
-	} else if !rt.stillAlive(rt.KBuckets[bIndex][0]) {
-		rt.KBuckets[bIndex] = append(rt.KBuckets[bIndex][1:], b)
+	// get the correspondient bucket
+	bIndex := getBucketIndex(rt.NodeInfo.ID, b.ID)
+	bucket := rt.KBuckets[bIndex]
+
+	// update the node position in the case of it already
+	// belongs to the bucket
+	for i := 0; i < len(bucket); i++ {
+		if bucket[i].Equal(b) {
+			bucket = append(bucket[:i], bucket[i+1:]...)
+			bucket = append(bucket, b)
+			goto RETURN
+		}
 	}
 
+	if len(bucket) < k {
+		bucket = append(bucket, b)
+	} else if !rt.isAlive(bucket[0]) {
+		bucket = append(bucket[1:], b)
+	}
+
+RETURN:
+	rt.KBuckets[bIndex] = bucket
 	return nil
 }
 
@@ -66,6 +93,7 @@ func (rt *RoutingTable) AddNode(b Node) error {
 // leandro_driguez: chequear bien el uso de este método,
 // no vaya a ser que se esté utilizando mal
 func getBucketIndex(id1 []byte, id2 []byte) int {
+
 	// Look at each byte from left to right
 	for j := 0; j < len(id1); j++ {
 		// xor the byte

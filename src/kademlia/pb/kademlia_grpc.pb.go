@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KademliaProtocolClient interface {
-	Ping(ctx context.Context, in *Bucket, opts ...grpc.CallOption) (*Bucket, error)
+	Ping(ctx context.Context, in *Node, opts ...grpc.CallOption) (*Node, error)
 	Store(ctx context.Context, opts ...grpc.CallOption) (KademliaProtocol_StoreClient, error)
 	FindNode(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (*KBucket, error)
 	FindValue(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (KademliaProtocol_FindValueClient, error)
@@ -36,8 +36,8 @@ func NewKademliaProtocolClient(cc grpc.ClientConnInterface) KademliaProtocolClie
 	return &kademliaProtocolClient{cc}
 }
 
-func (c *kademliaProtocolClient) Ping(ctx context.Context, in *Bucket, opts ...grpc.CallOption) (*Bucket, error) {
-	out := new(Bucket)
+func (c *kademliaProtocolClient) Ping(ctx context.Context, in *Node, opts ...grpc.CallOption) (*Node, error) {
+	out := new(Node)
 	err := c.cc.Invoke(ctx, "/kademlia.KademliaProtocol/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ func (x *kademliaProtocolFindValueClient) Recv() (*FindValueResponse, error) {
 // All implementations must embed UnimplementedKademliaProtocolServer
 // for forward compatibility
 type KademliaProtocolServer interface {
-	Ping(context.Context, *Bucket) (*Bucket, error)
+	Ping(context.Context, *Node) (*Node, error)
 	Store(KademliaProtocol_StoreServer) error
 	FindNode(context.Context, *TargetID) (*KBucket, error)
 	FindValue(*TargetID, KademliaProtocol_FindValueServer) error
@@ -135,7 +135,7 @@ type KademliaProtocolServer interface {
 type UnimplementedKademliaProtocolServer struct {
 }
 
-func (UnimplementedKademliaProtocolServer) Ping(context.Context, *Bucket) (*Bucket, error) {
+func (UnimplementedKademliaProtocolServer) Ping(context.Context, *Node) (*Node, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
 func (UnimplementedKademliaProtocolServer) Store(KademliaProtocol_StoreServer) error {
@@ -161,7 +161,7 @@ func RegisterKademliaProtocolServer(s grpc.ServiceRegistrar, srv KademliaProtoco
 }
 
 func _KademliaProtocol_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Bucket)
+	in := new(Node)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func _KademliaProtocol_Ping_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/kademlia.KademliaProtocol/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KademliaProtocolServer).Ping(ctx, req.(*Bucket))
+		return srv.(KademliaProtocolServer).Ping(ctx, req.(*Node))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -1,9 +1,9 @@
 package core
 
-import s "github.com/science-engineering-art/spotify/src/kademlia/structs"
+import "github.com/science-engineering-art/spotify/src/kademlia/structs"
 
 type FullNode struct {
-	s.Node
-	RoutingTable map[string][]s.Node
+	structs.Node
+	RoutingTable map[string][]structs.Node
 	// StorageTable Storage
 }
