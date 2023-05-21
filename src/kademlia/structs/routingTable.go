@@ -1,8 +1,10 @@
 package structs
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -96,4 +98,60 @@ func hasBit(n byte, pos uint) bool {
 	pos = 7 - pos
 	val := n & (1 << pos)
 	return (val > 0)
+}
+
+func (ht *RoutingTable) getClosestContacts(num int, target []byte, ignoredNodes []*Node) *shortList {
+	ht.mutex.Lock()
+	defer ht.mutex.Unlock()
+	// First we need to build the list of adjacent indices to our target
+	// in order
+	index := getBucketIndex(ht.NodeInfo.ID, target)
+	indexList := []int{index}
+	i := index - 1
+	j := index + 1
+
+	// TODO
+	// leandro_driguez: por qué el criterio es este?
+	for len(indexList) < b {
+		if j < b {
+			indexList = append(indexList, j)
+		}
+		if i >= 0 {
+			indexList = append(indexList, i)
+		}
+		i--
+		j++
+	}
+
+	sl := &shortList{}
+
+	leftToAdd := num
+
+	// Next we select alpha contacts and add them to the short list
+	for leftToAdd > 0 && len(indexList) > 0 {
+		index, indexList = indexList[0], indexList[1:]
+		bucketContacts := len(ht.RoutingTable[index])
+		for i := 0; i < bucketContacts; i++ {
+			ignored := false
+			for j := 0; j < len(ignoredNodes); j++ {
+				if bytes.Equal(ht.RoutingTable[index][i].ID, ignoredNodes[j].ID) {
+					ignored = true
+				}
+			}
+			if !ignored {
+				sl.AppendUnique([]*node{ht.RoutingTable[index][i]})
+				leftToAdd--
+				if leftToAdd == 0 {
+					break
+				}
+			}
+		}
+	}
+
+	// TODO
+	// leandro_driguez: no se está ordenando por el criterio de cercanía
+	// respecto a un ID específico
+	sort.Sort(sl)
+
+	return sl
 }
