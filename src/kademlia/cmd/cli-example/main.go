@@ -18,7 +18,6 @@ func main() {
 	var bIP = flag.String("bip", "", "IP Address to bootstrap against")
 	var bPort = flag.String("bport", "", "Port to bootstrap against")
 	var help = flag.Bool("help", false, "Display Help")
-	var stun = flag.Bool("stun", true, "Use STUN")
 
 	flag.Parse()
 
@@ -47,14 +46,9 @@ func main() {
 		BootstrapNodes: bootstrapNodes,
 		IP:             *ip,
 		Port:           *port,
-		UseStun:        *stun,
 	})
 
 	fmt.Println("Opening socket..")
-
-	if *stun {
-		fmt.Println("Discovering public address using STUN..")
-	}
 
 	err := dht.CreateSocket()
 	if err != nil {

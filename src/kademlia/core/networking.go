@@ -22,7 +22,7 @@ type networking interface {
 	timersFin()
 	getDisconnect() chan (int)
 	init(self *NetworkNode)
-	createSocket(host string, port string, useStun bool, stunAddr string) (publicHost string, publicPort string, err error)
+	createSocket(host string, port string) (publicHost string, publicPort string, err error)
 	listen() error
 	disconnect() error
 	cancelResponse(*expectedResponse)
@@ -96,7 +96,7 @@ func (rn *realNetworking) timersFin() {
 	rn.dcTimersChan <- 1
 }
 
-func (rn *realNetworking) createSocket(host string, port string, useStun bool, stunAddr string) (publicHost string, publicPort string, err error) {
+func (rn *realNetworking) createSocket(host string, port string) (publicHost string, publicPort string, err error) {
 	rn.mutex.Lock()
 	defer rn.mutex.Unlock()
 	if rn.connected {

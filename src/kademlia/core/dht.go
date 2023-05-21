@@ -30,14 +30,6 @@ type Options struct {
 	// The local port to listen for connections on
 	Port string
 
-	// Whether or not to use the STUN protocol to determine public IP and Port
-	// May be necessary if the node is behind a NAT
-	UseStun bool
-
-	// Specifies the the host of the STUN server. If left empty will use the
-	// default specified in go-stun.
-	StunAddr string
-
 	// A logger interface
 	Logger log.Logger
 
@@ -210,14 +202,12 @@ func (dht *DHT) CreateSocket() error {
 	netMsgInit()
 	dht.networking.init(dht.ht.Self)
 
-	publicHost, publicPort, err := dht.networking.createSocket(ip, port, dht.options.UseStun, dht.options.StunAddr)
+	publicHost, publicPort, err := dht.networking.createSocket(ip, port)
 	if err != nil {
 		return err
 	}
 
-	if dht.options.UseStun {
-		dht.ht.setSelfAddr(publicHost, publicPort)
-	}
+	dht.ht.setSelfAddr(publicHost, publicPort)
 
 	return nil
 }
