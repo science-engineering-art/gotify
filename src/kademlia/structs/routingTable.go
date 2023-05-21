@@ -89,9 +89,6 @@ RETURN:
 	return nil
 }
 
-// TODO
-// leandro_driguez: chequear bien el uso de este método,
-// no vaya a ser que se esté utilizando mal
 func getBucketIndex(id1 []byte, id2 []byte) int {
 
 	// Look at each byte from left to right
@@ -104,8 +101,7 @@ func getBucketIndex(id1 []byte, id2 []byte) int {
 			if hasBit(xor, uint(i)) {
 				byteIndex := j * 8
 				bitIndex := i
-				// return b - (byteIndex + bitIndex) - 1 // leandro_driguez: no será (byteIndex + bitIndex) solamente?
-				return byteIndex + bitIndex
+				return b - (byteIndex + bitIndex) - 1
 			}
 		}
 	}
@@ -138,8 +134,6 @@ func (rt *RoutingTable) getClosestContacts(num int, target []byte, ignoredNodes 
 	i := index - 1
 	j := index + 1
 
-	// TODO
-	// leandro_driguez: por qué el criterio es este?
 	for len(indexList) < b {
 		if j < b {
 			indexList = append(indexList, j)
@@ -176,9 +170,6 @@ func (rt *RoutingTable) getClosestContacts(num int, target []byte, ignoredNodes 
 		}
 	}
 
-	// TODO
-	// leandro_driguez: no se está ordenando por el criterio de cercanía
-	// respecto a un ID específico
 	sort.Sort(sl)
 
 	return sl
