@@ -128,12 +128,12 @@ func hasBit(n byte, pos uint) bool {
 	return (val > 0)
 }
 
-func (ht *RoutingTable) getClosestContacts(num int, target []byte, ignoredNodes []*Node) *shortList {
-	ht.mutex.Lock()
-	defer ht.mutex.Unlock()
+func (rt *RoutingTable) getClosestContacts(num int, target []byte, ignoredNodes []*Node) *ShortList {
+	rt.mutex.Lock()
+	defer rt.mutex.Unlock()
 	// First we need to build the list of adjacent indices to our target
 	// in order
-	index := getBucketIndex(ht.NodeInfo.ID, target)
+	index := getBucketIndex(rt.NodeInfo.ID, target)
 	indexList := []int{index}
 	i := index - 1
 	j := index + 1
@@ -151,23 +151,23 @@ func (ht *RoutingTable) getClosestContacts(num int, target []byte, ignoredNodes 
 		j++
 	}
 
-	sl := &shortList{}
+	sl := &ShortList{}
 
 	leftToAdd := num
 
 	// Next we select alpha contacts and add them to the short list
 	for leftToAdd > 0 && len(indexList) > 0 {
 		index, indexList = indexList[0], indexList[1:]
-		bucketContacts := len(ht.RoutingTable[index])
+		bucketContacts := len(rt.KBuckets[index])
 		for i := 0; i < bucketContacts; i++ {
 			ignored := false
 			for j := 0; j < len(ignoredNodes); j++ {
-				if bytes.Equal(ht.RoutingTable[index][i].ID, ignoredNodes[j].ID) {
+				if bytes.Equal(rt.KBuckets[index][i].ID, ignoredNodes[j].ID) {
 					ignored = true
 				}
 			}
 			if !ignored {
-				sl.AppendUnique([]*node{ht.RoutingTable[index][i]})
+				sl.AppendUnique([]*Node{&rt.KBuckets[index][i]})
 				leftToAdd--
 				if leftToAdd == 0 {
 					break
