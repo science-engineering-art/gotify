@@ -8,8 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/prettymuchbryce/kademlia"
-
+	kademlia "github.com/science-engineering-art/spotify/src/kademlia/core"
 	"gopkg.in/readline.v1"
 )
 
@@ -44,7 +43,7 @@ func main() {
 		bootstrapNodes = append(bootstrapNodes, bootstrapNode)
 	}
 
-	dht, err := kademlia.NewDHT(&kademlia.MemoryStore{}, &kademlia.Options{
+	dht, _ := kademlia.NewDHT(&kademlia.MemoryStore{}, &kademlia.Options{
 		BootstrapNodes: bootstrapNodes,
 		IP:             *ip,
 		Port:           *port,
@@ -57,7 +56,7 @@ func main() {
 		fmt.Println("Discovering public address using STUN..")
 	}
 
-	err = dht.CreateSocket()
+	err := dht.CreateSocket()
 	if err != nil {
 		panic(err)
 	}

@@ -1,4 +1,4 @@
-package kademlia
+package core
 
 import (
 	"bytes"
@@ -337,6 +337,7 @@ func newID() ([]byte, error) {
 
 // Simple helper function to determine the value of a particular
 // bit in a byte by index
+
 // Example:
 // number:  1
 // bits:    00000001

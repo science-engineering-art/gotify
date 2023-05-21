@@ -1,4 +1,4 @@
-package kademlia
+package core
 
 import (
 	"bytes"
@@ -159,7 +159,7 @@ func (dht *DHT) Get(key string) (data []byte, found bool, err error) {
 	value, exists := dht.store.Retrieve(keyBytes)
 
 	if len(keyBytes) != k {
-		return nil, false, errors.New("Invalid key")
+		return nil, false, errors.New("invalid key")
 	}
 
 	if !exists {
@@ -173,6 +173,8 @@ func (dht *DHT) Get(key string) (data []byte, found bool, err error) {
 		}
 	}
 
+	// TODO
+	// leandro_driguez: retornar *[]byte, NO []byte
 	return value, exists, nil
 }
 
@@ -227,6 +229,9 @@ func (dht *DHT) Listen() error {
 	}
 	go dht.listen()
 	go dht.timers()
+	// TODO
+	// leandro_driguez: nunca devuelve un error, el método listen()
+	// se queda a la escucha de un socket
 	return dht.networking.listen()
 }
 
@@ -300,9 +305,10 @@ func (dht *DHT) Disconnect() error {
 
 // Iterate does an iterative search through the network. This can be done
 // for multiple reasons. These reasons include:
-//     iterativeStore - Used to store new information in the network.
-//     iterativeFindNode - Used to bootstrap the network.
-//     iterativeFindValue - Used to find a value among the network given a key.
+//
+//	iterativeStore - Used to store new information in the network.
+//	iterativeFindNode - Used to bootstrap the network.
+//	iterativeFindValue - Used to find a value among the network given a key.
 func (dht *DHT) iterate(t int, target []byte, data []byte) (value []byte, closest []*NetworkNode, err error) {
 	sl := dht.ht.getClosestContacts(alpha, target, []*NetworkNode{})
 
@@ -345,7 +351,7 @@ func (dht *DHT) iterate(t int, target []byte, data []byte) (value []byte, closes
 			}
 
 			// Don't contact nodes already contacted
-			if contacted[string(node.ID)] == true {
+			if contacted[string(node.ID)] {
 				continue
 			}
 
@@ -433,6 +439,8 @@ func (dht *DHT) iterate(t int, target []byte, data []byte) (value []byte, closes
 				}
 			}
 
+			// TODO
+			// leandro_driguez: en algún momento se lleva a este código?
 			for _, result := range results {
 				if result.Error != nil {
 					sl.RemoveNode(result.Receiver)
@@ -465,7 +473,7 @@ func (dht *DHT) iterate(t int, target []byte, data []byte) (value []byte, closes
 		sort.Sort(sl)
 
 		// If closestNode is unchanged then we are done
-		if bytes.Compare(sl.Nodes[0].ID, closestNode.ID) == 0 || queryRest {
+		if bytes.Equal(sl.Nodes[0].ID, closestNode.ID) || queryRest {
 			// We are done
 			switch t {
 			case iterateFindNode:
@@ -559,6 +567,9 @@ func (dht *DHT) timers() {
 				}
 			}
 
+			// TODO
+			// leandro_driguez: es necesario replicar en tan cortos períodos de tiempo?
+
 			// Replication
 			keys := dht.store.GetAllKeysForReplication()
 			for _, key := range keys {
@@ -624,6 +635,8 @@ func (dht *DHT) listen() {
 				replication := time.Now().Add(dht.options.TReplicate)
 				dht.store.Store(key, data.Data, replication, expiration, false)
 			case messageTypePing:
+				// TODO
+				// leandro_driguez: no se debería almacenar el nodo que hizo ping?
 				response := &message{IsResponse: true}
 				response.Sender = dht.ht.Self
 				response.Receiver = msg.Sender

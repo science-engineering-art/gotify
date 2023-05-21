@@ -1,16 +1,14 @@
-package kademlia
+package core
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"net"
-	"strconv"
 	"sync"
 	"time"
 
 	"github.com/anacrolix/utp"
-	"github.com/ccding/go-stun/stun"
 )
 
 var (
@@ -110,28 +108,6 @@ func (rn *realNetworking) createSocket(host string, port string, useStun bool, s
 	socket, err := utp.NewSocket("udp", remoteAddress)
 	if err != nil {
 		return "", "", err
-	}
-
-	if useStun {
-		c := stun.NewClientWithConnection(socket)
-
-		if stunAddr != "" {
-			c.SetServerAddr(stunAddr)
-		}
-
-		_, h, err := c.Discover()
-		if err != nil {
-			return "", "", err
-		}
-
-		_, err = c.Keepalive()
-		if err != nil {
-			return "", "", err
-		}
-
-		host = h.IP()
-		port = strconv.Itoa(int(h.Port()))
-		remoteAddress = "[" + host + "]" + ":" + port
 	}
 
 	rn.remoteAddress = remoteAddress
