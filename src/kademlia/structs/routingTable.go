@@ -24,19 +24,19 @@ const (
 )
 
 type RoutingTable struct {
-	BucketInfo Bucket
-	KBuckets   [][]Bucket
-	mutex      *sync.Mutex
+	NodeInfo Node
+	KBuckets [][]Node
+	mutex    *sync.Mutex
 }
 
-func (rt *RoutingTable) init(b Bucket) {
-	rt.BucketInfo = b
-	rt.KBuckets = [][]Bucket{}
+func (rt *RoutingTable) init(b Node) {
+	rt.NodeInfo = b
+	rt.KBuckets = [][]Node{}
 	rt.mutex = &sync.Mutex{}
 }
 
-func (rt *RoutingTable) stillAlive(b Bucket) bool {
-	address := fmt.Sprintf("%s:%d", rt.BucketInfo.IP, rt.BucketInfo.Port)
+func (rt *RoutingTable) stillAlive(b Node) bool {
+	address := fmt.Sprintf("%s:%d", rt.NodeInfo.IP, rt.NodeInfo.Port)
 	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	client := pb.NewKademliaProtocolClient(conn)
 
@@ -48,8 +48,8 @@ func (rt *RoutingTable) stillAlive(b Bucket) bool {
 	return true
 }
 
-func (rt *RoutingTable) AddBucket(b Bucket) error {
-	bIndex := getBucketIndex(rt.BucketInfo.ID, b.ID)
+func (rt *RoutingTable) AddNode(b Node) error {
+	bIndex := getBucketIndex(rt.NodeInfo.ID, b.ID)
 
 	if len(rt.KBuckets[bIndex]) < k {
 		rt.KBuckets[bIndex] = append(rt.KBuckets[bIndex], b)

@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-type Bucket struct {
+type Node struct {
 	ID   []byte
 	IP   string
 	Port int
 }
 
-func (b Bucket) equal(other Bucket) bool {
+func (b Node) equal(other Node) bool {
 	return bytes.Equal(b.ID, other.ID) &&
 		strings.EqualFold(b.IP, other.IP) &&
 		b.Port == other.Port
