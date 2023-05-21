@@ -24,39 +24,61 @@ const (
 )
 
 type RoutingTable struct {
-	BucketInfo Bucket
-	KBuckets   [][]Bucket
-	mutex      *sync.Mutex
+	NodeInfo Node
+	KBuckets [][]Node
+	mutex    *sync.Mutex
 }
 
-func (rt *RoutingTable) init(b Bucket) {
-	rt.BucketInfo = b
-	rt.KBuckets = [][]Bucket{}
+func (rt *RoutingTable) init(b Node) {
+	rt.NodeInfo = b
+	rt.KBuckets = [][]Node{}
 	rt.mutex = &sync.Mutex{}
 }
 
-func (rt *RoutingTable) stillAlive(b Bucket) bool {
-	address := fmt.Sprintf("%s:%d", rt.BucketInfo.IP, rt.BucketInfo.Port)
+func (rt *RoutingTable) stillAlive(b Node) bool {
+	address := fmt.Sprintf("%s:%d", rt.NodeInfo.IP, rt.NodeInfo.Port)
 	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+
 	client := pb.NewKademliaProtocolClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client.Ping(ctx, &pb.Bucket{})
+	pbNode, err := client.Ping(ctx, &pb.Node{})
+	if err != nil {
+		return false
+	}
+
+	if !rt.NodeInfo.equal(Node{ID: pbNode.ID, IP: pbNode.IP, Port: int(pbNode.Port)}) {
+		return false
+	}
 
 	return true
 }
 
-func (rt *RoutingTable) AddBucket(b Bucket) error {
-	bIndex := getBucketIndex(rt.BucketInfo.ID, b.ID)
+func (rt *RoutingTable) AddNode(b Node) error {
+	// get bucket
+	bIndex := getBucketIndex(rt.NodeInfo.ID, b.ID)
+	bucket := rt.KBuckets[bIndex]
 
-	if len(rt.KBuckets[bIndex]) < k {
-		rt.KBuckets[bIndex] = append(rt.KBuckets[bIndex], b)
-	} else if !rt.stillAlive(rt.KBuckets[bIndex][0]) {
-		rt.KBuckets[bIndex] = append(rt.KBuckets[bIndex][1:], b)
+	// update the node position in the case of it already
+	// belongs to the bucket
+	for i := 0; i < len(bucket); i++ {
+		if bucket[i].equal(b) {
+			bucket = append(bucket[:i], bucket[i+1:]...)
+			bucket = append(bucket, b)
+			goto RETURN
+		}
 	}
 
+	if len(bucket) < k {
+		bucket = append(bucket, b)
+	} else if !rt.stillAlive(bucket[0]) {
+		bucket = append(bucket[1:], b)
+	}
+
+RETURN:
+	rt.KBuckets[bIndex] = bucket
 	return nil
 }
 

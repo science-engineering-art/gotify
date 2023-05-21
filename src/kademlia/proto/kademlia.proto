@@ -8,7 +8,7 @@ message Response {
     bool Success = 1;
 }
 
-message Bucket {
+message Node {
     bytes ID = 1;
     string IP = 2;
     int32 Port = 3;
@@ -25,7 +25,7 @@ message TargetID {
 }
 
 message KBucket {
-    repeated Bucket Buckets = 1;
+    repeated Node Bucket = 1;
 }
 
 message FindValueResponse {
@@ -34,7 +34,7 @@ message FindValueResponse {
 }
 
 service KademliaProtocol {
-    rpc Ping(Bucket)        returns (Bucket) {}
+    rpc Ping(Node)        returns (Node) {}
     rpc Store(stream Data)  returns (Response) {}
     rpc FindNode(TargetID)  returns (KBucket) {}
     rpc FindValue(TargetID) returns (stream FindValueResponse) {}
