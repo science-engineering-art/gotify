@@ -35,7 +35,7 @@ func (rt *RoutingTable) init(b Node) {
 	rt.mutex = &sync.Mutex{}
 }
 
-func (rt *RoutingTable) stillAlive(b Node) bool {
+func (rt *RoutingTable) isAlive(b Node) bool {
 	address := fmt.Sprintf("%s:%d", rt.NodeInfo.IP, rt.NodeInfo.Port)
 	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 
@@ -56,8 +56,13 @@ func (rt *RoutingTable) stillAlive(b Node) bool {
 	return true
 }
 
+// Función que se encarga de añadir un nodo a la tabla de
+// rutas con las restricciones pertinentes del protocolo
 func (rt *RoutingTable) AddNode(b Node) error {
-	// get bucket
+	rt.mutex.Lock()
+	defer rt.mutex.Unlock()
+
+	// get the correspondient bucket
 	bIndex := getBucketIndex(rt.NodeInfo.ID, b.ID)
 	bucket := rt.KBuckets[bIndex]
 
@@ -73,7 +78,7 @@ func (rt *RoutingTable) AddNode(b Node) error {
 
 	if len(bucket) < k {
 		bucket = append(bucket, b)
-	} else if !rt.stillAlive(bucket[0]) {
+	} else if !rt.isAlive(bucket[0]) {
 		bucket = append(bucket[1:], b)
 	}
 
@@ -86,6 +91,7 @@ RETURN:
 // leandro_driguez: chequear bien el uso de este método,
 // no vaya a ser que se esté utilizando mal
 func getBucketIndex(id1 []byte, id2 []byte) int {
+
 	// Look at each byte from left to right
 	for j := 0; j < len(id1); j++ {
 		// xor the byte
