@@ -11,7 +11,7 @@ type Node struct {
 	Port int
 }
 
-func (b Node) equal(other Node) bool {
+func (b Node) Equal(other Node) bool {
 	return bytes.Equal(b.ID, other.ID) &&
 		strings.EqualFold(b.IP, other.IP) &&
 		b.Port == other.Port
