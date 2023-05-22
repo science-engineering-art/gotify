@@ -1,7 +1,7 @@
 package interfaces
 
 type Persistence interface {
-	Create(data *[]byte) (key []byte)
+	Create(key []byte, data *[]byte) error
 
 	Read(key []byte) (data *[]byte)
 

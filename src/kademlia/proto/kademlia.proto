@@ -34,7 +34,7 @@ message FindValueResponse {
 }
 
 service KademliaProtocol {
-    rpc Ping(Node)        returns (Node) {}
+    rpc Ping(Node)          returns (Node) {}
     rpc Store(stream Data)  returns (Response) {}
     rpc FindNode(TargetID)  returns (KBucket) {}
     rpc FindValue(TargetID) returns (stream FindValueResponse) {}

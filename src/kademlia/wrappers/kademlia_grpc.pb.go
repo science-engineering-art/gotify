@@ -11,6 +11,7 @@ type KademliaProtocol struct {
 }
 
 func (kp *KademliaProtocol) Ping(context.Context, *pb.Node) (*pb.Node, error) {
+
 	return nil, nil
 }
 

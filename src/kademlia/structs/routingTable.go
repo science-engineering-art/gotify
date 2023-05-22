@@ -46,7 +46,13 @@ func (rt *RoutingTable) isAlive(b Node) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	pbNode, err := client.Ping(ctx, &pb.Node{})
+	pbNode, err := client.Ping(ctx,
+		&pb.Node{
+			ID:   rt.NodeInfo.ID,
+			IP:   rt.NodeInfo.IP,
+			Port: int32(rt.NodeInfo.Port),
+		})
+
 	if err != nil {
 		return false
 	}
