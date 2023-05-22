@@ -35,3 +35,23 @@ func (fn *FullNode) Store(data *[]byte) error {
 	}
 	return nil
 }
+
+// TODO: Check Find Value return when the value is not in the node
+func (fn *FullNode) FindValue(infoHash *[]byte) (value *[]byte) {
+	value, err := fn.Storage.Read(*infoHash)
+	if err != nil {
+		fmt.Println("Find Value error: ", err)
+	}
+	return value
+}
+
+// TODO: Check get k nearest values return
+// func (fn *FullNode) FindNode(target *[]byte) (kBucket *[]structs.Node) {
+// 	if bytes.Compare(fn.ID, *target) == 0 {
+// 		kBucket = &[]structs.Node{fn.Node}
+// 	}
+// 	sl := fn.RoutingTable.GetClosestContacts(3, *target, []*structs.Node{&fn.Node})
+
+// 	//kBucket = sl.Nodes
+// 	return
+// }

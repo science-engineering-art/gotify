@@ -130,7 +130,7 @@ func hasBit(n byte, pos uint) bool {
 	return (val > 0)
 }
 
-func (rt *RoutingTable) getClosestContacts(num int, target []byte, ignoredNodes []*Node) *ShortList {
+func (rt *RoutingTable) GetClosestContacts(num int, target []byte, ignoredNodes []*Node) *ShortList {
 	rt.mutex.Lock()
 	defer rt.mutex.Unlock()
 	// First we need to build the list of adjacent indices to our target
