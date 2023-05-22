@@ -7,5 +7,5 @@ type KademliaProtocol interface {
 	Store(value *[]byte) error
 	FindNode(target *[]byte) (kBucket *[]structs.Node)
 	FindValue(infoHash *[]byte) (value *[]byte)
-	// KNeartestBuckets(obj Identificable) (kBucket *[]s.Bucket)
+	KNeartestNodes(target *[]byte) (nodes *[]structs.Node)
 }

@@ -14,6 +14,8 @@ type FullNode struct {
 
 // TODO: NewFullNode method for node initializing
 
+// TODO: JoinNetwork method for connecting to a bootstrap node
+
 func (n *FullNode) Ping(sender structs.Node) structs.Node {
 	err := n.RoutingTable.AddNode(sender)
 	if err != nil {
