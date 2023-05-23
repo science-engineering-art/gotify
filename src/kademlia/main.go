@@ -73,22 +73,22 @@ func main() {
 			fmt.Println("Stored ID: " + id)
 
 		case "ping":
-			if len(input) != 3 {
+			if len(input) != 5 {
 				displayHelp()
 				continue
 			}
-			// 	data, exists, err := dht.Get(input[1])
-			// 	if err != nil {
-			// 		fmt.Println(err.Error())
-			// 	}
-			// 	fmt.Println("Searching for", input[1])
-			// 	if exists {
-			// 		fmt.Println("..Found data:", string(data))
-			// 	} else {
-			// 		fmt.Println("..Nothing found for this key!")
-			// 	}
-			// case "info":
-			// 	fmt.Println("To implement")
+			ipSender := input[1]
+			portSender, _ := strconv.Atoi(input[2])
+			ipReceiver := input[3]
+			portReceiver, _ := strconv.Atoi(input[4])
+			client := GetFullNodeClient(&ipReceiver, &portReceiver)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			pbNode, err := client.Ping(ctx, &pb.Node{ID: []byte{}, IP: ipSender, Port: int32(portSender)})
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println("I'm alive", pbNode.IP, ":", pbNode.Port)
 		}
 	}
 }
