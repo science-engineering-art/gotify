@@ -140,7 +140,7 @@ func CreateFullNodeServer(ip *string, port *int) {
 }
 
 func GetFullNodeClient(ip *string, port *int) pb.FullNodeClient {
-	address := fmt.Sprintf("%s:%d", ip, port)
+	address := fmt.Sprintf("%s:%d", *ip, *port)
 	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 
 	return pb.NewFullNodeClient(conn)
