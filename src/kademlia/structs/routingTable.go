@@ -15,7 +15,7 @@ import (
 
 const (
 	// a small number representing the degree of parallelism in network calls
-	alpha = 3
+	Alpha = 3
 
 	// the size in bits of the keys used to identify nodes and store and
 	// retrieve data; in basic Kademlia this is 160, the length of a SHA1

@@ -22,7 +22,7 @@ func (b Node) Equal(other Node) bool {
 // comparator. These nodes are sorted by xor distance
 type ShortList struct {
 	// Nodes are a list of nodes to be compared
-	Nodes []*Node
+	Nodes *[]Node
 
 	// Comparator is the ID to compare to
 	Comparator []byte
@@ -51,8 +51,8 @@ func areNodesEqual(n1 *Node, n2 *Node, allowNilID bool) bool {
 
 func (n *ShortList) RemoveNode(node *Node) {
 	for i := 0; i < n.Len(); i++ {
-		if bytes.Equal(n.Nodes[i].ID, node.ID) {
-			n.Nodes = append(n.Nodes[:i], n.Nodes[i+1:]...)
+		if bytes.Equal((*n.Nodes)[i].ID, node.ID) {
+			*n.Nodes = append((*n.Nodes)[:i], (*n.Nodes)[i+1:]...)
 			return
 		}
 	}
@@ -61,14 +61,14 @@ func (n *ShortList) RemoveNode(node *Node) {
 func (n *ShortList) AppendUniqueNetworkNodes(nodes []*Node) {
 	for _, vv := range nodes {
 		exists := false
-		for _, v := range n.Nodes {
+		for _, v := range *n.Nodes {
 			if bytes.Equal(v.ID, vv.ID) {
 				exists = true
 				break
 			}
 		}
 		if !exists {
-			n.Nodes = append(n.Nodes, vv)
+			*n.Nodes = append(*n.Nodes, *vv)
 		}
 	}
 }
@@ -76,29 +76,29 @@ func (n *ShortList) AppendUniqueNetworkNodes(nodes []*Node) {
 func (n *ShortList) AppendUnique(nodes []*Node) {
 	for _, vv := range nodes {
 		exists := false
-		for _, v := range n.Nodes {
+		for _, v := range *n.Nodes {
 			if bytes.Equal(v.ID, vv.ID) {
 				exists = true
 				break
 			}
 		}
 		if !exists {
-			n.Nodes = append(n.Nodes, vv)
+			*n.Nodes = append(*n.Nodes, *vv)
 		}
 	}
 }
 
 func (n *ShortList) Len() int {
-	return len(n.Nodes)
+	return len(*n.Nodes)
 }
 
 func (n *ShortList) Swap(i, j int) {
-	n.Nodes[i], n.Nodes[j] = n.Nodes[j], n.Nodes[i]
+	(*n.Nodes)[i], (*n.Nodes)[j] = (*n.Nodes)[j], (*n.Nodes)[i]
 }
 
 func (n *ShortList) Less(i, j int) bool {
-	iDist := getDistance(n.Nodes[i].ID, n.Comparator)
-	jDist := getDistance(n.Nodes[j].ID, n.Comparator)
+	iDist := getDistance((*n.Nodes)[i].ID, n.Comparator)
+	jDist := getDistance((*n.Nodes)[j].ID, n.Comparator)
 
 	return iDist.Cmp(jDist) == -1
 }

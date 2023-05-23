@@ -6,5 +6,5 @@ type KademliaProtocol interface {
 	Ping(structs.Node) structs.Node
 	Store(value *[]byte) error
 	FindNode(target []byte) (kBucket []structs.Node)
-	FindValue(infoHash []byte) (value *[]byte)
+	FindValue(infoHash []byte) (value *[]byte, neighbors *[]structs.Node)
 }

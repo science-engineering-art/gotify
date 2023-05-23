@@ -29,12 +29,14 @@ func (fn *DHT) Store(data *[]byte) error {
 }
 
 // TODO: Check Find Value return when the value is not in the node
-func (fn *DHT) FindValue(infoHash *[]byte) (value *[]byte) {
+func (fn *DHT) FindValue(infoHash *[]byte) (value *[]byte, neighbors *[]structs.Node) {
 	value, err := fn.Storage.Read(*infoHash)
 	if err != nil {
 		fmt.Println("Find Value error: ", err)
+		neighbors = fn.RoutingTable.GetClosestContacts(structs.Alpha, *infoHash, []*structs.Node{&fn.Node}).Nodes
+		return nil, neighbors
 	}
-	return value
+	return value, nil
 }
 
 // TODO: Check get k nearest values return
