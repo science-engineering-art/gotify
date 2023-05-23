@@ -41,7 +41,7 @@ func (rt *RoutingTable) isAlive(b Node) bool {
 	address := fmt.Sprintf("%s:%d", rt.NodeInfo.IP, rt.NodeInfo.Port)
 	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 
-	client := pb.NewKademliaProtocolClient(conn)
+	client := pb.NewFullNodeClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

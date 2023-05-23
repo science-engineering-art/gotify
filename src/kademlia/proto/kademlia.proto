@@ -33,7 +33,7 @@ message FindValueResponse {
     optional Data Value = 2;
 }
 
-service KademliaProtocol {
+service FullNode {
     rpc Ping(Node)          returns (Node) {}
     rpc Store(stream Data)  returns (Response) {}
     rpc FindNode(TargetID)  returns (KBucket) {}

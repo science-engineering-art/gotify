@@ -18,57 +18,57 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// KademliaProtocolClient is the client API for KademliaProtocol service.
+// FullNodeClient is the client API for FullNode service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type KademliaProtocolClient interface {
+type FullNodeClient interface {
 	Ping(ctx context.Context, in *Node, opts ...grpc.CallOption) (*Node, error)
-	Store(ctx context.Context, opts ...grpc.CallOption) (KademliaProtocol_StoreClient, error)
+	Store(ctx context.Context, opts ...grpc.CallOption) (FullNode_StoreClient, error)
 	FindNode(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (*KBucket, error)
-	FindValue(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (KademliaProtocol_FindValueClient, error)
+	FindValue(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (FullNode_FindValueClient, error)
 }
 
-type kademliaProtocolClient struct {
+type fullNodeClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewKademliaProtocolClient(cc grpc.ClientConnInterface) KademliaProtocolClient {
-	return &kademliaProtocolClient{cc}
+func NewFullNodeClient(cc grpc.ClientConnInterface) FullNodeClient {
+	return &fullNodeClient{cc}
 }
 
-func (c *kademliaProtocolClient) Ping(ctx context.Context, in *Node, opts ...grpc.CallOption) (*Node, error) {
+func (c *fullNodeClient) Ping(ctx context.Context, in *Node, opts ...grpc.CallOption) (*Node, error) {
 	out := new(Node)
-	err := c.cc.Invoke(ctx, "/kademlia.KademliaProtocol/Ping", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/kademlia.FullNode/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *kademliaProtocolClient) Store(ctx context.Context, opts ...grpc.CallOption) (KademliaProtocol_StoreClient, error) {
-	stream, err := c.cc.NewStream(ctx, &KademliaProtocol_ServiceDesc.Streams[0], "/kademlia.KademliaProtocol/Store", opts...)
+func (c *fullNodeClient) Store(ctx context.Context, opts ...grpc.CallOption) (FullNode_StoreClient, error) {
+	stream, err := c.cc.NewStream(ctx, &FullNode_ServiceDesc.Streams[0], "/kademlia.FullNode/Store", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &kademliaProtocolStoreClient{stream}
+	x := &fullNodeStoreClient{stream}
 	return x, nil
 }
 
-type KademliaProtocol_StoreClient interface {
+type FullNode_StoreClient interface {
 	Send(*Data) error
 	CloseAndRecv() (*Response, error)
 	grpc.ClientStream
 }
 
-type kademliaProtocolStoreClient struct {
+type fullNodeStoreClient struct {
 	grpc.ClientStream
 }
 
-func (x *kademliaProtocolStoreClient) Send(m *Data) error {
+func (x *fullNodeStoreClient) Send(m *Data) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *kademliaProtocolStoreClient) CloseAndRecv() (*Response, error) {
+func (x *fullNodeStoreClient) CloseAndRecv() (*Response, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
@@ -79,21 +79,21 @@ func (x *kademliaProtocolStoreClient) CloseAndRecv() (*Response, error) {
 	return m, nil
 }
 
-func (c *kademliaProtocolClient) FindNode(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (*KBucket, error) {
+func (c *fullNodeClient) FindNode(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (*KBucket, error) {
 	out := new(KBucket)
-	err := c.cc.Invoke(ctx, "/kademlia.KademliaProtocol/FindNode", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/kademlia.FullNode/FindNode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *kademliaProtocolClient) FindValue(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (KademliaProtocol_FindValueClient, error) {
-	stream, err := c.cc.NewStream(ctx, &KademliaProtocol_ServiceDesc.Streams[1], "/kademlia.KademliaProtocol/FindValue", opts...)
+func (c *fullNodeClient) FindValue(ctx context.Context, in *TargetID, opts ...grpc.CallOption) (FullNode_FindValueClient, error) {
+	stream, err := c.cc.NewStream(ctx, &FullNode_ServiceDesc.Streams[1], "/kademlia.FullNode/FindValue", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &kademliaProtocolFindValueClient{stream}
+	x := &fullNodeFindValueClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -103,16 +103,16 @@ func (c *kademliaProtocolClient) FindValue(ctx context.Context, in *TargetID, op
 	return x, nil
 }
 
-type KademliaProtocol_FindValueClient interface {
+type FullNode_FindValueClient interface {
 	Recv() (*FindValueResponse, error)
 	grpc.ClientStream
 }
 
-type kademliaProtocolFindValueClient struct {
+type fullNodeFindValueClient struct {
 	grpc.ClientStream
 }
 
-func (x *kademliaProtocolFindValueClient) Recv() (*FindValueResponse, error) {
+func (x *fullNodeFindValueClient) Recv() (*FindValueResponse, error) {
 	m := new(FindValueResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -120,83 +120,83 @@ func (x *kademliaProtocolFindValueClient) Recv() (*FindValueResponse, error) {
 	return m, nil
 }
 
-// KademliaProtocolServer is the server API for KademliaProtocol service.
-// All implementations must embed UnimplementedKademliaProtocolServer
+// FullNodeServer is the server API for FullNode service.
+// All implementations must embed UnimplementedFullNodeServer
 // for forward compatibility
-type KademliaProtocolServer interface {
+type FullNodeServer interface {
 	Ping(context.Context, *Node) (*Node, error)
-	Store(KademliaProtocol_StoreServer) error
+	Store(FullNode_StoreServer) error
 	FindNode(context.Context, *TargetID) (*KBucket, error)
-	FindValue(*TargetID, KademliaProtocol_FindValueServer) error
-	mustEmbedUnimplementedKademliaProtocolServer()
+	FindValue(*TargetID, FullNode_FindValueServer) error
+	mustEmbedUnimplementedFullNodeServer()
 }
 
-// UnimplementedKademliaProtocolServer must be embedded to have forward compatible implementations.
-type UnimplementedKademliaProtocolServer struct {
+// UnimplementedFullNodeServer must be embedded to have forward compatible implementations.
+type UnimplementedFullNodeServer struct {
 }
 
-func (UnimplementedKademliaProtocolServer) Ping(context.Context, *Node) (*Node, error) {
+func (UnimplementedFullNodeServer) Ping(context.Context, *Node) (*Node, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (UnimplementedKademliaProtocolServer) Store(KademliaProtocol_StoreServer) error {
+func (UnimplementedFullNodeServer) Store(FullNode_StoreServer) error {
 	return status.Errorf(codes.Unimplemented, "method Store not implemented")
 }
-func (UnimplementedKademliaProtocolServer) FindNode(context.Context, *TargetID) (*KBucket, error) {
+func (UnimplementedFullNodeServer) FindNode(context.Context, *TargetID) (*KBucket, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindNode not implemented")
 }
-func (UnimplementedKademliaProtocolServer) FindValue(*TargetID, KademliaProtocol_FindValueServer) error {
+func (UnimplementedFullNodeServer) FindValue(*TargetID, FullNode_FindValueServer) error {
 	return status.Errorf(codes.Unimplemented, "method FindValue not implemented")
 }
-func (UnimplementedKademliaProtocolServer) mustEmbedUnimplementedKademliaProtocolServer() {}
+func (UnimplementedFullNodeServer) mustEmbedUnimplementedFullNodeServer() {}
 
-// UnsafeKademliaProtocolServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to KademliaProtocolServer will
+// UnsafeFullNodeServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to FullNodeServer will
 // result in compilation errors.
-type UnsafeKademliaProtocolServer interface {
-	mustEmbedUnimplementedKademliaProtocolServer()
+type UnsafeFullNodeServer interface {
+	mustEmbedUnimplementedFullNodeServer()
 }
 
-func RegisterKademliaProtocolServer(s grpc.ServiceRegistrar, srv KademliaProtocolServer) {
-	s.RegisterService(&KademliaProtocol_ServiceDesc, srv)
+func RegisterFullNodeServer(s grpc.ServiceRegistrar, srv FullNodeServer) {
+	s.RegisterService(&FullNode_ServiceDesc, srv)
 }
 
-func _KademliaProtocol_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FullNode_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Node)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KademliaProtocolServer).Ping(ctx, in)
+		return srv.(FullNodeServer).Ping(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/kademlia.KademliaProtocol/Ping",
+		FullMethod: "/kademlia.FullNode/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KademliaProtocolServer).Ping(ctx, req.(*Node))
+		return srv.(FullNodeServer).Ping(ctx, req.(*Node))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KademliaProtocol_Store_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(KademliaProtocolServer).Store(&kademliaProtocolStoreServer{stream})
+func _FullNode_Store_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(FullNodeServer).Store(&fullNodeStoreServer{stream})
 }
 
-type KademliaProtocol_StoreServer interface {
+type FullNode_StoreServer interface {
 	SendAndClose(*Response) error
 	Recv() (*Data, error)
 	grpc.ServerStream
 }
 
-type kademliaProtocolStoreServer struct {
+type fullNodeStoreServer struct {
 	grpc.ServerStream
 }
 
-func (x *kademliaProtocolStoreServer) SendAndClose(m *Response) error {
+func (x *fullNodeStoreServer) SendAndClose(m *Response) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *kademliaProtocolStoreServer) Recv() (*Data, error) {
+func (x *fullNodeStoreServer) Recv() (*Data, error) {
 	m := new(Data)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -204,70 +204,70 @@ func (x *kademliaProtocolStoreServer) Recv() (*Data, error) {
 	return m, nil
 }
 
-func _KademliaProtocol_FindNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _FullNode_FindNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TargetID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KademliaProtocolServer).FindNode(ctx, in)
+		return srv.(FullNodeServer).FindNode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/kademlia.KademliaProtocol/FindNode",
+		FullMethod: "/kademlia.FullNode/FindNode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KademliaProtocolServer).FindNode(ctx, req.(*TargetID))
+		return srv.(FullNodeServer).FindNode(ctx, req.(*TargetID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KademliaProtocol_FindValue_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _FullNode_FindValue_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(TargetID)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(KademliaProtocolServer).FindValue(m, &kademliaProtocolFindValueServer{stream})
+	return srv.(FullNodeServer).FindValue(m, &fullNodeFindValueServer{stream})
 }
 
-type KademliaProtocol_FindValueServer interface {
+type FullNode_FindValueServer interface {
 	Send(*FindValueResponse) error
 	grpc.ServerStream
 }
 
-type kademliaProtocolFindValueServer struct {
+type fullNodeFindValueServer struct {
 	grpc.ServerStream
 }
 
-func (x *kademliaProtocolFindValueServer) Send(m *FindValueResponse) error {
+func (x *fullNodeFindValueServer) Send(m *FindValueResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-// KademliaProtocol_ServiceDesc is the grpc.ServiceDesc for KademliaProtocol service.
+// FullNode_ServiceDesc is the grpc.ServiceDesc for FullNode service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var KademliaProtocol_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "kademlia.KademliaProtocol",
-	HandlerType: (*KademliaProtocolServer)(nil),
+var FullNode_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "kademlia.FullNode",
+	HandlerType: (*FullNodeServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Ping",
-			Handler:    _KademliaProtocol_Ping_Handler,
+			Handler:    _FullNode_Ping_Handler,
 		},
 		{
 			MethodName: "FindNode",
-			Handler:    _KademliaProtocol_FindNode_Handler,
+			Handler:    _FullNode_FindNode_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Store",
-			Handler:       _KademliaProtocol_Store_Handler,
+			Handler:       _FullNode_Store_Handler,
 			ClientStreams: true,
 		},
 		{
 			StreamName:    "FindValue",
-			Handler:       _KademliaProtocol_FindValue_Handler,
+			Handler:       _FullNode_FindValue_Handler,
 			ServerStreams: true,
 		},
 	},

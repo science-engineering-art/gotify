@@ -8,25 +8,17 @@ import (
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
 )
 
-type FullNode struct {
+type DHT struct {
 	structs.Node
 	RoutingTable *structs.RoutingTable
 	Storage      interfaces.Persistence
 }
 
-// TODO: NewFullNode method for node initializing
+// TODO: NewDHT method for node initializing
 
 // TODO: JoinNetwork method for connecting to a bootstrap node
 
-func (fn *FullNode) Ping(sender structs.Node) structs.Node {
-	err := fn.RoutingTable.AddNode(sender)
-	if err != nil {
-		fmt.Println("An error ocurred when executing Ping: ", err)
-	}
-	return fn.Node
-}
-
-func (fn *FullNode) Store(data *[]byte) error {
+func (fn *DHT) Store(data *[]byte) error {
 	sha := sha1.Sum(*data)
 
 	err := fn.Storage.Create(sha[:], data)
@@ -37,7 +29,7 @@ func (fn *FullNode) Store(data *[]byte) error {
 }
 
 // TODO: Check Find Value return when the value is not in the node
-func (fn *FullNode) FindValue(infoHash *[]byte) (value *[]byte) {
+func (fn *DHT) FindValue(infoHash *[]byte) (value *[]byte) {
 	value, err := fn.Storage.Read(*infoHash)
 	if err != nil {
 		fmt.Println("Find Value error: ", err)
@@ -46,7 +38,7 @@ func (fn *FullNode) FindValue(infoHash *[]byte) (value *[]byte) {
 }
 
 // TODO: Check get k nearest values return
-// func (fn *FullNode) FindNode(target *[]byte) (kBucket *[]structs.Node) {
+// func (fn *DHT) FindNode(target *[]byte) (kBucket *[]structs.Node) {
 // 	if bytes.Compare(fn.ID, *target) == 0 {
 // 		kBucket = &[]structs.Node{fn.Node}
 // 	}

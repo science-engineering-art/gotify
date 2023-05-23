@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"net"
 	"strconv"
 
+	"github.com/science-engineering-art/spotify/src/peer/core/structs"
 	"github.com/science-engineering-art/spotify/src/peer/pb"
 	"github.com/science-engineering-art/spotify/src/peer/rpc"
 	"github.com/science-engineering-art/spotify/src/peer/services"
@@ -65,6 +67,9 @@ func init() {
 }
 
 func main() {
+
+	go ListenEntryPoint()
+
 	defer mongoclient.Disconnect(ctx)
 
 	songServer, err := rpc.NewGrpcSongServer(songCollection, songService)
@@ -87,4 +92,56 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot create grpc server: ", err)
 	}
+}
+
+func ListenEntryPoint() {
+	listener, err := net.Listen("tcp", "127.0.0.1:7999")
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			panic(err)
+		}
+
+		buffer := make([]byte, 1024)
+		n, err := conn.Read(buffer)
+		if err != nil {
+			panic(err)
+		}
+
+		bucket := structs.Bucket{}
+		err = json.Unmarshal(buffer[:n], &bucket)
+		if err != nil {
+			panic(err)
+		}
+
+		myBucket, _ := json.Marshal(structs.Bucket{
+			ID:   "",
+			IP:   "255.255.255.255",
+			Port: 32110,
+		})
+		conn.Write(myBucket)
+	}
+}
+
+func Broadcast() {
+	conn, err := net.Dial("tcp", "127.0.255.255:7999")
+	if err != nil {
+		panic(err)
+	}
+
+	myBucket, _ := json.Marshal(structs.Bucket{
+		ID:   "",
+		IP:   "0.0.0.0",
+		Port: 32110,
+	})
+
+	_, err = conn.Write(myBucket)
+	if err != nil {
+		panic(err)
+	}
+
 }
