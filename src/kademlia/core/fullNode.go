@@ -1,21 +1,20 @@
-package wrappers
+package core
 
 import (
 	"context"
 
-	"github.com/science-engineering-art/spotify/src/kademlia/core"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
 )
 
 type FullNode struct {
 	pb.UnimplementedFullNodeServer
-	DHT core.DHT
+	dht DHT
 }
 
 func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error) {
 
-	err := fn.DHT.RoutingTable.AddNode(
+	err := fn.dht.RoutingTable.AddNode(
 		structs.Node{
 			ID:   sender.ID,
 			IP:   sender.IP,
@@ -25,7 +24,7 @@ func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error)
 		return nil, err
 	}
 
-	receiver := &pb.Node{ID: fn.DHT.ID, IP: fn.DHT.IP, Port: int32(fn.DHT.Port)}
+	receiver := &pb.Node{ID: fn.dht.ID, IP: fn.dht.IP, Port: int32(fn.dht.Port)}
 	return receiver, nil
 }
 
@@ -51,7 +50,7 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 		}
 	}
 
-	err := fn.DHT.Store(&buffer)
+	err := fn.dht.Store(&buffer)
 	if err != nil {
 		return err
 	}
