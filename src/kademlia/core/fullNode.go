@@ -2,7 +2,9 @@ package core
 
 import (
 	"context"
+	"crypto/rand"
 
+	"github.com/science-engineering-art/spotify/src/kademlia/interfaces"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
 )
@@ -16,6 +18,22 @@ const (
 type FullNode struct {
 	pb.UnimplementedFullNodeServer
 	dht DHT
+}
+
+func NewFullNode(ip string, port int, storage interfaces.Persistence) *FullNode {
+	id, _ := newID()
+	node := structs.Node{ID: id, IP: ip, Port: port}
+	routingTable := structs.RoutingTable{}
+	dht := DHT{Node: node, RoutingTable: &routingTable, Storage: storage}
+	fullNode := FullNode{dht: dht}
+	return &fullNode
+}
+
+// newID generates a new random ID
+func newID() ([]byte, error) {
+	result := make([]byte, 20)
+	_, err := rand.Read(result)
+	return result, err
 }
 
 func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error) {

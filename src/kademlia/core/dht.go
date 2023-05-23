@@ -15,10 +15,6 @@ type DHT struct {
 	Storage      interfaces.Persistence
 }
 
-// TODO: NewDHT method for node initializing
-
-// TODO: JoinNetwork method for connecting to a bootstrap node
-
 func (fn *DHT) Store(data *[]byte) error {
 	sha := sha1.Sum(*data)
 
