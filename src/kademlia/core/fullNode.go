@@ -63,13 +63,25 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 	return nil
 }
 
-func (fn *FullNode) FindNode(context.Context, *pb.TargetID) (*pb.KBucket, error) {
-	return nil, nil
+func (fn *FullNode) FindNode(ctx context.Context, target *pb.TargetID) (*pb.KBucket, error) {
+	bucket := fn.dht.FindNode(&target.ID)
+	return getKBucketFromNodeArray(bucket), nil
 }
 
-func (fn *FullNode) FindValue(*pb.TargetID, pb.FullNode_FindValueServer) error {
-
+func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServer) error {
+	value, neighbors := fn.dht.FindValue(&target.ID)
+	kbucket := getKBucketFromNodeArray(neighbors)
+	response := pb.FindValueResponse{KNeartestBuckets: kbucket, Value: &pb.Data{Init: 0, End: int32(4000024), Buffer: (*value)[:4000024]}}
+	fv.Send(&response)
 	return nil
+}
+
+func getKBucketFromNodeArray(nodes *[]structs.Node) *pb.KBucket {
+	result := &pb.KBucket{}
+	for _, node := range *nodes {
+		(*result).Bucket = append((*result).Bucket, &pb.Node{ID: node.ID, IP: node.IP, Port: int32(node.Port)})
+	}
+	return result
 }
 
 func (fn *FullNode) LookUp(action int, target []byte, data *[]byte) error {

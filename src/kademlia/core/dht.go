@@ -29,7 +29,6 @@ func (fn *DHT) Store(data *[]byte) error {
 	return nil
 }
 
-// TODO: Check Find Value return when the value is not in the node
 func (fn *DHT) FindValue(infoHash *[]byte) (value *[]byte, neighbors *[]structs.Node) {
 	value, err := fn.Storage.Read(*infoHash)
 	if err != nil {
@@ -40,7 +39,6 @@ func (fn *DHT) FindValue(infoHash *[]byte) (value *[]byte, neighbors *[]structs.
 	return value, nil
 }
 
-// TODO: Check get k nearest values return
 func (fn *DHT) FindNode(target *[]byte) (kBucket *[]structs.Node) {
 	if bytes.Equal(fn.ID, *target) {
 		kBucket = &[]structs.Node{fn.Node}
