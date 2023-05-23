@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"fmt"
 
@@ -40,12 +41,11 @@ func (fn *DHT) FindValue(infoHash *[]byte) (value *[]byte, neighbors *[]structs.
 }
 
 // TODO: Check get k nearest values return
-// func (fn *DHT) FindNode(target *[]byte) (kBucket *[]structs.Node) {
-// 	if bytes.Compare(fn.ID, *target) == 0 {
-// 		kBucket = &[]structs.Node{fn.Node}
-// 	}
-// 	sl := fn.RoutingTable.GetClosestContacts(3, *target, []*structs.Node{&fn.Node})
+func (fn *DHT) FindNode(target *[]byte) (kBucket *[]structs.Node) {
+	if bytes.Equal(fn.ID, *target) {
+		kBucket = &[]structs.Node{fn.Node}
+	}
+	kBucket = fn.RoutingTable.GetClosestContacts(structs.Alpha, *target, []*structs.Node{&fn.Node}).Nodes
 
-// 	//kBucket = sl.Nodes
-// 	return
-// }
+	return kBucket
+}
