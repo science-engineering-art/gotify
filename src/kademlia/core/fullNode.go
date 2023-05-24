@@ -2,7 +2,8 @@ package core
 
 import (
 	"context"
-	"crypto/rand"
+	"crypto/sha1"
+	"strconv"
 
 	"github.com/science-engineering-art/spotify/src/kademlia/interfaces"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
@@ -17,28 +18,27 @@ const (
 
 type FullNode struct {
 	pb.UnimplementedFullNodeServer
-	dht DHT
+	DHT DHT
 }
 
 func NewGrpcFullNodeServer(ip string, port int, storage interfaces.Persistence) *FullNode {
-	id, _ := newID()
+	id, _ := newID(ip, port)
 	node := structs.Node{ID: id, IP: ip, Port: port}
 	routingTable := structs.RoutingTable{}
 	dht := DHT{Node: node, RoutingTable: &routingTable, Storage: storage}
-	fullNode := FullNode{dht: dht}
+	fullNode := FullNode{DHT: dht}
 	return &fullNode
 }
 
 // newID generates a new random ID
-func newID() ([]byte, error) {
-	result := make([]byte, 20)
-	_, err := rand.Read(result)
-	return result, err
+func newID(ip string, port int) ([]byte, error) {
+	hashValue := sha1.Sum([]byte(ip + ":" + strconv.FormatInt(int64(port), 10)))
+	return []byte(hashValue[:]), nil
 }
 
 func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error) {
 
-	err := fn.dht.RoutingTable.AddNode(
+	err := fn.DHT.RoutingTable.AddNode(
 		structs.Node{
 			ID:   sender.ID,
 			IP:   sender.IP,
@@ -48,7 +48,7 @@ func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error)
 		return nil, err
 	}
 
-	receiver := &pb.Node{ID: fn.dht.ID, IP: fn.dht.IP, Port: int32(fn.dht.Port)}
+	receiver := &pb.Node{ID: fn.DHT.ID, IP: fn.DHT.IP, Port: int32(fn.DHT.Port)}
 	return receiver, nil
 }
 
@@ -74,7 +74,7 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 		}
 	}
 
-	err := fn.dht.Store(&buffer)
+	err := fn.DHT.Store(&buffer)
 	if err != nil {
 		return err
 	}
@@ -82,12 +82,12 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 }
 
 func (fn *FullNode) FindNode(ctx context.Context, target *pb.TargetID) (*pb.KBucket, error) {
-	bucket := fn.dht.FindNode(&target.ID)
+	bucket := fn.DHT.FindNode(&target.ID)
 	return getKBucketFromNodeArray(bucket), nil
 }
 
 func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServer) error {
-	value, neighbors := fn.dht.FindValue(&target.ID)
+	value, neighbors := fn.DHT.FindValue(&target.ID)
 	kbucket := getKBucketFromNodeArray(neighbors)
 	response := pb.FindValueResponse{KNeartestBuckets: kbucket, Value: &pb.Data{Init: 0, End: int32(4000024), Buffer: (*value)[:4000024]}}
 	fv.Send(&response)

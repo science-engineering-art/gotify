@@ -46,7 +46,6 @@ func main() {
 
 			// Create a gRPC server full node
 			go CreateFullNodeServer(&ip, &port)
-			fmt.Println("Peer successfully created: ", ip, port)
 
 		case "store":
 			if len(input) != 4 {
@@ -132,7 +131,7 @@ func CreateFullNodeServer(ip *string, port *int) {
 		log.Fatal("cannot create grpc server: ", err)
 	}
 
-	log.Printf("start gRPC server on %s", listener.Addr().String())
+	log.Printf("start gRPC server %+v on %s", fullNodeServer.DHT.ID, listener.Addr().String())
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		log.Fatal("cannot create grpc server: ", err)
