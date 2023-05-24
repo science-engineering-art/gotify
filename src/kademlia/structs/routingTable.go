@@ -19,21 +19,22 @@ const (
 
 	// the size in bits of the keys used to identify nodes and store and
 	// retrieve data; in basic Kademlia this is 160, the length of a SHA1
-	b = 160
+	B = 160
 
 	// the maximum number of contacts stored in a bucket
-	k = 20
+	K = 20
 )
 
 type RoutingTable struct {
 	NodeInfo Node
-	KBuckets [][]Node
+	KBuckets [B][]Node
 	mutex    *sync.Mutex
 }
 
-func NewRoutingTable(b Node) (rt *RoutingTable) {
+func NewRoutingTable(b Node) *RoutingTable {
+	rt := &RoutingTable{}
 	rt.NodeInfo = b
-	rt.KBuckets = [][]Node{}
+	rt.KBuckets = [B][]Node{}
 	rt.mutex = &sync.Mutex{}
 	return rt
 }
@@ -68,8 +69,8 @@ func (rt *RoutingTable) isAlive(b Node) bool {
 // Función que se encarga de añadir un nodo a la tabla de
 // rutas con las restricciones pertinentes del protocolo
 func (rt *RoutingTable) AddNode(b Node) error {
-	// rt.mutex.Lock()
-	// defer rt.mutex.Unlock()
+	rt.mutex.Lock()
+	defer rt.mutex.Unlock()
 
 	// get the correspondient bucket
 	bIndex := getBucketIndex(rt.NodeInfo.ID, b.ID)
@@ -85,7 +86,7 @@ func (rt *RoutingTable) AddNode(b Node) error {
 		}
 	}
 
-	if len(bucket) < k {
+	if len(bucket) < K {
 		bucket = append(bucket, b)
 	} else if !rt.isAlive(bucket[0]) {
 		bucket = append(bucket[1:], b)
@@ -97,19 +98,14 @@ RETURN:
 }
 
 func getBucketIndex(id1 []byte, id2 []byte) int {
-	fmt.Println("Get into function getBucketIndex with values: ", id1, id2)
 	// Look at each byte from left to right
 	for j := 0; j < len(id1); j++ {
-		fmt.Println("for init for j =", j)
 		// xor the byte
 		xor := id1[j] ^ id2[j]
-		fmt.Println("xor id1[j] id2[j]", xor)
 
 		// check each bit on the xored result from left to right in order
 		for i := 0; i < 8; i++ {
-			fmt.Println("for init for i =:", i)
 			if hasBit(xor, uint(i)) {
-				fmt.Println("Has bit:", hasBit(xor, uint(i)))
 				byteIndex := j * 8
 				bitIndex := i
 				return (byteIndex + bitIndex)
@@ -145,8 +141,8 @@ func (rt *RoutingTable) GetClosestContacts(num int, target []byte, ignoredNodes 
 	i := index - 1
 	j := index + 1
 
-	for len(indexList) < b {
-		if j < b {
+	for len(indexList) < B {
+		if j < B {
 			indexList = append(indexList, j)
 		}
 		if i >= 0 {
