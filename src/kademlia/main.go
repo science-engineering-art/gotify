@@ -69,7 +69,7 @@ func main() {
 			}
 			data_hash := sha1.Sum([]byte(data))
 			id := string(data_hash[:])
-			fmt.Println("Stored ID: " + id)
+			fmt.Printf("Stored ID: %s", id)
 
 		case "ping":
 			if len(input) != 5 {
@@ -88,7 +88,7 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println("I'm alive", pbNode.IP, ":", pbNode.Port)
+			fmt.Println("The requested node is alive at:", pbNode.IP, ":", pbNode.Port)
 		}
 	}
 }
@@ -119,7 +119,7 @@ info - Display information about this node
 
 func CreateFullNodeServer(ip *string, port *int) {
 	grpcServerAddress := *ip + ":" + strconv.FormatInt(int64(*port), 10)
-	fullNodeServer := *core.NewGrpcFullNodeServer(*ip, *port, &structs.Storage{})
+	fullNodeServer := *core.NewGrpcFullNodeServer(*ip, *port, structs.NewStorage())
 
 	// Create gRPC Server
 	grpcServer := grpc.NewServer()

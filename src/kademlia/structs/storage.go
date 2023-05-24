@@ -10,8 +10,10 @@ type Storage struct {
 	KV map[string]interface{}
 }
 
-func (s *Storage) init() {
+func NewStorage() *Storage {
+	s := &Storage{}
 	s.KV = make(map[string]interface{})
+	return s
 }
 
 func (s *Storage) Create(key []byte, data *[]byte) error {
@@ -23,7 +25,7 @@ func (s *Storage) Create(key []byte, data *[]byte) error {
 	}
 
 	s.KV[id] = data
-
+	//fmt.Println(s.KV[id])
 	return nil
 }
 

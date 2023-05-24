@@ -94,6 +94,7 @@ func (rt *RoutingTable) AddNode(b Node) error {
 
 RETURN:
 	rt.KBuckets[bIndex] = bucket
+	//fmt.Println(rt.KBuckets)
 	return nil
 }
 
