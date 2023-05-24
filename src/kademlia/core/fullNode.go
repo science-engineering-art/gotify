@@ -22,16 +22,16 @@ type FullNode struct {
 }
 
 func NewGrpcFullNodeServer(ip string, port int, storage interfaces.Persistence) *FullNode {
-	id, _ := newID(ip, port)
+	id, _ := NewID(ip, port)
 	node := structs.Node{ID: id, IP: ip, Port: port}
-	routingTable := structs.RoutingTable{}
-	dht := DHT{Node: node, RoutingTable: &routingTable, Storage: storage}
+	routingTable := structs.NewRoutingTable(node)
+	dht := DHT{Node: node, RoutingTable: routingTable, Storage: storage}
 	fullNode := FullNode{DHT: dht}
 	return &fullNode
 }
 
 // newID generates a new random ID
-func newID(ip string, port int) ([]byte, error) {
+func NewID(ip string, port int) ([]byte, error) {
 	hashValue := sha1.Sum([]byte(ip + ":" + strconv.FormatInt(int64(port), 10)))
 	return []byte(hashValue[:]), nil
 }

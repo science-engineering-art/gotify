@@ -31,10 +31,11 @@ type RoutingTable struct {
 	mutex    *sync.Mutex
 }
 
-func (rt *RoutingTable) init(b Node) {
+func NewRoutingTable(b Node) (rt *RoutingTable) {
 	rt.NodeInfo = b
 	rt.KBuckets = [][]Node{}
 	rt.mutex = &sync.Mutex{}
+	return rt
 }
 
 func (rt *RoutingTable) isAlive(b Node) bool {

@@ -83,7 +83,8 @@ func main() {
 			client := GetFullNodeClient(&ipReceiver, &portReceiver)
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
-			pbNode, err := client.Ping(ctx, &pb.Node{ID: []byte{}, IP: ipSender, Port: int32(portSender)})
+			idSender, _ := core.NewID(ipSender, portSender)
+			pbNode, err := client.Ping(ctx, &pb.Node{ID: idSender, IP: ipSender, Port: int32(portSender)})
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -141,6 +142,6 @@ func CreateFullNodeServer(ip *string, port *int) {
 func GetFullNodeClient(ip *string, port *int) pb.FullNodeClient {
 	address := fmt.Sprintf("%s:%d", *ip, *port)
 	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
-
-	return pb.NewFullNodeClient(conn)
+	client := pb.NewFullNodeClient(conn)
+	return client
 }
