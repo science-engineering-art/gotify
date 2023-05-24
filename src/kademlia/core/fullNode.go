@@ -3,11 +3,18 @@ package core
 import (
 	"context"
 	"crypto/sha1"
+	"errors"
+	"fmt"
+	"math"
+	"sort"
 	"strconv"
+	"time"
 
 	"github.com/science-engineering-art/spotify/src/kademlia/interfaces"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -18,7 +25,7 @@ const (
 
 type FullNode struct {
 	pb.UnimplementedFullNodeServer
-	DHT DHT
+	dht DHT
 }
 
 func NewGrpcFullNodeServer(ip string, port int, storage interfaces.Persistence) *FullNode {
@@ -26,7 +33,7 @@ func NewGrpcFullNodeServer(ip string, port int, storage interfaces.Persistence) 
 	node := structs.Node{ID: id, IP: ip, Port: port}
 	routingTable := structs.NewRoutingTable(node)
 	dht := DHT{Node: node, RoutingTable: routingTable, Storage: storage}
-	fullNode := FullNode{DHT: dht}
+	fullNode := FullNode{dht: dht}
 	return &fullNode
 }
 
@@ -38,7 +45,7 @@ func NewID(ip string, port int) ([]byte, error) {
 
 func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error) {
 
-	err := fn.DHT.RoutingTable.AddNode(
+	err := fn.dht.RoutingTable.AddNode(
 		structs.Node{
 			ID:   sender.ID,
 			IP:   sender.IP,
@@ -48,7 +55,7 @@ func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error)
 		return nil, err
 	}
 
-	receiver := &pb.Node{ID: fn.DHT.ID, IP: fn.DHT.IP, Port: int32(fn.DHT.Port)}
+	receiver := &pb.Node{ID: fn.dht.ID, IP: fn.dht.IP, Port: int32(fn.dht.Port)}
 	return receiver, nil
 }
 
@@ -74,7 +81,7 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 		}
 	}
 
-	err := fn.DHT.Store(&buffer)
+	err := fn.dht.Store(&buffer)
 	if err != nil {
 		return err
 	}
@@ -82,12 +89,12 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 }
 
 func (fn *FullNode) FindNode(ctx context.Context, target *pb.TargetID) (*pb.KBucket, error) {
-	bucket := fn.DHT.FindNode(&target.ID)
+	bucket := fn.dht.FindNode(&target.ID)
 	return getKBucketFromNodeArray(bucket), nil
 }
 
 func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServer) error {
-	value, neighbors := fn.DHT.FindValue(&target.ID)
+	value, neighbors := fn.dht.FindValue(&target.ID)
 	kbucket := getKBucketFromNodeArray(neighbors)
 	response := pb.FindValueResponse{KNeartestBuckets: kbucket, Value: &pb.Data{Init: 0, End: int32(4000024), Buffer: (*value)[:4000024]}}
 	fv.Send(&response)
@@ -102,205 +109,157 @@ func getKBucketFromNodeArray(nodes *[]structs.Node) *pb.KBucket {
 	return result
 }
 
-func (fn *FullNode) LookUp(action int, target []byte, data *[]byte) error {
+func (fn *FullNode) LookUp(action int, target []byte, data *[]byte) (*[]byte, []structs.Node, error) {
 
-	// sl := fn.dht.RoutingTable.GetClosestContacts(structs.Alpha, target, []*structs.Node{})
+	sl := fn.dht.RoutingTable.GetClosestContacts(structs.Alpha, target, []*structs.Node{})
 
-	// contacted := make(map[string]bool)
+	contacted := make(map[string]bool)
 
-	// // We keep track of nodes contacted so far. We don't contact the same node
-	// // twice.
-	// var contacted = make(map[string]bool)
+	if len(*sl.Nodes) == 0 {
+		return nil, nil, nil
+	}
 
-	// // According to the Kademlia white paper, after a round of FIND_NODE RPCs
-	// // fails to provide a node closer than closestNode, we should send a
-	// // FIND_NODE RPC to all remaining nodes in the shortlist that have not
-	// // yet been contacted.
-	// queryRest := false
+	for {
+		addedNodes := 0
 
-	// // We keep a reference to the closestNode. If after performing a search
-	// // we do not find a closer node, we stop searching.
-	// if len(sl.Nodes) == 0 {
-	// 	return nil, nil, nil
-	// }
+		for i, node := range *sl.Nodes {
+			if i >= structs.Alpha {
+				break
+			}
+			if contacted[string(node.ID)] {
+				continue
+			}
+			contacted[string(node.ID)] = true
 
-	// closestNode := sl.Nodes[0]
+			// get RPC client
+			address := fmt.Sprintf("%s:%d", node.IP, node.Port)
+			conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+			client := pb.NewFullNodeClient(conn)
 
-	// if t == iterateFindNode {
-	// 	bucket := getBucketIndexFromDifferingBit(target, dht.ht.Self.ID)
-	// 	dht.ht.resetRefreshTimeForBucket(bucket)
-	// }
+			// function to add the received nodes into the short list
+			addRecvNodes := func(recvNodes *pb.KBucket) {
+				kBucket := []*structs.Node{}
+				for _, pbNode := range recvNodes.Bucket {
+					if !contacted[string(pbNode.ID)] {
+						kBucket = append(kBucket, &structs.Node{
+							ID:   pbNode.ID,
+							IP:   pbNode.IP,
+							Port: int(pbNode.Port),
+						})
+						addedNodes++
+					}
+				}
+				sl.Append(kBucket)
+			}
 
-	// removeFromShortlist := []*NetworkNode{}
+			switch action {
+			case StoreValue:
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
 
-	// for {
-	// 	expectedResponses := []*expectedResponse{}
-	// 	numExpectedResponses := 0
+				recvNodes, err := client.FindNode(ctx, &pb.TargetID{ID: node.ID})
+				if err != nil {
+					return nil, nil, err
+				}
+				addRecvNodes(recvNodes)
+			case KNeartestNodes:
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
 
-	// 	// Next we send messages to the first (closest) alpha nodes in the
-	// 	// shortlist and wait for a response
+				recvNodes, err := client.FindNode(ctx, &pb.TargetID{ID: node.ID})
+				if err != nil {
+					return nil, nil, err
+				}
+				addRecvNodes(recvNodes)
+			case GetValue:
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
 
-	// 	for i, node := range sl.Nodes {
-	// 		// Contact only alpha nodes
-	// 		if i >= alpha && !queryRest {
-	// 			break
-	// 		}
+				stream, err := client.FindValue(ctx, &pb.TargetID{ID: node.ID})
+				if err != nil {
+					return nil, nil, err
+				}
 
-	// 		// Don't contact nodes already contacted
-	// 		if contacted[string(node.ID)] {
-	// 			continue
-	// 		}
+				buffer := []byte{}
+				var init int32 = 0
 
-	// 		contacted[string(node.ID)] = true
-	// 		query := &message{}
-	// 		query.Sender = dht.ht.Self
-	// 		query.Receiver = node
+				for {
+					resp, err := stream.Recv()
+					if resp == nil {
+						break
+					}
+					if err != nil {
+						return nil, nil, err
+					}
 
-	// 		switch t {
-	// 		case iterateFindNode:
-	// 			query.Type = messageTypeFindNode
-	// 			queryData := &queryDataFindNode{}
-	// 			queryData.Target = target
-	// 			query.Data = queryData
-	// 		case iterateFindValue:
-	// 			query.Type = messageTypeFindValue
-	// 			queryData := &queryDataFindValue{}
-	// 			queryData.Target = target
-	// 			query.Data = queryData
-	// 		case iterateStore:
-	// 			query.Type = messageTypeFindNode
-	// 			queryData := &queryDataFindNode{}
-	// 			queryData.Target = target
-	// 			query.Data = queryData
-	// 		default:
-	// 			panic("Unknown iterate type")
-	// 		}
+					if resp.KNeartestBuckets != nil && resp.Value == nil {
+						addRecvNodes(resp.KNeartestBuckets)
+						continue
+					}
 
-	// 		// Send the async queries and wait for a response
-	// 		res, err := dht.networking.sendMessage(query, true, -1)
-	// 		if err != nil {
-	// 			// Node was unreachable for some reason. We will have to remove
-	// 			// it from the shortlist, but we will keep it in our routing
-	// 			// table in hopes that it might come back online in the future.
-	// 			removeFromShortlist = append(removeFromShortlist, query.Receiver)
-	// 			continue
-	// 		}
+					if resp.KNeartestBuckets == nil && resp.Value != nil {
+						if init == resp.Value.Init {
+							buffer = append(buffer, resp.Value.Buffer...)
+							init = resp.Value.End
+						} else {
+							return nil, nil, errors.New("error")
+						}
+					}
+				}
 
-	// 		expectedResponses = append(expectedResponses, res)
-	// 	}
+				if len(buffer) > 0 {
+					return &buffer, nil, nil
+				}
+			}
 
-	// 	for _, n := range removeFromShortlist {
-	// 		sl.RemoveNode(n)
-	// 	}
+		}
 
-	// 	numExpectedResponses = len(expectedResponses)
+		sl.Comparator = fn.dht.ID
+		sort.Sort(sl)
 
-	// 	resultChan := make(chan (*message))
-	// 	for _, r := range expectedResponses {
-	// 		go func(r *expectedResponse) {
-	// 			select {
-	// 			case result := <-r.ch:
-	// 				if result == nil {
-	// 					// Channel was closed
-	// 					return
-	// 				}
-	// 				dht.addNode(newNode(result.Sender))
-	// 				resultChan <- result
-	// 				return
-	// 			case <-time.After(dht.options.TMsgTimeout):
-	// 				dht.networking.cancelResponse(r)
-	// 				return
-	// 			}
-	// 		}(r)
-	// 	}
+		if addedNodes == 0 {
+			break
+		}
+	}
 
-	// 	var results []*message
-	// 	if numExpectedResponses > 0 {
-	// 	Loop:
-	// 		for {
-	// 			select {
-	// 			case result := <-resultChan:
-	// 				if result != nil {
-	// 					results = append(results, result)
-	// 				} else {
-	// 					numExpectedResponses--
-	// 				}
-	// 				if len(results) == numExpectedResponses {
-	// 					close(resultChan)
-	// 					break Loop
-	// 				}
-	// 			case <-time.After(dht.options.TMsgTimeout):
-	// 				close(resultChan)
-	// 				break Loop
-	// 			}
-	// 		}
+	kBucket := []structs.Node{}
 
-	// 		// TODO
-	// 		// leandro_driguez: en algún momento se lleva a este código?
-	// 		for _, result := range results {
-	// 			if result.Error != nil {
-	// 				sl.RemoveNode(result.Receiver)
-	// 				continue
-	// 			}
-	// 			switch t {
-	// 			case iterateFindNode:
-	// 				responseData := result.Data.(*responseDataFindNode)
-	// 				sl.AppendUniqueNetworkNodes(responseData.Closest)
-	// 			case iterateFindValue:
-	// 				responseData := result.Data.(*responseDataFindValue)
-	// 				// TODO When an iterativeFindValue succeeds, the initiator must
-	// 				// store the key/value pair at the closest node seen which did
-	// 				// not return the value.
-	// 				if responseData.Value != nil {
-	// 					return responseData.Value, nil, nil
-	// 				}
-	// 				sl.AppendUniqueNetworkNodes(responseData.Closest)
-	// 			case iterateStore:
-	// 				responseData := result.Data.(*responseDataFindNode)
-	// 				sl.AppendUniqueNetworkNodes(responseData.Closest)
-	// 			}
-	// 		}
-	// 	}
+	for i, node := range *sl.Nodes {
+		if i == structs.K {
+			break
+		}
+		switch action {
+		case StoreValue:
+			address := fmt.Sprintf("%s:%d", node.IP, node.Port)
+			conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+			client := pb.NewFullNodeClient(conn)
 
-	// 	if !queryRest && len(sl.Nodes) == 0 {
-	// 		return nil, nil, nil
-	// 	}
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
 
-	// 	sort.Sort(sl)
+			stream, err := client.Store(ctx)
+			if err != nil {
+				return nil, nil, err
+			}
 
-	// 	// If closestNode is unchanged then we are done
-	// 	if bytes.Equal(sl.Nodes[0].ID, closestNode.ID) || queryRest {
-	// 		// We are done
-	// 		switch t {
-	// 		case iterateFindNode:
-	// 			if !queryRest {
-	// 				queryRest = true
-	// 				continue
-	// 			}
-	// 			return nil, sl.Nodes, nil
-	// 		case iterateFindValue:
-	// 			return nil, sl.Nodes, nil
-	// 		case iterateStore:
-	// 			for i, n := range sl.Nodes {
-	// 				if i >= k {
-	// 					return nil, nil, nil
-	// 				}
+			for i := 0; i < len(*data); i++ {
+				init := int32(i)
+				end := int32(math.Max(float64(i+1024), float64(len(*data))))
 
-	// 				query := &message{}
-	// 				query.Receiver = n
-	// 				query.Sender = dht.ht.Self
-	// 				query.Type = messageTypeStore
-	// 				queryData := &queryDataStore{}
-	// 				queryData.Data = data
-	// 				query.Data = queryData
-	// 				dht.networking.sendMessage(query, false, -1)
-	// 			}
-	// 			return nil, nil, nil
-	// 		}
-	// 	} else {
-	// 		closestNode = sl.Nodes[0]
-	// 	}
-	// }
-
-	return nil
+				stream.Send(&pb.Data{
+					Init:   init,
+					End:    end,
+					Buffer: (*data)[init:end],
+				})
+			}
+			return nil, nil, nil
+		case KNeartestNodes:
+			kBucket = append(kBucket, structs.Node{
+				ID:   node.ID,
+				IP:   node.IP,
+				Port: node.Port,
+			})
+		}
+	}
+	return nil, kBucket, nil
 }

@@ -109,7 +109,7 @@ func getBucketIndex(id1 []byte, id2 []byte) int {
 			if hasBit(xor, uint(i)) {
 				byteIndex := j * 8
 				bitIndex := i
-				return (byteIndex + bitIndex)
+				return byteIndex + bitIndex
 			}
 		}
 	}
@@ -169,7 +169,7 @@ func (rt *RoutingTable) GetClosestContacts(num int, target []byte, ignoredNodes 
 				}
 			}
 			if !ignored {
-				sl.AppendUnique([]*Node{&rt.KBuckets[index][i]})
+				sl.Append([]*Node{&rt.KBuckets[index][i]})
 				leftToAdd--
 				if leftToAdd == 0 {
 					break

@@ -132,7 +132,7 @@ func CreateFullNodeServer(ip *string, port *int) {
 		log.Fatal("cannot create grpc server: ", err)
 	}
 
-	log.Printf("start gRPC server %+v on %s", fullNodeServer.DHT.ID, listener.Addr().String())
+	log.Printf("start gRPC server on %s", listener.Addr().String())
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		log.Fatal("cannot create grpc server: ", err)

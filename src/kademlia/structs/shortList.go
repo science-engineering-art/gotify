@@ -45,22 +45,7 @@ func (n *ShortList) RemoveNode(node *Node) {
 	}
 }
 
-func (n *ShortList) AppendUniqueNetworkNodes(nodes []*Node) {
-	for _, vv := range nodes {
-		exists := false
-		for _, v := range *n.Nodes {
-			if bytes.Equal(v.ID, vv.ID) {
-				exists = true
-				break
-			}
-		}
-		if !exists {
-			*n.Nodes = append(*n.Nodes, *vv)
-		}
-	}
-}
-
-func (n *ShortList) AppendUnique(nodes []*Node) {
+func (n *ShortList) Append(nodes []*Node) {
 	for _, vv := range nodes {
 		exists := false
 		for _, v := range *n.Nodes {
