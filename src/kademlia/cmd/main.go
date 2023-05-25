@@ -209,8 +209,7 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println("Made Ping from ", pbNode.IP, ":", pbNode.Port, "to", ip, ":", port)
-
+			fmt.Println("Made Ping from ", bootIp, ":", bootPort, "to", pbNode.IP, ":", pbNode.Port)
 			nearestNodes, _ := fullNodeServer.LookUp(target)
 			fmt.Println("This are the", structs.K, "closes node to", ip, ":", port, " ==> ", nearestNodes)
 		}
