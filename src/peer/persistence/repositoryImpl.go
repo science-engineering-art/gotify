@@ -1,4 +1,4 @@
-package services
+package persistence
 
 import (
 	"bytes"
@@ -15,16 +15,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type SongServiceImpl struct {
+type SongRepositoryImpl struct {
 	songCollection *mongo.Collection
 	ctx            context.Context
 }
 
-func NewSongService(songCollection *mongo.Collection, ctx context.Context) SongService {
-	return &SongServiceImpl{songCollection, ctx}
+func NewSongRepository(songCollection *mongo.Collection) (s SongRepository) {
+	newRepo := SongRepositoryImpl{}
+	newRepo.songCollection = songCollection
+	newRepo.ctx = context.TODO()
+	return &newRepo
 }
 
-func (s *SongServiceImpl) CreateSong(rawSong *[]byte) error {
+func (s *SongRepositoryImpl) CreateSong(key string, rawSong *[]byte) error {
 	songBytes := bytes.NewReader(*rawSong)
 
 	m, err := tag.ReadFrom(songBytes)
@@ -32,7 +35,10 @@ func (s *SongServiceImpl) CreateSong(rawSong *[]byte) error {
 		return err
 	}
 
-	objId := primitive.NewObjectID()
+	objId, err := primitive.ObjectIDFromHex(key)
+	if err != nil {
+		return err
+	}
 
 	// build the Song model with all its metadata
 	newSong := models.Song{
@@ -77,7 +83,7 @@ func (s *SongServiceImpl) CreateSong(rawSong *[]byte) error {
 	return nil
 }
 
-func (s *SongServiceImpl) GetSongById(objID *primitive.ObjectID) (*models.Song, error) {
+func (s *SongRepositoryImpl) GetSongById(objID *primitive.ObjectID) (*models.Song, error) {
 
 	query := bson.M{"_id": objID}
 
@@ -94,7 +100,7 @@ func (s *SongServiceImpl) GetSongById(objID *primitive.ObjectID) (*models.Song, 
 	return song, nil
 }
 
-func (s *SongServiceImpl) UpdateSong(objID *primitive.ObjectID, updatedSong *bson.M) error {
+func (s *SongRepositoryImpl) UpdateSong(objID *primitive.ObjectID, updatedSong *bson.M) error {
 
 	query := bson.M{"_id": objID}
 	update := bson.M{"$set": updatedSong}
@@ -104,7 +110,7 @@ func (s *SongServiceImpl) UpdateSong(objID *primitive.ObjectID, updatedSong *bso
 	return res.Err()
 }
 
-func (s *SongServiceImpl) RemoveSongById(objID *primitive.ObjectID) error {
+func (s *SongRepositoryImpl) RemoveSongById(objID *primitive.ObjectID) error {
 
 	query := bson.M{"_id": objID}
 
@@ -120,12 +126,9 @@ func (s *SongServiceImpl) RemoveSongById(objID *primitive.ObjectID) error {
 	return nil
 }
 
-func (s *SongServiceImpl) FilterSongs(query *bson.M) ([]*models.Song, error) {
+func (s *SongRepositoryImpl) FilterSongs(query *bson.M) ([]*models.Song, error) {
 
 	opt := options.FindOptions{}
-	// opt.SetLimit(int64(limit))
-	// opt.SetSkip(int64(skip))
-	// opt.SetSort(bson.M{"created_at": -1})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

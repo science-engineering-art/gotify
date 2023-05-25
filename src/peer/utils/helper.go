@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/science-engineering-art/spotify/src/peer/pb"
+	"github.com/science-engineering-art/spotify/src/api/pb"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
