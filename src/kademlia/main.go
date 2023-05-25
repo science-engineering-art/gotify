@@ -73,7 +73,7 @@ func main() {
 			data_hash := sha1.Sum(dataBytes)
 			id := data_hash[:]
 			str := b58.Encode(id)
-			fmt.Println("Stored ID: ", str)
+			fmt.Println("Stored ID: ", str, "Stored Data:", dataBytes)
 
 		case "ping":
 			if len(input) != 5 {
@@ -150,7 +150,7 @@ func main() {
 					fmt.Println(err.Error())
 				}
 			}
-			foundValue := b58.Encode(buffer)
+			foundValue := buffer
 			fmt.Println("Found value:", foundValue)
 		}
 	}
