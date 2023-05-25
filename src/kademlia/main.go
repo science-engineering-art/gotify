@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	b58 "github.com/jbenet/go-base58"
 	"github.com/science-engineering-art/spotify/src/kademlia/core"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
@@ -68,8 +69,9 @@ func main() {
 				fmt.Println(err.Error())
 			}
 			data_hash := sha1.Sum([]byte(data))
-			id := string(data_hash[:])
-			fmt.Printf("Stored ID: %s", id)
+			id := data_hash[:]
+			str := b58.Encode(id)
+			fmt.Printf("Stored ID: %s", str)
 
 		case "ping":
 			if len(input) != 5 {
@@ -89,6 +91,52 @@ func main() {
 				fmt.Println(err)
 			}
 			fmt.Println("The requested node is alive at:", pbNode.IP, ":", pbNode.Port)
+
+		case "findnode":
+			if len(input) != 4 {
+				displayHelp()
+				continue
+			}
+			ip := input[1]
+			port, _ := strconv.Atoi(input[2])
+			data := input[3]
+			target := b58.Decode(data)
+
+			client := GetFullNodeClient(&ip, &port)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			pbKBucket, err := client.FindNode(ctx, &pb.TargetID{ID: target})
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			fmt.Println("The found nodes where: ", pbKBucket.Bucket)
+
+		case "findvalue":
+			if len(input) != 4 {
+				displayHelp()
+				continue
+			}
+			ip := input[1]
+			port, _ := strconv.Atoi(input[2])
+			data := input[3]
+			target := b58.Decode(data)
+
+			client := GetFullNodeClient(&ip, &port)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			receiver, err := client.FindValue(ctx, &pb.TargetID{ID: target})
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+
+			value, err := receiver.Recv()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			foundValue := b58.Encode(value.Value.Buffer)
+			fmt.Println("Found value:", foundValue)
 		}
 	}
 }
