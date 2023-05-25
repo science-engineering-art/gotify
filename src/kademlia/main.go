@@ -111,6 +111,7 @@ func main() {
 				fmt.Println(err.Error())
 			}
 			fmt.Println("The found nodes where: ", pbKBucket.Bucket)
+			//fmt.Println("First node is: ", b58.Encode(pbKBucket.Bucket[0].ID))
 
 		case "findvalue":
 			if len(input) != 4 {
@@ -180,7 +181,8 @@ func CreateFullNodeServer(ip *string, port *int) {
 		log.Fatal("cannot create grpc server: ", err)
 	}
 
-	log.Printf("start gRPC server on %s", listener.Addr().String())
+	id, _ := core.NewID(*ip, *port)
+	log.Printf("start gRPC server on %s with id %s", listener.Addr().String(), b58.Encode(id))
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		log.Fatal("cannot create grpc server: ", err)

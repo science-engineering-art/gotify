@@ -2,6 +2,7 @@ package structs
 
 import (
 	"bytes"
+	"fmt"
 	"math/big"
 )
 
@@ -46,8 +47,10 @@ func (n *ShortList) RemoveNode(node *Node) {
 }
 
 func (n *ShortList) Append(nodes []*Node) {
+	fmt.Println(nodes)
 	for _, vv := range nodes {
 		exists := false
+		fmt.Println(*n.Nodes)
 		for _, v := range *n.Nodes {
 			if bytes.Equal(v.ID, vv.ID) {
 				exists = true

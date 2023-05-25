@@ -153,7 +153,7 @@ func (rt *RoutingTable) GetClosestContacts(num int, target []byte, ignoredNodes 
 		j++
 	}
 
-	sl := &ShortList{}
+	sl := &ShortList{Nodes: &[]Node{}, Comparator: rt.NodeInfo.ID}
 
 	leftToAdd := num
 
