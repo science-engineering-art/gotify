@@ -137,6 +137,7 @@ func (rt *RoutingTable) GetClosestContacts(num int, target []byte, ignoredNodes 
 	defer rt.mutex.Unlock()
 	// First we need to build the list of adjacent indices to our target
 	// in order
+	//fmt.Println(rt.NodeInfo.ID, target)
 	index := getBucketIndex(rt.NodeInfo.ID, target)
 	indexList := []int{index}
 	i := index - 1

@@ -65,7 +65,7 @@ func main() {
 				fmt.Println(err.Error())
 			}
 			dataBytes := []byte(data)
-			fmt.Println("data bytes", dataBytes)
+			//fmt.Println("data bytes", dataBytes)
 			err = sender.Send(&pb.Data{Init: 0, End: int32(len(dataBytes)), Buffer: dataBytes})
 			if err != nil {
 				fmt.Println(err.Error())
@@ -125,6 +125,11 @@ func main() {
 			data := input[3]
 			target := b58.Decode(data)
 
+			if len(target) == 0 {
+				fmt.Println("Invalid target decoding.")
+				continue
+			}
+
 			client := GetFullNodeClient(&ip, &port)
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
@@ -135,6 +140,7 @@ func main() {
 			}
 
 			buffer := []byte{}
+			nearestNeighbors := []*pb.Node{}
 			var init int32 = 0
 
 			for {
@@ -142,7 +148,10 @@ func main() {
 				if data == nil {
 					break
 				}
-
+				if len(data.KNeartestBuckets.Bucket) != 0 {
+					nearestNeighbors = data.KNeartestBuckets.Bucket
+					break
+				}
 				if init == data.Value.Init {
 					buffer = append(buffer, data.Value.Buffer...)
 					init = data.Value.End
@@ -151,7 +160,11 @@ func main() {
 				}
 			}
 			foundValue := buffer
-			fmt.Println("Found value:", foundValue)
+			if len(foundValue) == 0 {
+				fmt.Println("Not found the requested value, this are alpha closest nodes:", nearestNeighbors)
+			} else {
+				fmt.Println("Found value:", foundValue)
+			}
 		}
 	}
 }

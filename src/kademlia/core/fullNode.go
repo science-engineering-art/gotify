@@ -97,8 +97,11 @@ func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServe
 	value, neighbors := fn.dht.FindValue(&target.ID)
 	//fmt.Println("Retrieved value:", b58.Encode(*value))
 	kbucket := &pb.KBucket{Bucket: []*pb.Node{}}
-	if neighbors != nil {
+	if neighbors != nil && len(*neighbors) > 0 {
 		kbucket = getKBucketFromNodeArray(neighbors)
+	}
+	if value == nil {
+		value = &[]byte{}
 	}
 	response := pb.FindValueResponse{KNeartestBuckets: kbucket, Value: &pb.Data{Init: 0, End: int32(len(*value)), Buffer: (*value)[:]}}
 	fv.Send(&response)
@@ -108,9 +111,9 @@ func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServe
 func getKBucketFromNodeArray(nodes *[]structs.Node) *pb.KBucket {
 	result := pb.KBucket{Bucket: []*pb.Node{}}
 	for _, node := range *nodes {
-		fmt.Println("In the for:", node)
+		//fmt.Println("In the for:", node)
 		result.Bucket = append(result.Bucket, &pb.Node{ID: node.ID, IP: node.IP, Port: int32(node.Port)})
-		fmt.Println("Append Well")
+		//fmt.Println("Append Well")
 	}
 	return &result
 }

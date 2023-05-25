@@ -3,7 +3,6 @@ package core
 import (
 	"bytes"
 	"crypto/sha1"
-	"fmt"
 
 	"github.com/science-engineering-art/spotify/src/kademlia/interfaces"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
@@ -28,7 +27,7 @@ func (fn *DHT) Store(data *[]byte) error {
 func (fn *DHT) FindValue(infoHash *[]byte) (value *[]byte, neighbors *[]structs.Node) {
 	value, err := fn.Storage.Read(*infoHash)
 	if err != nil {
-		fmt.Println("Find Value error: ", err)
+		//fmt.Println("Find Value error: ", err)
 		neighbors = fn.RoutingTable.GetClosestContacts(structs.Alpha, *infoHash, []*structs.Node{&fn.Node}).Nodes
 		return nil, neighbors
 	}
