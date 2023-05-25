@@ -165,6 +165,54 @@ func main() {
 			} else {
 				fmt.Println("Found value:", foundValue)
 			}
+
+		case "lookup":
+			if len(input) != 6 {
+				displayHelp()
+				continue
+			}
+			ip := input[1]
+			port, _ := strconv.Atoi(input[2])
+			bootIp := input[3]
+			bootPort, _ := strconv.Atoi(input[4])
+			data := input[5]
+			target := b58.Decode(data)
+
+			grpcServerAddress := ip + ":" + strconv.FormatInt(int64(port), 10)
+			fullNodeServer := *core.NewGrpcFullNodeServer(ip, port, structs.NewStorage())
+
+			// Create gRPC Server for ip and port
+			go func(fullNode core.FullNode) {
+				grpcServer := grpc.NewServer()
+
+				pb.RegisterFullNodeServer(grpcServer, &fullNodeServer)
+				reflection.Register(grpcServer)
+
+				listener, err := net.Listen("tcp", grpcServerAddress)
+				if err != nil {
+					log.Fatal("cannot create grpc server: ", err)
+				}
+
+				log.Printf("start gRPC server on %s", listener.Addr().String())
+				err = grpcServer.Serve(listener)
+				if err != nil {
+					log.Fatal("cannot create grpc server: ", err)
+				}
+			}(fullNodeServer)
+
+			//Send ping rpc from bootIp:bootPort for adding it to routing table as entry points
+			client := GetFullNodeClient(&ip, &port)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			idSender, _ := core.NewID(bootIp, bootPort)
+			pbNode, err := client.Ping(ctx, &pb.Node{ID: idSender, IP: bootIp, Port: int32(bootPort)})
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println("Made Ping from ", pbNode.IP, ":", pbNode.Port, "to", ip, ":", port)
+
+			nearestNodes, _ := fullNodeServer.LookUp(target)
+			fmt.Println("This are the", structs.K, "closes node to", ip, ":", port, " ==> ", nearestNodes)
 		}
 	}
 }

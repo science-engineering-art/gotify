@@ -3,9 +3,7 @@ package core
 import (
 	"context"
 	"crypto/sha1"
-	"errors"
 	"fmt"
-	"math"
 	"sort"
 	"strconv"
 	"time"
@@ -118,14 +116,14 @@ func getKBucketFromNodeArray(nodes *[]structs.Node) *pb.KBucket {
 	return &result
 }
 
-func (fn *FullNode) LookUp(action int, target []byte, data *[]byte) (*[]byte, []structs.Node, error) {
+func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 
 	sl := fn.dht.RoutingTable.GetClosestContacts(structs.Alpha, target, []*structs.Node{})
 
 	contacted := make(map[string]bool)
 
 	if len(*sl.Nodes) == 0 {
-		return nil, nil, nil
+		return nil, nil
 	}
 
 	for {
@@ -161,66 +159,14 @@ func (fn *FullNode) LookUp(action int, target []byte, data *[]byte) (*[]byte, []
 				sl.Append(kBucket)
 			}
 
-			switch action {
-			case StoreValue:
-				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-				defer cancel()
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
 
-				recvNodes, err := client.FindNode(ctx, &pb.TargetID{ID: node.ID})
-				if err != nil {
-					return nil, nil, err
-				}
-				addRecvNodes(recvNodes)
-			case KNeartestNodes:
-				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-				defer cancel()
-
-				recvNodes, err := client.FindNode(ctx, &pb.TargetID{ID: node.ID})
-				if err != nil {
-					return nil, nil, err
-				}
-				addRecvNodes(recvNodes)
-			case GetValue:
-				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-				defer cancel()
-
-				stream, err := client.FindValue(ctx, &pb.TargetID{ID: node.ID})
-				if err != nil {
-					return nil, nil, err
-				}
-
-				buffer := []byte{}
-				var init int32 = 0
-
-				for {
-					resp, err := stream.Recv()
-					if resp == nil {
-						break
-					}
-					if err != nil {
-						return nil, nil, err
-					}
-
-					if resp.KNeartestBuckets != nil && resp.Value == nil {
-						addRecvNodes(resp.KNeartestBuckets)
-						continue
-					}
-
-					if resp.KNeartestBuckets == nil && resp.Value != nil {
-						if init == resp.Value.Init {
-							buffer = append(buffer, resp.Value.Buffer...)
-							init = resp.Value.End
-						} else {
-							return nil, nil, errors.New("error")
-						}
-					}
-				}
-
-				if len(buffer) > 0 {
-					return &buffer, nil, nil
-				}
+			recvNodes, err := client.FindNode(ctx, &pb.TargetID{ID: node.ID})
+			if err != nil {
+				return nil, err
 			}
-
+			addRecvNodes(recvNodes)
 		}
 
 		sl.Comparator = fn.dht.ID
@@ -237,38 +183,11 @@ func (fn *FullNode) LookUp(action int, target []byte, data *[]byte) (*[]byte, []
 		if i == structs.K {
 			break
 		}
-		switch action {
-		case StoreValue:
-			address := fmt.Sprintf("%s:%d", node.IP, node.Port)
-			conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
-			client := pb.NewFullNodeClient(conn)
-
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-
-			stream, err := client.Store(ctx)
-			if err != nil {
-				return nil, nil, err
-			}
-
-			for i := 0; i < len(*data); i++ {
-				init := int32(i)
-				end := int32(math.Max(float64(i+1024), float64(len(*data))))
-
-				stream.Send(&pb.Data{
-					Init:   init,
-					End:    end,
-					Buffer: (*data)[init:end],
-				})
-			}
-			return nil, nil, nil
-		case KNeartestNodes:
-			kBucket = append(kBucket, structs.Node{
-				ID:   node.ID,
-				IP:   node.IP,
-				Port: node.Port,
-			})
-		}
+		kBucket = append(kBucket, structs.Node{
+			ID:   node.ID,
+			IP:   node.IP,
+			Port: node.Port,
+		})
 	}
-	return nil, kBucket, nil
+	return kBucket, nil
 }
