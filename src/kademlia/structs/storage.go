@@ -2,22 +2,23 @@ package structs
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
+
+	"github.com/jbenet/go-base58"
 )
 
 type Storage struct {
-	KV map[string]interface{}
+	KV map[string]*[]byte
 }
 
 func NewStorage() *Storage {
 	s := &Storage{}
-	s.KV = make(map[string]interface{})
+	s.KV = make(map[string]*[]byte)
 	return s
 }
 
 func (s *Storage) Create(key []byte, data *[]byte) error {
-	id := base64.RawStdEncoding.EncodeToString(key)
+	id := base58.Encode(key)
 
 	_, exists := s.KV[id]
 	if exists {
@@ -30,19 +31,14 @@ func (s *Storage) Create(key []byte, data *[]byte) error {
 }
 
 func (s *Storage) Read(key []byte) (*[]byte, error) {
-	id := base64.RawStdEncoding.EncodeToString(key)
+	id := base58.Encode(key)
 
 	v, exists := s.KV[id]
 	if !exists {
 		return nil, errors.New("the key is not found")
 	}
 
-	data, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-
-	return &data, nil
+	return v, nil
 }
 
 func (s *Storage) Delete(key []byte) error {

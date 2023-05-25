@@ -80,7 +80,7 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 			return err
 		}
 	}
-
+	//fmt.Printf("The value that reached %s", b58.Encode(buffer))
 	err := fn.dht.Store(&buffer)
 	if err != nil {
 		return err
@@ -95,18 +95,24 @@ func (fn *FullNode) FindNode(ctx context.Context, target *pb.TargetID) (*pb.KBuc
 
 func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServer) error {
 	value, neighbors := fn.dht.FindValue(&target.ID)
-	kbucket := getKBucketFromNodeArray(neighbors)
-	response := pb.FindValueResponse{KNeartestBuckets: kbucket, Value: &pb.Data{Init: 0, End: int32(4000024), Buffer: (*value)[:4000024]}}
+	//fmt.Println("Retrieved value:", b58.Encode(*value))
+	kbucket := &pb.KBucket{Bucket: []*pb.Node{}}
+	if neighbors != nil {
+		kbucket = getKBucketFromNodeArray(neighbors)
+	}
+	response := pb.FindValueResponse{KNeartestBuckets: kbucket, Value: &pb.Data{Init: 0, End: int32(len(*value)), Buffer: (*value)[:]}}
 	fv.Send(&response)
 	return nil
 }
 
 func getKBucketFromNodeArray(nodes *[]structs.Node) *pb.KBucket {
-	result := &pb.KBucket{}
+	result := pb.KBucket{Bucket: []*pb.Node{}}
 	for _, node := range *nodes {
-		(*result).Bucket = append((*result).Bucket, &pb.Node{ID: node.ID, IP: node.IP, Port: int32(node.Port)})
+		fmt.Println("In the for:", node)
+		result.Bucket = append(result.Bucket, &pb.Node{ID: node.ID, IP: node.IP, Port: int32(node.Port)})
+		fmt.Println("Append Well")
 	}
-	return result
+	return &result
 }
 
 func (fn *FullNode) LookUp(action int, target []byte, data *[]byte) (*[]byte, []structs.Node, error) {

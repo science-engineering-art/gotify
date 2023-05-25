@@ -64,14 +64,16 @@ func main() {
 			if err != nil {
 				fmt.Println(err.Error())
 			}
-			err = sender.Send(&pb.Data{Init: 0, End: int32(len(data)), Buffer: []byte(data)})
+			dataBytes := []byte(data)
+			fmt.Println("data bytes", dataBytes)
+			err = sender.Send(&pb.Data{Init: 0, End: int32(len(dataBytes)), Buffer: dataBytes})
 			if err != nil {
 				fmt.Println(err.Error())
 			}
-			data_hash := sha1.Sum([]byte(data))
+			data_hash := sha1.Sum(dataBytes)
 			id := data_hash[:]
 			str := b58.Encode(id)
-			fmt.Printf("Stored ID: %s", str)
+			fmt.Println("Stored ID: ", str)
 
 		case "ping":
 			if len(input) != 5 {
@@ -132,11 +134,23 @@ func main() {
 				fmt.Println(err.Error())
 			}
 
-			value, err := receiver.Recv()
-			if err != nil {
-				fmt.Println(err.Error())
+			buffer := []byte{}
+			var init int32 = 0
+
+			for {
+				data, err := receiver.Recv()
+				if data == nil {
+					break
+				}
+
+				if init == data.Value.Init {
+					buffer = append(buffer, data.Value.Buffer...)
+					init = data.Value.End
+				} else {
+					fmt.Println(err.Error())
+				}
 			}
-			foundValue := b58.Encode(value.Value.Buffer)
+			foundValue := b58.Encode(buffer)
 			fmt.Println("Found value:", foundValue)
 		}
 	}
