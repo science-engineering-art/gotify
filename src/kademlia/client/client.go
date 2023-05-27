@@ -7,8 +7,8 @@ import (
 
 func main() {
 	addr := net.UDPAddr{
-		IP:   net.IPv4(255, 255, 255, 255),
-		Port: 8080,
+		IP:   net.IPv4(18, 62, 255, 255),
+		Port: 8888,
 	}
 
 	conn, err := net.DialUDP("udp4", nil, &addr)
@@ -17,7 +17,7 @@ func main() {
 	}
 
 	buffer := []byte("Hello world!")
-	_, err = conn.WriteTo(buffer, &addr)
+	_, err = conn.Write(buffer)
 	if err != nil {
 		log.Fatal(err)
 	}
