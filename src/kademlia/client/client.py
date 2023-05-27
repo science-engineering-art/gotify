@@ -1,6 +1,6 @@
 import socket
 
-host = '18.62.255.255'
+host = '255.255.255.255'
 port = 8888
 
 client_socket = socket.socket(socket.AF_INET, \

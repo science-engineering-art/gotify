@@ -7,7 +7,7 @@ import (
 
 func main() {
 	addr := net.UDPAddr{
-		IP:   net.IPv4(18, 62, 255, 255),
+		IP:   net.IPv4(255, 255, 255, 255),
 		Port: 8888,
 	}
 
