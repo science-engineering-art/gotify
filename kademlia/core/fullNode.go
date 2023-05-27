@@ -26,7 +26,7 @@ type FullNode struct {
 	dht DHT
 }
 
-func NewGrpcFullNodeServer(ip string, port int, storage interfaces.Persistence) *FullNode {
+func NewFullNode(ip string, port int, storage interfaces.Persistence) *FullNode {
 	id, _ := NewID(ip, port)
 	node := structs.Node{ID: id, IP: ip, Port: port}
 	routingTable := structs.NewRoutingTable(node)

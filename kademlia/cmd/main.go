@@ -179,7 +179,7 @@ func main() {
 			target := b58.Decode(data)
 
 			grpcServerAddress := ip + ":" + strconv.FormatInt(int64(port), 10)
-			fullNodeServer := *core.NewGrpcFullNodeServer(ip, port, structs.NewStorage())
+			fullNodeServer := *core.NewFullNode(ip, port, structs.NewStorage())
 
 			// Create gRPC Server for ip and port
 			go func(fullNode core.FullNode) {
@@ -242,7 +242,7 @@ info - Display information about this node
 
 func CreateFullNodeServer(ip *string, port *int) {
 	grpcServerAddress := *ip + ":" + strconv.FormatInt(int64(*port), 10)
-	fullNodeServer := *core.NewGrpcFullNodeServer(*ip, *port, structs.NewStorage())
+	fullNodeServer := *core.NewFullNode(*ip, *port, structs.NewStorage())
 
 	// Create gRPC Server
 	grpcServer := grpc.NewServer()

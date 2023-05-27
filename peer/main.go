@@ -10,5 +10,5 @@ var (
 )
 
 func main() {
-	_ = kademlia.NewGrpcFullNodeServer("localhost", 8080, db)
+	_ = kademlia.NewFullNode("localhost", 8080, db)
 }
