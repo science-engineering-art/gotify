@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -29,16 +30,18 @@ type FullNode struct {
 	dht *DHT
 }
 
-func NewFullNode(ip string, port, bootstrapPort int, storage interfaces.Persistence, isBootstrapNode bool) *FullNode {
+func NewFullNode(nodeIP string, nodePort, bootstrapPort int, storage interfaces.Persistence, isBootstrapNode bool) *FullNode {
 
-	id, _ := NewID(ip, port)
-	node := structs.Node{ID: id, IP: ip, Port: port}
+	id, _ := NewID(nodeIP, nodePort)
+	node := structs.Node{ID: id, IP: nodeIP, Port: nodePort}
 	routingTable := structs.NewRoutingTable(node)
 	dht := DHT{Node: node, RoutingTable: routingTable, Storage: storage}
 	fullNode := FullNode{dht: &dht}
 
 	if isBootstrapNode {
-		go listen(bootstrapPort, &dht)
+		go fullNode.bootstrap(bootstrapPort)
+	} else {
+		go fullNode.joinNetwork(bootstrapPort)
 	}
 
 	return &fullNode
@@ -201,7 +204,7 @@ func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 	return kBucket, nil
 }
 
-func listen(port int, dht *DHT) {
+func (fn *FullNode) bootstrap(port int) {
 	strAddr := fmt.Sprintf("0.0.0.0:%d", port)
 
 	addr, err := net.ResolveUDPAddr("udp4", strAddr)
@@ -224,25 +227,87 @@ func listen(port int, dht *DHT) {
 		fmt.Printf("Received %d bytes from %v\n", n, rAddr)
 
 		go func() {
-			kBucket := dht.FindNode(&buffer)
+			kBucket, err := fn.LookUp(buffer)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			host, port, _ := net.SplitHostPort(rAddr.String())
 			portInt, _ := strconv.Atoi(port)
 
-			dht.RoutingTable.AddNode(structs.Node{IP: host, Port: portInt})
+			fn.dht.RoutingTable.AddNode(structs.Node{IP: host, Port: portInt})
 
 			respConn, err := net.Dial("tcp", rAddr.String())
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 			defer conn.Close()
 
-			bytesKBucket, err := utils.SerializeMessage(kBucket)
+			bytesKBucket, err := utils.SerializeMessage(&kBucket)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			respConn.Write(*bytesKBucket)
 		}()
+	}
+}
+
+func (fn *FullNode) joinNetwork(boostrapPort int) {
+	raddr := net.UDPAddr{
+		IP:   net.IPv4(255, 255, 255, 255),
+		Port: boostrapPort,
+	}
+
+	conn, err := net.DialUDP("udp4", nil, &raddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	host, port, err := net.SplitHostPort(conn.LocalAddr().String())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = conn.Write(fn.dht.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	conn.Close()
+
+	address := fmt.Sprintf("%s:%s", host, port)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", address)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lis, err := net.ListenTCP("tcp", tcpAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tcpConn, err := lis.AcceptTCP()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	kBucket, err := utils.DeserializeMessage(tcpConn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i := 0; i < len(*kBucket); i++ {
+		node := (*kBucket)[i]
+
+		recvNode, err := NewClientNode(node.IP, node.Port).Ping(fn.dht.Node)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if recvNode.Equal(node) {
+			fn.dht.RoutingTable.AddNode(node)
+		} else {
+			log.Fatal(errors.New("bad ping"))
+		}
 	}
 }
