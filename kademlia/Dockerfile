@@ -2,12 +2,16 @@ FROM docker.uclv.cu/golang:1.20-alpine
 
 WORKDIR /kademlia
 
-RUN go install github.com/cosmtrek/air@v1.43.0
+COPY ./ ./
 
-RUN go clean -modcache
+CMD [ "go", "run", "./cmd/main.go"]
 
-COPY ./src/kademlia/go.mod ./
+# RUN go install github.com/cosmtrek/air@v1.43.0
 
-RUN go mod download
+# RUN go clean -modcache
 
-CMD ["air", "-c", ".air.toml"]
+# COPY ./kademlia/go.mod ./
+
+# RUN go mod download
+
+# CMD ["air", "-c", ".air.toml"]
