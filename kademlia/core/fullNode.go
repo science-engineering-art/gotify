@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/sha1"
 	"fmt"
+	"log"
+	"net"
 	"sort"
 	"strconv"
 	"time"
@@ -11,6 +13,7 @@ import (
 	"github.com/science-engineering-art/spotify/src/kademlia/interfaces"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
+	"github.com/science-engineering-art/spotify/src/kademlia/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -23,15 +26,21 @@ const (
 
 type FullNode struct {
 	pb.UnimplementedFullNodeServer
-	dht DHT
+	dht *DHT
 }
 
-func NewFullNode(ip string, port int, storage interfaces.Persistence) *FullNode {
+func NewFullNode(ip string, port, bootstrapPort int, storage interfaces.Persistence, isBootstrapNode bool) *FullNode {
+
 	id, _ := NewID(ip, port)
 	node := structs.Node{ID: id, IP: ip, Port: port}
 	routingTable := structs.NewRoutingTable(node)
 	dht := DHT{Node: node, RoutingTable: routingTable, Storage: storage}
-	fullNode := FullNode{dht: dht}
+	fullNode := FullNode{dht: &dht}
+
+	if isBootstrapNode {
+		go listen(bootstrapPort, &dht)
+	}
+
 	return &fullNode
 }
 
@@ -190,4 +199,50 @@ func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 		})
 	}
 	return kBucket, nil
+}
+
+func listen(port int, dht *DHT) {
+	strAddr := fmt.Sprintf("0.0.0.0:%d", port)
+
+	addr, err := net.ResolveUDPAddr("udp4", strAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	conn, err := net.ListenUDP("udp4", addr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	buffer := make([]byte, 1024)
+
+	for {
+		n, rAddr, err := conn.ReadFrom(buffer)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Received %d bytes from %v\n", n, rAddr)
+
+		go func() {
+			kBucket := dht.FindNode(&buffer)
+
+			host, port, _ := net.SplitHostPort(rAddr.String())
+			portInt, _ := strconv.Atoi(port)
+
+			dht.RoutingTable.AddNode(structs.Node{IP: host, Port: portInt})
+
+			respConn, err := net.Dial("tcp", rAddr.String())
+			if err != nil {
+				panic(err)
+			}
+			defer conn.Close()
+
+			bytesKBucket, err := utils.SerializeMessage(kBucket)
+			if err != nil {
+				panic(err)
+			}
+
+			respConn.Write(*bytesKBucket)
+		}()
+	}
 }

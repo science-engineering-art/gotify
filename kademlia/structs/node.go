@@ -6,9 +6,9 @@ import (
 )
 
 type Node struct {
-	ID   []byte
-	IP   string
-	Port int
+	ID   []byte `json:"id,omitempty"`
+	IP   string `json:"ip,omitempty"`
+	Port int    `json:"port,omitempty"`
 }
 
 func (b Node) Equal(other Node) bool {
