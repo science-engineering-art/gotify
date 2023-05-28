@@ -20,6 +20,11 @@ message Data {
     bytes Buffer = 3;
 }
 
+message StoreData{
+    bytes Key = 1;
+    Data Value = 2;
+}
+
 message TargetID {
     bytes ID = 1;
 }
@@ -35,7 +40,7 @@ message FindValueResponse {
 
 service FullNode {
     rpc Ping(Node)          returns (Node) {}
-    rpc Store(stream Data)  returns (Response) {}
+    rpc Store(stream StoreData)  returns (Response) {}
     rpc FindNode(TargetID)  returns (KBucket) {}
     rpc FindValue(TargetID) returns (stream FindValueResponse) {}
 }

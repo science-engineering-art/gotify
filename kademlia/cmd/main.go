@@ -65,8 +65,10 @@ func main() {
 				fmt.Println(err.Error())
 			}
 			dataBytes := []byte(data)
+			sha := sha1.Sum(dataBytes)
+			keyHash := sha[:]
 			//fmt.Println("data bytes", dataBytes)
-			err = sender.Send(&pb.Data{Init: 0, End: int32(len(dataBytes)), Buffer: dataBytes})
+			err = sender.Send(&pb.StoreData{Key: keyHash, Value: &pb.Data{Init: 0, End: int32(len(dataBytes)), Buffer: dataBytes}})
 			if err != nil {
 				fmt.Println(err.Error())
 			}

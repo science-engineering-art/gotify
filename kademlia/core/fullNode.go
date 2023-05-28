@@ -70,6 +70,7 @@ func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error)
 }
 
 func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
+	key := []byte{}
 	buffer := []byte{}
 	var init int32 = 0
 
@@ -79,9 +80,10 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 			break
 		}
 
-		if init == data.Init {
-			buffer = append(buffer, data.Buffer...)
-			init = data.End
+		key = data.Key
+		if init == data.Value.Init {
+			buffer = append(buffer, data.Value.Buffer...)
+			init = data.Value.End
 		} else {
 			return err
 		}
@@ -91,7 +93,7 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 		}
 	}
 	//fmt.Printf("The value that reached %s", b58.Encode(buffer))
-	err := fn.dht.Store(&buffer)
+	err := fn.dht.Store(key, &buffer)
 	if err != nil {
 		return err
 	}
@@ -310,4 +312,19 @@ func (fn *FullNode) joinNetwork(boostrapPort int) {
 			log.Fatal(errors.New("bad ping"))
 		}
 	}
+}
+
+func (fn *FullNode) StoreValue(ip string, port int, key string, data string) (string, error) {
+	return "", nil
+}
+
+func (fn *FullNode) GetValue() {
+
+}
+
+func getFullNodeClient(ip *string, port *int) pb.FullNodeClient {
+	address := fmt.Sprintf("%s:%d", *ip, *port)
+	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+	client := pb.NewFullNodeClient(conn)
+	return client
 }

@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"crypto/sha1"
 
 	"github.com/science-engineering-art/spotify/src/kademlia/interfaces"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
@@ -14,10 +13,8 @@ type DHT struct {
 	Storage      interfaces.Persistence
 }
 
-func (fn *DHT) Store(data *[]byte) error {
-	sha := sha1.Sum(*data)
-
-	err := fn.Storage.Create(sha[:], data)
+func (fn *DHT) Store(key []byte, data *[]byte) error {
+	err := fn.Storage.Create(key, data)
 	if err != nil {
 		return err
 	}
