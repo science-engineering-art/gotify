@@ -327,7 +327,11 @@ func (fn *FullNode) StoreValue(key string, data string) (string, error) {
 	}
 
 	if len(nearestNeighbors) == 0 {
-		fn.dht.Store(keyHash, &dataBytes)
+		err := fn.dht.Store(keyHash, &dataBytes)
+		if err != nil {
+			return "", nil
+		}
+		return str, nil
 	}
 
 	for _, node := range nearestNeighbors {
