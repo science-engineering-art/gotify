@@ -4,7 +4,7 @@ WORKDIR /kademlia
 
 COPY ./ ./
 
-CMD [ "go", "run", "./cmd/main.go"]
+CMD [ "go", "run", "./main.go"]
 
 # RUN go install github.com/cosmtrek/air@v1.43.0
 
