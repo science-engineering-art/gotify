@@ -326,6 +326,10 @@ func (fn *FullNode) StoreValue(key string, data string) (string, error) {
 		return "", err
 	}
 
+	if len(nearestNeighbors) == 0 {
+		fn.dht.Store(keyHash, &dataBytes)
+	}
+
 	for _, node := range nearestNeighbors {
 		client := getFullNodeClient(&node.IP, &node.Port)
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -347,6 +351,11 @@ func (fn *FullNode) StoreValue(key string, data string) (string, error) {
 
 func (fn *FullNode) GetValue(target string) ([]byte, error) {
 	keyHash := b58.Decode(target)
+
+	val, err := fn.dht.Storage.Read(keyHash)
+	if err == nil {
+		return *val, nil
+	}
 
 	nearestNeighbors, err := fn.LookUp(keyHash)
 	if err != nil {
