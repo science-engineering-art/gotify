@@ -46,6 +46,8 @@ func main() {
 
 			fullNode = *core.NewFullNode(ip, port, bPort, storage, isB)
 
+			fmt.Println("Node running at:", ip, ":", port)
+
 		case "store":
 			if len(input) != 3 {
 				displayHelp()
