@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	b58 "github.com/jbenet/go-base58"
 	"github.com/science-engineering-art/spotify/src/kademlia/interfaces"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
@@ -314,12 +315,76 @@ func (fn *FullNode) joinNetwork(boostrapPort int) {
 	}
 }
 
-func (fn *FullNode) StoreValue(ip string, port int, key string, data string) (string, error) {
-	return "", nil
+func (fn *FullNode) StoreValue(key string, data string) (string, error) {
+	dataBytes := []byte(data)
+	sha := sha1.Sum(dataBytes)
+	keyHash := sha[:]
+	str := b58.Encode(keyHash)
+
+	nearestNeighbors, err := fn.LookUp(keyHash)
+	if err != nil {
+		return "", err
+	}
+
+	for _, node := range nearestNeighbors {
+		client := getFullNodeClient(&node.IP, &node.Port)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		sender, err := client.Store(ctx)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		//fmt.Println("data bytes", dataBytes)
+		err = sender.Send(&pb.StoreData{Key: keyHash, Value: &pb.Data{Init: 0, End: int32(len(dataBytes)), Buffer: dataBytes}})
+		if err != nil {
+			return "", err
+		}
+	}
+
+	fmt.Println("Stored ID: ", str, "Stored Data:", dataBytes)
+	return str, nil
 }
 
-func (fn *FullNode) GetValue() {
+func (fn *FullNode) GetValue(target string) ([]byte, error) {
+	keyHash := b58.Decode(target)
 
+	nearestNeighbors, err := fn.LookUp(keyHash)
+	if err != nil {
+		return nil, nil
+	}
+
+	buffer := []byte{}
+
+	for _, node := range nearestNeighbors {
+		if len(target) == 0 {
+			fmt.Println("Invalid target decoding.")
+			continue
+		}
+
+		client := getFullNodeClient(&node.IP, &node.Port)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		receiver, err := client.FindValue(ctx, &pb.TargetID{ID: keyHash})
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		var init int32 = 0
+
+		for {
+			data, err := receiver.Recv()
+			if data == nil {
+				return nil, nil
+			}
+			if init == data.Value.Init {
+				buffer = append(buffer, data.Value.Buffer...)
+				init = data.Value.End
+			} else {
+				fmt.Println(err.Error())
+			}
+		}
+	}
+	return buffer, nil
 }
 
 func getFullNodeClient(ip *string, port *int) pb.FullNodeClient {
