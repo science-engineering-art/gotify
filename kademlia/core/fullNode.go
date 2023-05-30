@@ -282,7 +282,6 @@ func (fn *FullNode) joinNetwork(boostrapPort int) {
 	dataToSend := fn.dht.ID
 	bs := make([]byte, 4)
 	binary.LittleEndian.PutUint32(bs, uint32(fn.dht.Port))
-	fmt.Println(bs)
 	dataToSend = append(dataToSend, bs...)
 	_, err = conn.Write(dataToSend)
 	if err != nil {
