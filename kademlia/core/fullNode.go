@@ -237,8 +237,8 @@ func (fn *FullNode) bootstrap(port int) {
 
 			host, port, _ := net.SplitHostPort(rAddr.String())
 			portInt, _ := strconv.Atoi(port)
-
-			fn.dht.RoutingTable.AddNode(structs.Node{IP: host, Port: portInt})
+			id, _ := NewID(host, portInt)
+			fn.dht.RoutingTable.AddNode(structs.Node{ID: id, IP: host, Port: portInt})
 
 			respConn, err := net.Dial("tcp", rAddr.String())
 			if err != nil {
