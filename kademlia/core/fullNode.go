@@ -232,9 +232,19 @@ func (fn *FullNode) bootstrap(port int) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		//fmt.Printf("Received %d bytes from %v\n", n, rAddr)
+		// fmt.Printf("Received %d bytes from %v\n", n, rAddr)
 
 		go func(rAddr net.Addr) {
+			connChan := make(chan net.Conn)
+
+			go func() {
+				respConn, err := net.Dial("tcp", rAddr.String())
+				for err != nil {
+					respConn, err = net.Dial("tcp", rAddr.String())
+				}
+				connChan <- respConn
+			}()
+
 			kBucket, err := fn.LookUp(buffer[:20])
 			if err != nil {
 				log.Fatal(err)
@@ -248,16 +258,12 @@ func (fn *FullNode) bootstrap(port int) {
 			id, _ := NewID(host, intVal)
 			fn.dht.RoutingTable.AddNode(structs.Node{ID: id, IP: host, Port: intVal})
 
-			respConn, err := net.Dial("tcp", rAddr.String())
-			if err != nil {
-				log.Fatal(err)
-			}
-
 			bytesKBucket, err := utils.SerializeMessage(&kBucket)
 			if err != nil {
 				log.Fatal(err)
 			}
 
+			respConn := <-connChan
 			respConn.Write(*bytesKBucket)
 		}(rAddr)
 	}
@@ -291,7 +297,7 @@ func (fn *FullNode) joinNetwork(boostrapPort int) {
 
 	address := fmt.Sprintf("%s:%s", host, port)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", address)
-	if err != nil {
+	for err != nil {
 		log.Fatal(err)
 	}
 
