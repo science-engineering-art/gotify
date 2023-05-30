@@ -3,16 +3,22 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"net"
 	"os/exec"
 	"strconv"
 	"strings"
 
 	"github.com/science-engineering-art/spotify/src/kademlia/core"
+	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"gopkg.in/readline.v1"
 )
 
 var fullNode core.FullNode
+var grpcServerAddress string
 
 func main() {
 	// Init CLI for using Full Node Methods
@@ -43,8 +49,9 @@ func main() {
 			storage := structs.NewStorage()
 
 			ip := getIpFromHost()
-
+			grpcServerAddress = ip + ":" + strconv.FormatInt(int64(port), 10)
 			fullNode = *core.NewFullNode(ip, port, bPort, storage, isB)
+			go CreateGRPCServerFromFullNode(fullNode)
 
 			fmt.Println("Node running at:", ip, ":", port)
 
@@ -95,4 +102,22 @@ store <message> - Store a message on the network
 get <key> - Get a message from the network
 info - Display information about this node
 	`)
+}
+
+func CreateGRPCServerFromFullNode(fullNode core.FullNode) {
+	grpcServer := grpc.NewServer()
+
+	pb.RegisterFullNodeServer(grpcServer, &fullNode)
+	reflection.Register(grpcServer)
+
+	listener, err := net.Listen("tcp", grpcServerAddress)
+	if err != nil {
+		log.Fatal("cannot create grpc server: ", err)
+	}
+
+	log.Printf("start gRPC server on %s", listener.Addr().String())
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		log.Fatal("cannot create grpc server: ", err)
+	}
 }
