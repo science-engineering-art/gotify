@@ -221,6 +221,7 @@ func (fn *FullNode) bootstrap(port int) {
 	}
 
 	buffer := make([]byte, 1024)
+	defer conn.Close()
 
 	for {
 		n, rAddr, err := conn.ReadFrom(buffer)
@@ -235,16 +236,15 @@ func (fn *FullNode) bootstrap(port int) {
 				log.Fatal(err)
 			}
 
-			host, port, _ := net.SplitHostPort(rAddr.String())
-			portInt, _ := strconv.Atoi(port)
-			id, _ := NewID(host, portInt)
-			fn.dht.RoutingTable.AddNode(structs.Node{ID: id, IP: host, Port: portInt})
+			//host, port, _ := net.SplitHostPort(rAddr.String())
+			//portInt, _ := strconv.Atoi(port)
+			//id, _ := NewID(host, portInt)
+			//fn.dht.RoutingTable.AddNode(structs.Node{ID: id, IP: host, Port: portInt})
 
 			respConn, err := net.Dial("tcp", rAddr.String())
 			if err != nil {
 				log.Fatal(err)
 			}
-			defer conn.Close()
 
 			bytesKBucket, err := utils.SerializeMessage(&kBucket)
 			if err != nil {
