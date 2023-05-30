@@ -234,7 +234,7 @@ func (fn *FullNode) bootstrap(port int) {
 		}
 		//fmt.Printf("Received %d bytes from %v\n", n, rAddr)
 
-		go func() {
+		go func(rAddr net.Addr) {
 			kBucket, err := fn.LookUp(buffer[:20])
 			if err != nil {
 				log.Fatal(err)
@@ -259,7 +259,7 @@ func (fn *FullNode) bootstrap(port int) {
 			}
 
 			respConn.Write(*bytesKBucket)
-		}()
+		}(rAddr)
 	}
 }
 
