@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"crypto/sha1"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"log"
@@ -185,6 +186,9 @@ func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 		}
 
 		sl.Comparator = fn.dht.ID
+		if sl.Len() < structs.K {
+			sl.Append([]*structs.Node{&fn.dht.Node})
+		}
 		sort.Sort(sl)
 
 		if addedNodes == 0 {
@@ -224,22 +228,25 @@ func (fn *FullNode) bootstrap(port int) {
 	defer conn.Close()
 
 	for {
-		n, rAddr, err := conn.ReadFrom(buffer)
+		_, rAddr, err := conn.ReadFrom(buffer)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Received %d bytes from %v\n", n, rAddr)
+		//fmt.Printf("Received %d bytes from %v\n", n, rAddr)
 
 		go func() {
-			kBucket, err := fn.LookUp(buffer)
+			kBucket, err := fn.LookUp(buffer[:20])
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			//host, port, _ := net.SplitHostPort(rAddr.String())
-			//portInt, _ := strconv.Atoi(port)
-			//id, _ := NewID(host, portInt)
-			//fn.dht.RoutingTable.AddNode(structs.Node{ID: id, IP: host, Port: portInt})
+			//Convert port from byte to int
+			portInt := binary.BigEndian.Uint32(buffer[20:24])
+			intVal := int(portInt)
+
+			host, _, _ := net.SplitHostPort(rAddr.String())
+			id, _ := NewID(host, intVal)
+			fn.dht.RoutingTable.AddNode(structs.Node{ID: id, IP: host, Port: intVal})
 
 			respConn, err := net.Dial("tcp", rAddr.String())
 			if err != nil {
@@ -272,7 +279,12 @@ func (fn *FullNode) joinNetwork(boostrapPort int) {
 		log.Fatal(err)
 	}
 
-	_, err = conn.Write(fn.dht.ID)
+	dataToSend := fn.dht.ID
+	bs := make([]byte, 4)
+	binary.LittleEndian.PutUint32(bs, uint32(fn.dht.Port))
+	fmt.Println(bs)
+	dataToSend = append(dataToSend, bs...)
+	_, err = conn.Write(dataToSend)
 	if err != nil {
 		log.Fatal(err)
 	}
