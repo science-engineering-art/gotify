@@ -77,7 +77,9 @@ func main() {
 			if err != nil {
 				fmt.Println(err.Error())
 			}
-			fmt.Println("The retrived value is:", value)
+			fmt.Println("The retrived value is:", string(value))
+		case "dht":
+			fullNode.PrintRoutingTable()
 		}
 	}
 }

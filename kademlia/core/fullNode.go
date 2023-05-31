@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	b58 "github.com/jbenet/go-base58"
 	"github.com/science-engineering-art/spotify/src/kademlia/interfaces"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
@@ -94,7 +94,7 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 			return err
 		}
 	}
-	//fmt.Printf("The value that reached %s", b58.Encode(buffer))
+
 	err := fn.dht.Store(key, &buffer)
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (fn *FullNode) FindNode(ctx context.Context, target *pb.TargetID) (*pb.KBuc
 
 func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServer) error {
 	value, neighbors := fn.dht.FindValue(&target.ID)
-	//fmt.Println("Retrieved value:", b58.Encode(*value))
+
 	kbucket := &pb.KBucket{Bucket: []*pb.Node{}}
 	if neighbors != nil && len(*neighbors) > 0 {
 		kbucket = getKBucketFromNodeArray(neighbors)
@@ -117,7 +117,14 @@ func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServe
 	if value == nil {
 		value = &[]byte{}
 	}
-	response := pb.FindValueResponse{KNeartestBuckets: kbucket, Value: &pb.Data{Init: 0, End: int32(len(*value)), Buffer: (*value)[:]}}
+	response := pb.FindValueResponse{
+		KNeartestBuckets: kbucket,
+		Value: &pb.Data{
+			Init:   0,
+			End:    int32(len(*value)),
+			Buffer: (*value)[:],
+		},
+	}
 	fv.Send(&response)
 	return nil
 }
@@ -155,7 +162,7 @@ func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 			contacted[string(node.ID)] = true
 
 			// get RPC client
-			address := fmt.Sprintf("%s:%d", node.IP, node.Port)
+			address := fmt.Sprintf("%s:%d", node.IP, 8080)
 			conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 			client := pb.NewFullNodeClient(conn)
 
@@ -186,9 +193,6 @@ func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 		}
 
 		sl.Comparator = fn.dht.ID
-		if sl.Len() < structs.K {
-			sl.Append([]*structs.Node{&fn.dht.Node})
-		}
 		sort.Sort(sl)
 
 		if addedNodes == 0 {
@@ -251,7 +255,7 @@ func (fn *FullNode) bootstrap(port int) {
 			}
 
 			//Convert port from byte to int
-			portInt := binary.BigEndian.Uint32(buffer[20:24])
+			portInt := binary.LittleEndian.Uint32(buffer[20:24])
 			intVal := int(portInt)
 
 			host, _, _ := net.SplitHostPort(rAddr.String())
@@ -336,7 +340,7 @@ func (fn *FullNode) StoreValue(key string, data string) (string, error) {
 	dataBytes := []byte(data)
 	sha := sha1.Sum(dataBytes)
 	keyHash := sha[:]
-	str := b58.Encode(keyHash)
+	str := base64.RawStdEncoding.EncodeToString(keyHash)
 
 	nearestNeighbors, err := fn.LookUp(keyHash)
 	if err != nil {
@@ -371,7 +375,7 @@ func (fn *FullNode) StoreValue(key string, data string) (string, error) {
 }
 
 func (fn *FullNode) GetValue(target string) ([]byte, error) {
-	keyHash := b58.Decode(target)
+	keyHash, _ := base64.RawStdEncoding.DecodeString(target)
 
 	val, err := fn.dht.Storage.Read(keyHash)
 	if err == nil {
@@ -404,7 +408,7 @@ func (fn *FullNode) GetValue(target string) ([]byte, error) {
 		for {
 			data, err := receiver.Recv()
 			if data == nil {
-				return nil, nil
+				break
 			}
 			if init == data.Value.Init {
 				buffer = append(buffer, data.Value.Buffer...)
@@ -414,6 +418,7 @@ func (fn *FullNode) GetValue(target string) ([]byte, error) {
 			}
 		}
 	}
+
 	return buffer, nil
 }
 
@@ -422,4 +427,14 @@ func getFullNodeClient(ip *string, port *int) pb.FullNodeClient {
 	conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	client := pb.NewFullNodeClient(conn)
 	return client
+}
+
+func (fn *FullNode) PrintRoutingTable() {
+	KBuckets := fn.dht.RoutingTable.KBuckets
+
+	for i := 0; i < len(KBuckets); i++ {
+		for j := 0; j < len(KBuckets[i]); j++ {
+			fmt.Println(KBuckets[i][j])
+		}
+	}
 }

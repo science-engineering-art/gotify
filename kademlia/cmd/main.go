@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/sha1"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net"
@@ -10,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	b58 "github.com/jbenet/go-base58"
 	"github.com/science-engineering-art/spotify/src/kademlia/core"
 	"github.com/science-engineering-art/spotify/src/kademlia/pb"
 	"github.com/science-engineering-art/spotify/src/kademlia/structs"
@@ -74,7 +74,7 @@ func main() {
 			}
 			data_hash := sha1.Sum(dataBytes)
 			id := data_hash[:]
-			str := b58.Encode(id)
+			str := base64.RawStdEncoding.EncodeToString(id)
 			fmt.Println("Stored ID: ", str, "Stored Data:", dataBytes)
 
 		case "ping":
@@ -104,7 +104,7 @@ func main() {
 			ip := input[1]
 			port, _ := strconv.Atoi(input[2])
 			data := input[3]
-			target := b58.Decode(data)
+			target, _ := base64.RawStdEncoding.DecodeString(data)
 
 			client := GetFullNodeClient(&ip, &port)
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -115,7 +115,6 @@ func main() {
 				fmt.Println(err.Error())
 			}
 			fmt.Println("The found nodes where: ", pbKBucket.Bucket)
-			//fmt.Println("First node is: ", b58.Encode(pbKBucket.Bucket[0].ID))
 
 		case "findvalue":
 			if len(input) != 4 {
@@ -125,7 +124,7 @@ func main() {
 			ip := input[1]
 			port, _ := strconv.Atoi(input[2])
 			data := input[3]
-			target := b58.Decode(data)
+			target, _ := base64.RawStdEncoding.DecodeString(data)
 
 			if len(target) == 0 {
 				fmt.Println("Invalid target decoding.")
@@ -178,7 +177,7 @@ func main() {
 			bootIp := input[3]
 			bootPort, _ := strconv.Atoi(input[4])
 			data := input[5]
-			target := b58.Decode(data)
+			target, _ := base64.RawStdEncoding.DecodeString(data)
 
 			grpcServerAddress := ip + ":" + strconv.FormatInt(int64(port), 10)
 			fullNodeServer := *core.NewFullNode(ip, port, 0, structs.NewStorage(), false)
@@ -258,7 +257,7 @@ func CreateFullNodeServer(ip *string, port *int) {
 	}
 
 	id, _ := core.NewID(*ip, *port)
-	log.Printf("start gRPC server on %s with id %s", listener.Addr().String(), b58.Encode(id))
+	log.Printf("start gRPC server on %s with id %s", listener.Addr().String(), base64.RawURLEncoding.EncodeToString(id))
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		log.Fatal("cannot create grpc server: ", err)

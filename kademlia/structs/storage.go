@@ -3,8 +3,6 @@ package structs
 import (
 	"encoding/base64"
 	"errors"
-
-	"github.com/jbenet/go-base58"
 )
 
 type Storage struct {
@@ -18,7 +16,7 @@ func NewStorage() *Storage {
 }
 
 func (s *Storage) Create(key []byte, data *[]byte) error {
-	id := base58.Encode(key)
+	id := base64.RawStdEncoding.EncodeToString(key)
 
 	_, exists := s.KV[id]
 	if exists {
@@ -31,7 +29,7 @@ func (s *Storage) Create(key []byte, data *[]byte) error {
 }
 
 func (s *Storage) Read(key []byte) (*[]byte, error) {
-	id := base58.Encode(key)
+	id := base64.RawStdEncoding.EncodeToString(key)
 
 	v, exists := s.KV[id]
 	if !exists {
