@@ -6,4 +6,5 @@ use (
 	./dns
 	./kademlia
 	./peer
+	./tracker
 )
