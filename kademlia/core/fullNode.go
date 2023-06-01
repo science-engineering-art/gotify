@@ -481,6 +481,11 @@ func (fn *FullNode) GetValue(target string) ([]byte, error) {
 				fmt.Println(err.Error())
 			}
 		}
+
+		// Received data
+		if len(buffer) > 0 {
+			break
+		}
 	}
 
 	return buffer, nil
