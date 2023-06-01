@@ -57,17 +57,20 @@ func NewID(ip string, port int) ([]byte, error) {
 
 func (fn *FullNode) Ping(ctx context.Context, sender *pb.Node) (*pb.Node, error) {
 
-	err := fn.dht.RoutingTable.AddNode(
-		structs.Node{
-			ID:   sender.ID,
-			IP:   sender.IP,
-			Port: int(sender.Port),
-		})
-	if err != nil {
-		return nil, err
+	// add the sender to the Routing Table
+	_sender := structs.Node{
+		ID:   sender.ID,
+		IP:   sender.IP,
+		Port: int(sender.Port),
+	}
+	fn.dht.RoutingTable.AddNode(_sender)
+
+	receiver := &pb.Node{
+		ID:   fn.dht.ID,
+		IP:   fn.dht.IP,
+		Port: int32(fn.dht.Port),
 	}
 
-	receiver := &pb.Node{ID: fn.dht.ID, IP: fn.dht.IP, Port: int32(fn.dht.Port)}
 	return receiver, nil
 }
 
@@ -80,6 +83,16 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 		data, err := stream.Recv()
 		if data == nil {
 			break
+		}
+
+		if init == 0 {
+			// add the sender to the Routing Table
+			sender := structs.Node{
+				ID:   data.Sender.ID,
+				IP:   data.Sender.IP,
+				Port: int(data.Sender.Port),
+			}
+			fn.dht.RoutingTable.AddNode(sender)
 		}
 
 		key = data.Key
@@ -103,11 +116,28 @@ func (fn *FullNode) Store(stream pb.FullNode_StoreServer) error {
 }
 
 func (fn *FullNode) FindNode(ctx context.Context, target *pb.TargetID) (*pb.KBucket, error) {
+	// add the sender to the Routing Table
+	sender := structs.Node{
+		ID:   target.Sender.ID,
+		IP:   target.Sender.IP,
+		Port: int(target.Sender.Port),
+	}
+	fn.dht.RoutingTable.AddNode(sender)
+
 	bucket := fn.dht.FindNode(&target.ID)
+
 	return getKBucketFromNodeArray(bucket), nil
 }
 
 func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServer) error {
+	// add the sender to the Routing Table
+	sender := structs.Node{
+		ID:   target.Sender.ID,
+		IP:   target.Sender.IP,
+		Port: int(target.Sender.Port),
+	}
+	fn.dht.RoutingTable.AddNode(sender)
+
 	value, neighbors := fn.dht.FindValue(&target.ID)
 
 	kbucket := &pb.KBucket{Bucket: []*pb.Node{}}
@@ -132,9 +162,13 @@ func (fn *FullNode) FindValue(target *pb.TargetID, fv pb.FullNode_FindValueServe
 func getKBucketFromNodeArray(nodes *[]structs.Node) *pb.KBucket {
 	result := pb.KBucket{Bucket: []*pb.Node{}}
 	for _, node := range *nodes {
-		//fmt.Println("In the for:", node)
-		result.Bucket = append(result.Bucket, &pb.Node{ID: node.ID, IP: node.IP, Port: int32(node.Port)})
-		//fmt.Println("Append Well")
+		result.Bucket = append(result.Bucket,
+			&pb.Node{
+				ID:   node.ID,
+				IP:   node.IP,
+				Port: int32(node.Port),
+			},
+		)
 	}
 	return &result
 }
@@ -144,6 +178,7 @@ func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 	sl := fn.dht.RoutingTable.GetClosestContacts(structs.Alpha, target, []*structs.Node{})
 
 	contacted := make(map[string]bool)
+	contacted[string(fn.dht.ID)] = true
 
 	if len(*sl.Nodes) == 0 {
 		return nil, nil
@@ -162,9 +197,7 @@ func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 			contacted[string(node.ID)] = true
 
 			// get RPC client
-			address := fmt.Sprintf("%s:%d", node.IP, 8080)
-			conn, _ := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
-			client := pb.NewFullNodeClient(conn)
+			client := NewClientNode(node.IP, 8080)
 
 			// function to add the received nodes into the short list
 			addRecvNodes := func(recvNodes *pb.KBucket) {
@@ -185,7 +218,16 @@ func (fn *FullNode) LookUp(target []byte) ([]structs.Node, error) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 
-			recvNodes, err := client.FindNode(ctx, &pb.TargetID{ID: node.ID})
+			recvNodes, err := client.FindNode(ctx,
+				&pb.TargetID{
+					ID: node.ID,
+					Sender: &pb.Node{
+						ID:   fn.dht.ID,
+						IP:   fn.dht.IP,
+						Port: int32(fn.dht.Port),
+					},
+				},
+			)
 			if err != nil {
 				return nil, err
 			}
@@ -253,6 +295,7 @@ func (fn *FullNode) bootstrap(port int) {
 			if err != nil {
 				log.Fatal(err)
 			}
+			kBucket = append(kBucket, fn.dht.Node)
 
 			//Convert port from byte to int
 			portInt := binary.LittleEndian.Uint32(buffer[20:24])
@@ -338,9 +381,7 @@ func (fn *FullNode) joinNetwork(boostrapPort int) {
 
 func (fn *FullNode) StoreValue(key string, data string) (string, error) {
 	dataBytes := []byte(data)
-	sha := sha1.Sum(dataBytes)
-	keyHash := sha[:]
-	str := base64.RawStdEncoding.EncodeToString(keyHash)
+	keyHash, _ := base64.RawStdEncoding.DecodeString(key)
 
 	nearestNeighbors, err := fn.LookUp(keyHash)
 	if err != nil {
@@ -352,7 +393,7 @@ func (fn *FullNode) StoreValue(key string, data string) (string, error) {
 		if err != nil {
 			return "", nil
 		}
-		return str, nil
+		return key, nil
 	}
 
 	for _, node := range nearestNeighbors {
@@ -364,14 +405,28 @@ func (fn *FullNode) StoreValue(key string, data string) (string, error) {
 			fmt.Println(err.Error())
 		}
 		//fmt.Println("data bytes", dataBytes)
-		err = sender.Send(&pb.StoreData{Key: keyHash, Value: &pb.Data{Init: 0, End: int32(len(dataBytes)), Buffer: dataBytes}})
+		err = sender.Send(
+			&pb.StoreData{
+				Sender: &pb.Node{
+					ID:   fn.dht.ID,
+					IP:   fn.dht.IP,
+					Port: int32(fn.dht.Port),
+				},
+				Key: keyHash,
+				Value: &pb.Data{
+					Init:   0,
+					End:    int32(len(dataBytes)),
+					Buffer: dataBytes,
+				},
+			},
+		)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	fmt.Println("Stored ID: ", str, "Stored Data:", dataBytes)
-	return str, nil
+	fmt.Println("Stored ID: ", key, "Stored Data:", dataBytes)
+	return key, nil
 }
 
 func (fn *FullNode) GetValue(target string) ([]byte, error) {
@@ -399,7 +454,16 @@ func (fn *FullNode) GetValue(target string) ([]byte, error) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		receiver, err := client.FindValue(ctx, &pb.TargetID{ID: keyHash})
+		receiver, err := client.FindValue(ctx,
+			&pb.TargetID{
+				ID: keyHash,
+				Sender: &pb.Node{
+					ID:   fn.dht.ID,
+					IP:   fn.dht.IP,
+					Port: int32(fn.dht.Port),
+				},
+			},
+		)
 		if err != nil {
 			fmt.Println(err.Error())
 		}

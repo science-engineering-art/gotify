@@ -183,7 +183,7 @@ func main() {
 			fullNodeServer := *core.NewFullNode(ip, port, 0, structs.NewStorage(), false)
 
 			// Create gRPC Server for ip and port
-			go func(fullNode core.FullNode) {
+			go func() {
 				grpcServer := grpc.NewServer()
 
 				pb.RegisterFullNodeServer(grpcServer, &fullNodeServer)
@@ -199,7 +199,7 @@ func main() {
 				if err != nil {
 					log.Fatal("cannot create grpc server: ", err)
 				}
-			}(fullNodeServer)
+			}()
 
 			//Send ping rpc from bootIp:bootPort for adding it to routing table as entry points
 			client := GetFullNodeClient(&ip, &port)
@@ -215,21 +215,6 @@ func main() {
 			fmt.Println("This are the", structs.K, "closes node to", ip, ":", port, " ==> ", nearestNodes)
 		}
 	}
-}
-
-func displayFlagHelp() {
-	fmt.Println(`cli-example
-
-Usage:
-	cli-example --port [port]
-
-Options:
-	--help Show this screen.
-	--ip=<ip> Local IP [default: 0.0.0.0]
-	--port=[port] Local Port [default: 0]
-	--bip=<ip> Bootstrap IP
-	--bport=<port> Bootstrap Port
-	--stun=<bool> Use STUN protocol for public addr discovery [default: true]`)
 }
 
 func displayHelp() {

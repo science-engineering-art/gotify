@@ -16,12 +16,17 @@ type FullNodeClient struct {
 }
 
 func NewClientNode(ip string, port int) *FullNodeClient {
+
 	address := fmt.Sprintf("%s:%d", ip, port)
+
+	// stablish connection
 	conn, _ := grpc.Dial(address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock())
 	client := pb.NewFullNodeClient(conn)
+
 	fnClient := FullNodeClient{FullNodeClient: client}
+
 	return &fnClient
 }
 
