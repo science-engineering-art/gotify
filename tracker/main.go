@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/science-engineering-art/spotify/src/tracker/kademlia"
+	"github.com/science-engineering-art/spotify/src/tracker/utils"
 )
 
 func main() {
@@ -14,6 +14,6 @@ func main() {
 		"stringValue": "hello!"
 	}
 	`
-	hashesPowerSet := kademlia.GetHashesPowerSet(jsonData)
+	hashesPowerSet := utils.GetHashesPowerSet(jsonData)
 	fmt.Println(hashesPowerSet)
 }

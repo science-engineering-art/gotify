@@ -1,4 +1,4 @@
-package kademlia
+package utils
 
 import (
 	"crypto/sha1"

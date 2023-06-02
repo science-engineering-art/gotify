@@ -1,69 +1,55 @@
-package kademlia
+package core
 
 import (
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"strconv"
+
+	"github.com/science-engineering-art/spotify/src/kademlia/core"
+	"github.com/science-engineering-art/spotify/src/tracker/persistence"
+	"github.com/science-engineering-art/spotify/src/tracker/utils"
 
 	b58 "github.com/jbenet/go-base58"
 )
 
 type Tracker struct {
-	dht *DHT
+	fn core.FullNode
 }
 
-func NewTracker(ip string, port int, bootIp string, bootPort int) (*Tracker, error) {
-	tracker := &Tracker{}
-	id, _ := getNewID()
-	var err error = nil
-	tracker.dht, err = NewDHT(getNewInMemoryStore(), &Options{
-		ID:   id,
-		IP:   ip,
-		Port: strconv.Itoa(port),
-		BootstrapNodes: []*NetworkNode{
-			NewNetworkNode(bootIp, strconv.Itoa(bootPort)),
-		},
-	})
-	return tracker, err
+func NewTracker(ip string, port int, bootPort int, isBoot bool) (*Tracker, error) {
+	metadataStorage := persistence.NewMetadataStorage()
+	fn := core.NewFullNode(ip, port, bootPort, metadataStorage, isBoot)
+	tracker := &Tracker{fn: *fn}
+	return tracker, nil
 }
 
 func (t *Tracker) GetSongList(key string) []string {
 	songList := []string{}
 
-	flatArray, found, err := t.dht.Get(key)
+	flatArray, err := t.fn.GetValue(key)
 	if err != nil {
 		fmt.Println("Error when retrieving data:", err)
+		return songList
 	}
 
-	if found {
-		formatedArray := getFormatedArray(flatArray)
-		songList = getStringSliceFromByteArray(formatedArray)
-	}
+	formatedArray := getFormatedArray(flatArray)
+	songList = getStringSliceFromByteArray(formatedArray)
 
 	return songList
 }
 
-func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songData []byte) []string {
-	hashesPowerSet := GetHashesPowerSet(jsonSongMetadata)
-	songDataHash := sha1.Sum(songData)
-	value := songDataHash[:]
+func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songDataHash string) []string {
+	hashesPowerSet := utils.GetHashesPowerSet(jsonSongMetadata)
 
 	for _, hash := range hashesPowerSet {
-		key := []byte(hash)
-		id, err := t.dht.Store(key, value)
+		id, err := t.fn.StoreValue(hash, songDataHash)
 		if err != nil {
 			fmt.Println("Error when storing key:", id, err)
 		}
 	}
 
 	return hashesPowerSet
-}
-
-func getNewInMemoryStore() *MemoryStore {
-	memStore := &MemoryStore{}
-	return memStore
 }
 
 // newID generates a new random ID
