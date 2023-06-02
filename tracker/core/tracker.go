@@ -11,20 +11,20 @@ import (
 )
 
 type Tracker struct {
-	fn core.FullNode
+	FN core.FullNode
 }
 
 func NewTracker(ip string, port int, bootPort int, isBoot bool) (*Tracker, error) {
 	metadataStorage := persistence.NewMetadataStorage()
 	fn := core.NewFullNode(ip, port, bootPort, metadataStorage, isBoot)
-	tracker := &Tracker{fn: *fn}
+	tracker := &Tracker{FN: *fn}
 	return tracker, nil
 }
 
 func (t *Tracker) GetSongList(key string) []string {
 	songList := []string{}
 
-	flatArray, err := t.fn.GetValue(key)
+	flatArray, err := t.FN.GetValue(key)
 	if err != nil {
 		fmt.Println("Error when retrieving data:", err)
 		return songList
@@ -41,7 +41,7 @@ func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songDataHash string
 	valueFullJsonData := getValueFullJsonData(jsonSongMetadata, songDataHash)
 
 	for _, hash := range hashesPowerSet {
-		id, err := t.fn.StoreValue(hash, valueFullJsonData)
+		id, err := t.FN.StoreValue(hash, valueFullJsonData)
 		if err != nil {
 			fmt.Println("Error when storing key:", id, err)
 		}
