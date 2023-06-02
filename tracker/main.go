@@ -1,10 +1,6 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/science-engineering-art/spotify/src/tracker/utils"
-)
+import "fmt"
 
 func main() {
 	jsonData := `
@@ -14,6 +10,8 @@ func main() {
 		"stringValue": "hello!"
 	}
 	`
-	hashesPowerSet := utils.GetHashesPowerSet(jsonData)
-	fmt.Println(hashesPowerSet)
+	// hashesPowerSet := utils.GetHashesPowerSet(jsonData)
+	// fmt.Println(hashesPowerSet)
+
+	fmt.Println([]byte(jsonData), string([]byte(jsonData)))
 }

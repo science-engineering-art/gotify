@@ -1,7 +1,6 @@
 package core
 
 import (
-	"crypto/rand"
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
@@ -52,38 +51,17 @@ func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songDataHash string
 	return hashesPowerSet
 }
 
-// newID generates a new random ID
-func getNewID() ([]byte, error) {
-	result := make([]byte, 20)
-	_, err := rand.Read(result)
-	return result, err
-}
-
-func getFormatedArray(flatArray []byte) [][20]byte {
-	result := [][20]byte{}
-	lenght := len(flatArray)
-	currentElem := [20]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	for i := 0; i < lenght; i++ {
-		pos := i % 10
-		if pos == 0 {
-			result = append(result, currentElem)
-			currentElem := [20]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-			currentElem[pos] = flatArray[i]
-		} else if pos < lenght-1 {
-			currentElem[pos] = flatArray[i]
-		} else {
-			currentElem[pos] = flatArray[i]
-			result = append(result, currentElem)
-		}
-	}
+func getFormatedArray(flatArray []byte) [][]byte {
+	result := [][]byte{}
+	//lenght := len(flatArray)
 
 	return result
 }
 
-func getStringSliceFromByteArray(array [][20]byte) []string {
+func getStringSliceFromByteArray(array [][]byte) []string {
 	result := []string{}
 	for _, byteArray := range array {
-		str := string(byteArray[:])
+		str := string(byteArray)
 		result = append(result, str)
 	}
 	return result
