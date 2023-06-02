@@ -57,9 +57,9 @@ func getFlattenByteArray(data [][]byte) []byte {
 	flatByteArray := []byte{}
 
 	for _, elem := range data {
-		elem_len := len(elem)
+		elemLen := len(elem)
 		byteLen := make([]byte, 4)
-		binary.BigEndian.PutUint32(byteLen, uint32(elem_len))
+		binary.LittleEndian.PutUint32(byteLen, uint32(elemLen))
 
 		flatByteArray = append(flatByteArray, byteLen...)
 		flatByteArray = append(flatByteArray, elem...)

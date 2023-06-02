@@ -1,15 +1,13 @@
 package core
 
 import (
-	"crypto/sha1"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 
 	"github.com/science-engineering-art/spotify/src/kademlia/core"
 	"github.com/science-engineering-art/spotify/src/tracker/persistence"
 	"github.com/science-engineering-art/spotify/src/tracker/utils"
-
-	b58 "github.com/jbenet/go-base58"
 )
 
 type Tracker struct {
@@ -40,9 +38,10 @@ func (t *Tracker) GetSongList(key string) []string {
 
 func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songDataHash string) []string {
 	hashesPowerSet := utils.GetHashesPowerSet(jsonSongMetadata)
+	valueFullJsonData := getValueFullJsonData(jsonSongMetadata, songDataHash)
 
 	for _, hash := range hashesPowerSet {
-		id, err := t.fn.StoreValue(hash, songDataHash)
+		id, err := t.fn.StoreValue(hash, valueFullJsonData)
 		if err != nil {
 			fmt.Println("Error when storing key:", id, err)
 		}
@@ -53,7 +52,14 @@ func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songDataHash string
 
 func getFormatedArray(flatArray []byte) [][]byte {
 	result := [][]byte{}
-	//lenght := len(flatArray)
+	lenght := len(flatArray)
+
+	for i := 0; i < lenght; {
+		elemLen := int32(binary.LittleEndian.Uint32(flatArray[i : i+4]))
+		elem := flatArray[i+4 : i+4+int(elemLen)]
+		result = append(result, elem)
+		i += i + 4 + int(elemLen)
+	}
 
 	return result
 }
@@ -67,14 +73,21 @@ func getStringSliceFromByteArray(array [][]byte) []string {
 	return result
 }
 
-func GetStringKeyFromRawJson(jsonSongMetadata string) string {
-	subJson := make(map[string]interface{})
-	jsonFromMap, err := json.Marshal(subJson)
+func getValueFullJsonData(jsonSongMetadata string, songDataHash string) string {
+	var data map[string]interface{}
+	fullJsonData := ""
+
+	err := json.Unmarshal([]byte(jsonSongMetadata), &data)
+	if err != nil {
+		fmt.Printf("could not unmarshal json: %s\n", err)
+	}
+	data["datahash"] = songDataHash
+
+	jsonData, _ := json.Marshal(data)
 	if err != nil {
 		fmt.Printf("could not marshal map: %s\n", err)
 	}
-	jsonHash := sha1.Sum(jsonFromMap)
-	resultHash := jsonHash[:]
-	hash := b58.Encode(resultHash)
-	return hash
+
+	fullJsonData = string(jsonData)
+	return fullJsonData
 }
