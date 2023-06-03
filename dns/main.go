@@ -1,36 +1,85 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 
 	"github.com/miekg/dns"
+	"github.com/science-engineering-art/spotify/src/dns/utils"
 )
 
-var domainsToAddresses map[string]string = map[string]string{
-	"google.com.":       "1.2.3.4",
-	"jameshfisher.com.": "104.198.14.52",
-	"gotify.com.":       "127.0.0.1",
+var broadcastPort map[string]int = map[string]int{
+	"gotify.com":     3000,
+	"api.gotify.com": 5000,
 }
 
 type handler struct{}
 
-func (this *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
+func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	msg := dns.Msg{}
 	msg.SetReply(r)
 	switch r.Question[0].Qtype {
 	case dns.TypeA:
 		msg.Authoritative = true
 		domain := msg.Question[0].Name
-		address, ok := domainsToAddresses[domain]
-		if ok {
+		IP, err := h.broadcast(broadcastPort[domain])
+		if err == nil {
 			msg.Answer = append(msg.Answer, &dns.A{
 				Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 60},
-				A:   net.ParseIP(address),
+				A:   IP,
 			})
 		}
 	}
 	w.WriteMsg(&msg)
+}
+
+func (h *handler) broadcast(port int) (net.IP, error) {
+	raddr := net.UDPAddr{
+		IP:   net.IPv4(255, 255, 255, 255),
+		Port: port,
+	}
+
+	conn, err := net.DialUDP("udp4", nil, &raddr)
+	if err != nil {
+		return nil, err
+	}
+
+	IP, Port, err := net.SplitHostPort(conn.LocalAddr().String())
+	if err != nil {
+		return nil, err
+	}
+
+	msg := utils.SerializeMessage(IP, Port)
+
+	_, err = conn.Write(msg)
+	if err != nil {
+		return nil, err
+	}
+	conn.Close()
+
+	address := fmt.Sprintf("%s:%s", IP, Port)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", address)
+	for err != nil {
+		return nil, err
+	}
+
+	lis, err := net.ListenTCP("tcp", tcpAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	tcpConn, err := lis.AcceptTCP()
+	if err != nil {
+		return nil, err
+	}
+
+	ip, err := utils.DeserializeMessage(tcpConn)
+	if err != nil {
+		return nil, err
+	}
+
+	return ip, nil
 }
 
 func main() {
