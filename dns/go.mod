@@ -2,6 +2,11 @@ module github.com/science-engineering-art/spotify/src/dns
 
 go 1.20
 
-require github.com/openmohan/lightdns v0.0.0-20181005121551-25aa6453d4ed
+require github.com/miekg/dns v1.1.54
 
-require github.com/google/gopacket v1.1.19 // indirect
+require (
+	golang.org/x/mod v0.7.0 // indirect
+	golang.org/x/net v0.2.0 // indirect
+	golang.org/x/sys v0.2.0 // indirect
+	golang.org/x/tools v0.3.0 // indirect
+)

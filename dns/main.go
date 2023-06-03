@@ -1,36 +1,42 @@
 package main
 
 import (
-	lightdns "github.com/openmohan/lightdns"
+	"log"
+	"net"
+
+	"github.com/miekg/dns"
 )
 
-var records = map[string]string{
-	"mail.amazon.com":  "192.162.1.2",
-	"paste.amazon.com": "191.165.0.3",
+var domainsToAddresses map[string]string = map[string]string{
+	"google.com.":       "1.2.3.4",
+	"jameshfisher.com.": "104.198.14.52",
+	"gotify.com.":       "127.0.0.1",
 }
 
-func lookupFunc(string) (string, error) {
-	//Do some action
-	//Get data from DB
-	//Process it further more
-	return "192.2.2.1", nil
+type handler struct{}
+
+func (this *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
+	msg := dns.Msg{}
+	msg.SetReply(r)
+	switch r.Question[0].Qtype {
+	case dns.TypeA:
+		msg.Authoritative = true
+		domain := msg.Question[0].Name
+		address, ok := domainsToAddresses[domain]
+		if ok {
+			msg.Answer = append(msg.Answer, &dns.A{
+				Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 60},
+				A:   net.ParseIP(address),
+			})
+		}
+	}
+	w.WriteMsg(&msg)
 }
 
 func main() {
-	var googleRecords = map[string]string{
-		"mail.google.com":  "192.168.0.2",
-		"paste.google.com": "192.168.0.3",
+	srv := &dns.Server{Addr: ":53", Net: "udp"}
+	srv.Handler = &handler{}
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatalf("Failed to set udp listener %s\n", err.Error())
 	}
-	var microsoftRecords = map[string]string{
-		"mail.microsoft.com":  "192.168.0.78",
-		"paste.microsoft.com": "192.168.0.25",
-	}
-	dns := lightdns.NewDNSServer(8900)
-	dns.AddZoneData("google.com", googleRecords, nil, lightdns.DNSForwardLookupZone)
-	dns.AddZoneData("microsoft.com", microsoftRecords, nil, lightdns.DNSForwardLookupZone)
-
-	/* Incase if the records are not static or to be taken from DB or from any other sources
-	lookupFunc method can be used.append*/
-	dns.AddZoneData("amazon.com", nil, lookupFunc, lightdns.DNSForwardLookupZone)
-	dns.StartAndServe()
 }

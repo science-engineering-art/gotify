@@ -16,4 +16,4 @@ vendor/
 src/api/tmp/main
 src/api/tmp/build-errors.log
 tmp
-SOTA
+sota
