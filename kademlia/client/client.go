@@ -8,7 +8,7 @@ import (
 func main() {
 	addr := net.UDPAddr{
 		IP:   net.IPv4(255, 255, 255, 255),
-		Port: 8888,
+		Port: 41234,
 	}
 
 	conn, err := net.DialUDP("udp4", nil, &addr)

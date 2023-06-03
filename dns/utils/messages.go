@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
 	"net"
 	"strconv"
@@ -20,13 +21,14 @@ func SerializeMessage(ip string, port string) []byte {
 
 func DeserializeMessage(conn io.Reader) (net.IP, error) {
 
-	ipBuff := make([]byte, 16)
+	ipBuff := make([]byte, 4)
 	_, err := conn.Read(ipBuff)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(ipBuff)
 
-	portBuff := make([]byte, 4)
+	portBuff := make([]byte, 1)
 	_, err = conn.Read(portBuff)
 	if err != nil {
 		return nil, err

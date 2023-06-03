@@ -2,10 +2,11 @@ FROM docker.uclv.cu/node:19.9-alpine
 
 WORKDIR /app
 
-COPY ./src/client/ ./
+COPY ./ ./
 
-RUN npm i
+# RUN npm i
 
-EXPOSE 3000
+EXPOSE 80
+EXPOSE 41234/udp
 
 CMD ["npm", "run", "dev"]

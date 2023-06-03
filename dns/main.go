@@ -10,8 +10,8 @@ import (
 )
 
 var broadcastPort map[string]int = map[string]int{
-	"gotify.com":     3000,
-	"api.gotify.com": 5000,
+	"gotify.com.":     41234,
+	"api.gotify.com.": 5000,
 }
 
 type handler struct{}
@@ -23,6 +23,7 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	case dns.TypeA:
 		msg.Authoritative = true
 		domain := msg.Question[0].Name
+		fmt.Println(domain)
 		IP, err := h.broadcast(broadcastPort[domain])
 		if err == nil {
 			msg.Answer = append(msg.Answer, &dns.A{
@@ -35,6 +36,7 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 }
 
 func (h *handler) broadcast(port int) (net.IP, error) {
+
 	raddr := net.UDPAddr{
 		IP:   net.IPv4(255, 255, 255, 255),
 		Port: port,
@@ -50,9 +52,7 @@ func (h *handler) broadcast(port int) (net.IP, error) {
 		return nil, err
 	}
 
-	msg := utils.SerializeMessage(IP, Port)
-
-	_, err = conn.Write(msg)
+	_, err = conn.Write([]byte{})
 	if err != nil {
 		return nil, err
 	}
@@ -73,11 +73,13 @@ func (h *handler) broadcast(port int) (net.IP, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("AcceptTCP Connection")
 	ip, err := utils.DeserializeMessage(tcpConn)
 	if err != nil {
+		fmt.Println("ERROR!!!!!!!!!!! ", err)
 		return nil, err
 	}
+	fmt.Println(ip)
 
 	return ip, nil
 }
