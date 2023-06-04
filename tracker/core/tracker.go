@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/science-engineering-art/spotify/src/kademlia/core"
+	"github.com/science-engineering-art/kademlia-grpc/core"
 	"github.com/science-engineering-art/spotify/src/tracker/persistence"
 	"github.com/science-engineering-art/spotify/src/tracker/utils"
 )

@@ -1,6 +1,53 @@
 version: '3'
 
 services:
+
+  dns:
+    build:
+      context: ./dns
+      dockerfile: Dockerfile
+    volumes:
+      - ./dns:/dns
+    stdin_open: true
+    tty: true
+    networks:
+      - default
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    volumes:
+      - ./web:/web
+    stdin_open: true
+    tty: true
+    networks:
+      - default
+
+  api:
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - ./api:/api
+    stdin_open: true
+    tty: true
+    networks:
+      - default
+
+  peer:
+    build: 
+      context: ./peer
+      dockerfile: Dockerfile
+    volumes:
+      - ./peer:/peer
+    stdin_open: true
+    tty: true
+    networks:
+      - default
+    depends_on:
+      - db
+
   db:
     container_name: mongodb
     image: docker.uclv.cu/mongo
@@ -9,38 +56,14 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  peer:
-    build: 
-      context: .
-      dockerfile: ./peer/Dockerfile
-    depends_on: 
-      - db
-    ports:
-      - 8080:8080
-    volumes:
-      - ./peer:/peer
-    env_file: ./peer/.env
-
-  api:
-    build: 
-      context: .
-      dockerfile: ./api/Dockerfile
-    depends_on: 
-      - peer 
-    volumes:
-      - ./api:/api
-    network_mode: host
-  
-  web:
-    build:
-      context: .
-      dockerfile: ./client/Dockerfile
-    depends_on:
-      - api
-    volumes:
-      - ./client/src:/app/src
-    ports:
-      - 3000:3000
-
 volumes:
   mongo_data:
+
+networks:
+  default:
+    # external: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/16
+          gateway: 192.168.0.1

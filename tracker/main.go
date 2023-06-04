@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	kademliaCore "github.com/science-engineering-art/spotify/src/kademlia/core"
-	"github.com/science-engineering-art/spotify/src/kademlia/pb"
+	kademliaCore "github.com/science-engineering-art/kademlia-grpc/core"
+	"github.com/science-engineering-art/kademlia-grpc/pb"
 	trackerCore "github.com/science-engineering-art/spotify/src/tracker/core"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

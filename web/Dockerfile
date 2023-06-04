@@ -1,6 +1,6 @@
 FROM docker.uclv.cu/node:19.9-alpine
 
-WORKDIR /app
+WORKDIR /web
 
 COPY ./ ./
 

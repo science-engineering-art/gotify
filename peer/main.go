@@ -1,7 +1,7 @@
 package main
 
 import (
-	kademlia "github.com/science-engineering-art/spotify/src/kademlia/core"
+	kademlia "github.com/science-engineering-art/kademlia-grpc/core"
 	"github.com/science-engineering-art/spotify/src/peer/persistence"
 )
 
