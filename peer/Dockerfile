@@ -2,12 +2,19 @@ FROM docker.uclv.cu/golang:1.20-alpine
 
 WORKDIR /peer
 
-RUN go install github.com/cosmtrek/air@v1.43.0
+COPY ./ ./
 
-RUN go clean -modcache
+EXPOSE 8080
+EXPOSE 32140/udp
 
-COPY ./src/peer/go.mod ./
+CMD [ "go", "run", "main.go" ]
 
-RUN go mod download
+# RUN go install github.com/cosmtrek/air@v1.43.0
 
-CMD ["air", "-c", ".air.toml"]
+# RUN go clean -modcache
+
+# COPY ./src/peer/go.mod ./
+
+# RUN go mod download
+
+# CMD ["air", "-c", ".air.toml"]

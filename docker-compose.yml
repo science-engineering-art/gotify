@@ -1,4 +1,4 @@
-version: '3'
+version: '3.9'
 
 services:
 
@@ -61,9 +61,9 @@ volumes:
 
 networks:
   default:
-    # external: true
     ipam:
       driver: default
       config:
         - subnet: 192.168.0.0/16
           gateway: 192.168.0.1
+ 
