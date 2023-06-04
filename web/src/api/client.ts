@@ -1,6 +1,6 @@
 
 export async function client(endpoint: string, body: any | null = null) {
-  const resp = await fetch(`http://localhost:5000/api/${endpoint}`, {
+  const resp = await fetch(`http://api.gotify.com/${endpoint}`, {
     method: body? 'POST' : 'GET',
     body: body
   }).then(res => res.json())

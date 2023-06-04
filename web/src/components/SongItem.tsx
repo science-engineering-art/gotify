@@ -19,7 +19,7 @@ export const SongItem = ({ song }: SongItemPropsType) =>{
 
   const handleSelectedSong = async (_: MouseEvent<HTMLLIElement>) => {
     dispatch(selectedSongId(song.id))
-    dispatch(selectedSongURL(`http://localhost:5000/api/song/${song.id}`))
+    dispatch(selectedSongURL(`http://api.gotify.com/song/${song.id}`))
   }
 
   return (

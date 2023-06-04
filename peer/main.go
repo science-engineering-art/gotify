@@ -10,5 +10,5 @@ var (
 )
 
 func main() {
-	_ = kademlia.NewFullNode("localhost", 8080, 32140, db, false)
+	_ = kademlia.NewFullNode("0.0.0.0", 8080, 32140, db, false)
 }

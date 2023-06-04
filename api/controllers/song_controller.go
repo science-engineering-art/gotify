@@ -6,16 +6,18 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/science-engineering-art/gotify/peer/persistence"
+	kademlia "github.com/science-engineering-art/kademlia-grpc/core"
+
 	"github.com/science-engineering-art/gotify/api/responses"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-// var (
-// 	address    = "0.0.0.0:8080"
-// 	conn, _    = grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
-// 	songClient = pb.NewSongServiceClient(conn)
-// )
+var (
+	db   = persistence.NewMongoDb("admin", "songs")
+	peer = kademlia.NewFullNode("0.0.0.0", 8080, 32140, db, false)
+)
 
 func CreateSong(c *fiber.Ctx) error {
 	// get file from the multipart-form
@@ -49,6 +51,8 @@ func CreateSong(c *fiber.Ctx) error {
 
 	// keep in a buffer the file information
 	file.Read(buffer)
+
+	// peer.StoreValue()
 
 	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	// defer cancel()

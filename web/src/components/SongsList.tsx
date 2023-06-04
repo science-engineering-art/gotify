@@ -13,7 +13,7 @@ export const SongsList = () => {
   const [songs, setSongs ]= useState<SongDTO[]>();
 
   const getSongs = async () => {
-    const resp = await fetch(`http://localhost:5000/api/songs`, {
+    const resp = await fetch(`http://api.gotify.com/songs`, {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({})
