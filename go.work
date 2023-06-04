@@ -1,9 +1,0 @@
-go 1.20
-
-use (
-	./api
-	./cli
-	./dns
-	./peer
-	./tracker
-)
