@@ -11,7 +11,7 @@ import (
 
 var broadcastPort map[string]int = map[string]int{
 	"gotify.com.":     41234,
-	"api.gotify.com.": 5000,
+	"api.gotify.com.": 53123,
 }
 
 type handler struct{}
@@ -76,7 +76,6 @@ func (h *handler) broadcast(port int) (net.IP, error) {
 	fmt.Println("AcceptTCP Connection")
 	ip, err := utils.DeserializeMessage(tcpConn)
 	if err != nil {
-		fmt.Println("ERROR!!!!!!!!!!! ", err)
 		return nil, err
 	}
 	fmt.Println(ip)

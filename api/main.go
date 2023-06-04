@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/google/uuid"
-
+	"github.com/science-engineering-art/spotify/src/api/net"
 	"github.com/science-engineering-art/spotify/src/api/routes"
 )
 
@@ -43,6 +43,8 @@ func main() {
 	// Configure the routes
 	routes.SongRoute(app)
 
+	go net.Broadcast(53123)
+
 	// Enable port for listening
-	app.Listen(":5000")
+	app.Listen("0.0.0.0:80")
 }

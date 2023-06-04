@@ -38,7 +38,7 @@ const parts = ip?.split(".");
 
 const IPv4 = parts?.map(Number)?.map(numberToBytes)
 
-const resp = new Uint8Array(5)
+const resp = new Uint8Array(4)
 resp.set(IPv4?.[0]!)
 resp.set(IPv4?.[1]!, 1)
 resp.set(IPv4?.[2]!, 2)
