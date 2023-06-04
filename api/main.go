@@ -4,8 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/google/uuid"
-	"github.com/science-engineering-art/spotify/src/api/net"
-	"github.com/science-engineering-art/spotify/src/api/routes"
+	"github.com/science-engineering-art/gotify/api/net"
+	"github.com/science-engineering-art/gotify/api/routes"
 )
 
 func main() {

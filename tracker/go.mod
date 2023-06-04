@@ -1,4 +1,4 @@
-module github.com/science-engineering-art/spotify/src/tracker
+module github.com/science-engineering-art/gotify/tracker
 
 go 1.20
 

@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/science-engineering-art/spotify/src/api/controllers"
+	"github.com/science-engineering-art/gotify/api/controllers"
 )
 
 func SongRoute(app *fiber.App) {

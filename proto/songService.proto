@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/science-engineering-art/spotify/src/proto/pb";
+option go_package = "github.com/science-engineering-art/gotify/proto/pb";
 
 package songs;
 

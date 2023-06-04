@@ -6,7 +6,7 @@ import (
 	"net"
 
 	"github.com/miekg/dns"
-	"github.com/science-engineering-art/spotify/src/dns/utils"
+	"github.com/science-engineering-art/gotify/dns/utils"
 )
 
 var broadcastPort map[string]int = map[string]int{

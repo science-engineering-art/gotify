@@ -1,4 +1,4 @@
-module github.com/science-engineering-art/spotify/src/dns
+module github.com/science-engineering-art/gotify/dns
 
 go 1.20
 

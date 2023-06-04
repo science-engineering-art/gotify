@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"github.com/science-engineering-art/spotify/src/peer/models"
+	"github.com/science-engineering-art/gotify/peer/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

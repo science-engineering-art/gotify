@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/science-engineering-art/gotify/tracker/persistence"
+	"github.com/science-engineering-art/gotify/tracker/utils"
 	"github.com/science-engineering-art/kademlia-grpc/core"
-	"github.com/science-engineering-art/spotify/src/tracker/persistence"
-	"github.com/science-engineering-art/spotify/src/tracker/utils"
 )
 
 type Tracker struct {

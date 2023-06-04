@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
+	trackerCore "github.com/science-engineering-art/gotify/tracker/core"
 	kademliaCore "github.com/science-engineering-art/kademlia-grpc/core"
 	"github.com/science-engineering-art/kademlia-grpc/pb"
-	trackerCore "github.com/science-engineering-art/spotify/src/tracker/core"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gopkg.in/readline.v1"

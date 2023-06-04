@@ -1,4 +1,4 @@
-module github.com/science-engineering-art/spotify/src/peer
+module github.com/science-engineering-art/gotify/peer
 
 go 1.20
 

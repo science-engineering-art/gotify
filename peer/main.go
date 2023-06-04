@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/science-engineering-art/gotify/peer/persistence"
 	kademlia "github.com/science-engineering-art/kademlia-grpc/core"
-	"github.com/science-engineering-art/spotify/src/peer/persistence"
 )
 
 var (

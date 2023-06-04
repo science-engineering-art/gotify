@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/science-engineering-art/spotify/src/api/responses"
+	"github.com/science-engineering-art/gotify/api/responses"
 
 	"github.com/gofiber/fiber/v2"
 )
