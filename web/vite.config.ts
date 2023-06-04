@@ -15,8 +15,7 @@ import * as dgram from 'dgram'
 import * as net from 'net';
 
 function numberToBytes(number: number): Uint8Array {
-  const len = Math.ceil(Math.log2(number) / 8);
-  console.log(number, len)
+  // const len = Math.ceil(Math.log2(number) / 8);
   const byteArray = new Uint8Array(1);
 
   for (let index = 0; index < byteArray.length; index++) {
@@ -29,7 +28,6 @@ function numberToBytes(number: number): Uint8Array {
 }
 
 const socket = dgram.createSocket("udp4")
-
 
 const ip = Object.values(os.networkInterfaces())
   .flat()
@@ -46,15 +44,22 @@ resp.set(IPv4?.[1]!, 1)
 resp.set(IPv4?.[2]!, 2)
 resp.set(IPv4?.[3]!, 3)
 
-
 socket.on("message", (_, rinfo) => {
   const tcpSocket = {
     port: rinfo.port,
     host: rinfo.address,
   }
-  const client = net.createConnection(tcpSocket, () => {})
+  const client = net.createConnection(tcpSocket, () => {
+    console.log('Connected to DNS');
+  })
 
-  client.on('connect', ()=>{ client.write(resp); })
+  client.on('connect', ()=>{ 
+    client.write(resp); 
+  })
+
+  client.on('error', (err) => {
+    console.log(err)
+  })
 });
 
 socket.bind(41234);
