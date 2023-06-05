@@ -1,6 +1,7 @@
 import random
 import docker
 import sys
+import os
 from pprint import pprint
 from ipaddress import IPv4Network
 
@@ -107,33 +108,23 @@ def rm_rand_containers(image:str, amount: int):
 
 
 if __name__ == '__main__':
-    images = {
-        "dns": "gotify-dns", 
-        "web": "gotify-web", 
-        "api": "gotify-api", 
-        "peer": "gotify-peer",
-        "mongo": "docker.uclv.cu/mongo"
-    }
     
     command = sys.argv[1]
+
     try:
         image = sys.argv[2]
     except:
         image = ""
-    
+
     if command == "start":
-        # $ docker run --rm -d --net gotify-net \
-        # -e MONGO_INITDB_ROOT_USERNAME=user \
-        # -e MONGO_INITDB_ROOT_PASSWORD=password \
-        # docker.uclv.cu/mongo
 
         dns = run_container(
-            image=images['dns']
+            image='dns'
         )
         
         dockerIp = getDockerIPAvailable()
         db = run_container(
-            image=images['mongo'],
+            image='mongo',
             ip=dockerIp,
             env={
                 'MONGO_INITDB_ROOT_USERNAME': 'user',
@@ -141,7 +132,7 @@ if __name__ == '__main__':
             },
         )
         peer = run_container(
-            image=images['peer'],
+            image='peer',
             env={
                 'MONGODB_IP': dockerIp
             },
@@ -150,7 +141,7 @@ if __name__ == '__main__':
 
         dockerIp = getDockerIPAvailable()
         db = run_container(
-            image=images['mongo'],
+            image='mongo',
             ip=dockerIp,
             env={
                 'MONGO_INITDB_ROOT_USERNAME': 'user',
@@ -158,23 +149,23 @@ if __name__ == '__main__':
             },
         )
         api = run_container(
-            image=images['api'],
+            image='api',
             env={
                 'MONGODB_IP': dockerIp
             },
         )
 
         web = run_container(
-            image=images['web']
+            image='web'
         )
 
     elif command == "kill":
 
         if image == "all" and len(sys.argv) == 3:
-            for container in client.containers.list():
+            for container in client.containers.list(all=True):
                 try:
                     container.stop()
-                    container.kill()
+                    container.remove()
                 except:...
 
         elif len(sys.argv) == 3:
@@ -196,7 +187,7 @@ if __name__ == '__main__':
             # remove N-1 containers
             if amount == -1:
                 containers = client.containers.list(filters={
-                    "ancestor": f"gotify-{image}:latest"
+                    "ancestor": f"{image}:latest"
                 })
                 rm_rand_containers(image, len(containers) - 1)
             
@@ -211,7 +202,7 @@ if __name__ == '__main__':
             
             for i in range(amount):
                 client.containers.run(
-                    image=images[image], 
+                    image=image, 
                     detach=True,
                     auto_remove=True,
                     init=True,
@@ -223,7 +214,7 @@ if __name__ == '__main__':
             ip = sys.argv[3]
 
             client.containers.run(
-                image=f'gotify-{image}', 
+                image=image, 
                 detach=True,
                 auto_remove=True,
                 init=True,
@@ -235,7 +226,31 @@ if __name__ == '__main__':
 
         if image in ["dns", "web", "api", "peer"]:
             containers = client.containers.list(filters={
-                "ancestor": f"gotify-{image}:latest"
+                "ancestor": f"{image}:latest"
             })
             for container in containers:
                 print(container)
+
+    elif command == "build":
+
+        for container in client.containers.list():
+            container.stop()
+
+        for img in ["dns", "web", "api", "peer"]:
+            client.images.build(
+                path=f"../{img}",
+                dockerfile="Dockerfile",
+                rm=False,
+                tag=f"{img}:latest"
+            )
+        
+        old_imgs = [img for img in client.images.list() if len(img.attrs['RepoTags']) == 0]
+
+        for img in old_imgs:
+            client.images.remove(image=img.id)
+
+        for container in client.containers.list(all=True):
+            try:
+                container.stop()
+                container.remove()
+            except:...
