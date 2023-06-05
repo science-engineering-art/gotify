@@ -14,6 +14,7 @@ import (
 
 var (
 	peer = core.NewPeer(os.Getenv("MONGODB_IP"), false)
+	// tracker, _ = tcore.NewTracker("0.0.0.0", 8080, 32141, false)
 )
 
 func CreateSong(c *fiber.Ctx) error {
@@ -81,6 +82,21 @@ func CreateSong(c *fiber.Ctx) error {
 				},
 			)
 	}
+
+	// // Store metadata section
+	// jsonMap := make(map[string]string)
+	// jsonMap["title"] = c.FormValue("title")
+	// jsonMap["author"] = c.FormValue("author")
+	// jsonMap["album"] = c.FormValue("album")
+	// jsonMap["gender"] = c.FormValue("gender")
+
+	// jsonString, _ := basicJson.Marshal(jsonMap)
+
+	// // Get datahash
+	// hash := sha1.Sum(buffer)
+	// songDataHash := base64.RawStdEncoding.EncodeToString(hash[:])
+
+	// tracker.StoreSongMetadata(string(jsonString), songDataHash)
 
 	fmt.Printf("Song ID Created: %s\n", key)
 
