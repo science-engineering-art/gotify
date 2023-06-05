@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/gofiber/fiber/v2 v2.43.0
 	github.com/google/uuid v1.3.0
-	github.com/science-engineering-art/kademlia-grpc v0.1.1
+	github.com/science-engineering-art/kademlia-grpc v0.1.2 // indirect
 	go.mongodb.org/mongo-driver v1.11.6
 	google.golang.org/protobuf v1.30.0
 )

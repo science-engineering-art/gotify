@@ -6,8 +6,8 @@ services:
     build:
       context: ./dns
       dockerfile: Dockerfile
-    volumes:
-      - ./dns:/dns
+    # volumes:
+    #   - ./dns:/dns
     stdin_open: true
     tty: true
     networks:
@@ -28,8 +28,8 @@ services:
     build: 
       context: ./api
       dockerfile: Dockerfile
-    volumes:
-      - ./api:/api
+    # volumes:
+    #   - ./api:/api
     stdin_open: true
     tty: true
     networks:
@@ -39,8 +39,8 @@ services:
     build: 
       context: ./peer
       dockerfile: Dockerfile
-    volumes:
-      - ./peer:/peer
+    # volumes:
+    #   - ./peer:/peer
     stdin_open: true
     tty: true
     networks:

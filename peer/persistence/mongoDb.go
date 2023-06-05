@@ -12,17 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-const (
-	MongoDbUri = "mongodb://user:password@db:27017/?maxPoolSize=20&w=majority"
-)
-
 type MongoDb struct {
 	repository SongRepository
 }
 
-func NewMongoDb(database, collection string) (s *MongoDb) {
-
-	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDbUri))
+func NewMongoDb(database, collection, mongoDbIP string) (s *MongoDb) {
+	mongoDbUri := fmt.Sprintf("mongodb://user:password@%s:27017/?maxPoolSize=20&w=majority", mongoDbIP)
+	fmt.Println("Trying to connect...", mongoDbIP)
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoDbUri))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +35,7 @@ func NewMongoDb(database, collection string) (s *MongoDb) {
 		panic(err)
 	}
 
-	fmt.Println("MongoDb successfully connected...")
+	fmt.Println("MongoDb successfully connected to", mongoDbIP)
 
 	// Collections
 	songCollection := client.Database(database).Collection(collection)

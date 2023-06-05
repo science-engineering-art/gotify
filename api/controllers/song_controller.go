@@ -1,24 +1,19 @@
 package controllers
 
 import (
-	"crypto/sha1"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/science-engineering-art/gotify/peer/persistence"
-	kademlia "github.com/science-engineering-art/kademlia-grpc/core"
-
 	"github.com/science-engineering-art/gotify/api/responses"
+	"github.com/science-engineering-art/gotify/peer/core"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 var (
-	db   = persistence.NewMongoDb("admin", "songs")
-	peer = kademlia.NewFullNode("0.0.0.0", 8080, 32140, db, false)
+	peer = core.NewPeer(os.Getenv("MONGODB_IP"), false)
 )
 
 func CreateSong(c *fiber.Ctx) error {
@@ -26,14 +21,28 @@ func CreateSong(c *fiber.Ctx) error {
 	fileForm, err := c.FormFile("file")
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return c.Status(http.StatusCreated).
+			JSON(
+				responses.SongResponse{
+					Status:  http.StatusBadRequest,
+					Message: "You must send in the form data the music file, with the key `file`.",
+					Data:    &fiber.Map{"success": false},
+				},
+			)
 	}
 	filename := fileForm.Filename
 
 	// create a temporal file with the received file
 	err = c.SaveFile(fileForm, fmt.Sprintf("./%s", filename))
 	if err != nil {
-		return err
+		return c.Status(http.StatusCreated).
+			JSON(
+				responses.SongResponse{
+					Status:  http.StatusInternalServerError,
+					Message: "failed",
+					Data:    &fiber.Map{"success": false},
+				},
+			)
 	}
 	// then remove it
 	defer os.Remove(filename)
@@ -41,7 +50,14 @@ func CreateSong(c *fiber.Ctx) error {
 	// open the temporal file
 	file, err := os.Open(filename)
 	if err != nil {
-		return err
+		return c.Status(http.StatusCreated).
+			JSON(
+				responses.SongResponse{
+					Status:  http.StatusInternalServerError,
+					Message: "failed",
+					Data:    &fiber.Map{"success": false},
+				},
+			)
 	}
 	// when it finish, close it
 	defer file.Close()
@@ -54,20 +70,28 @@ func CreateSong(c *fiber.Ctx) error {
 	// keep in a buffer the file information
 	file.Read(buffer)
 
-	hash := sha1.Sum(buffer)
-	key := base64.RawStdEncoding.EncodeToString(hash[:])
+	key, err := peer.Store(&buffer)
+	if err != nil {
+		return c.Status(http.StatusCreated).
+			JSON(
+				responses.SongResponse{
+					Status:  http.StatusInternalServerError,
+					Message: "failed",
+					Data:    &fiber.Map{"success": false},
+				},
+			)
+	}
 
 	fmt.Printf("Song ID Created: %s\n", key)
-	peer.StoreValue(key, buffer)
 
-	return c.Status(
-		http.StatusCreated).JSON(
-		responses.SongResponse{
-			Status:  http.StatusCreated,
-			Message: "success",
-			Data:    &fiber.Map{"success": true},
-		},
-	)
+	return c.Status(http.StatusCreated).
+		JSON(
+			responses.SongResponse{
+				Status:  http.StatusCreated,
+				Message: "success",
+				Data:    &fiber.Map{"success": true},
+			},
+		)
 }
 
 // func GetSongById(c *fiber.Ctx) error {
