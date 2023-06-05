@@ -3,23 +3,12 @@ import docker
 import sys
 
 
-images = ["dns", "web", "api", "peer"]
 client = docker.from_env()
 
 
-def run_container(image: str, ip: str):
-    container = client.containers.run(
-        image=f'gotify-{image}', 
-        detach=True,
-        auto_remove=True,
-        init=True,
-        network="gotify_default",
-        hostname=ip,
-    )
-    return container
-
-
 def rm_rand_containers(image:str, amount: int):
+    """Remove `amount` docker containers with `image` as the base image"""
+
     containers = client.containers.list(filters={
         "ancestor": f"gotify-{image}:latest"
     })
@@ -33,8 +22,12 @@ def rm_rand_containers(image:str, amount: int):
 
 
 if __name__ == '__main__':
-    if sys.argv[1] == "kill":
-        if sys.argv[2] == "all" and len(sys.argv) == 3:
+    command = sys.argv[1]
+    image = sys.argv[2]
+    
+    if command == "kill":
+
+        if image == "all" and len(sys.argv) == 3:
             for container in client.containers.list():
                 try:
                     container.stop()
@@ -42,21 +35,64 @@ if __name__ == '__main__':
                 except:...
 
         elif len(sys.argv) == 3:
-            container = client.containers.get(sys.argv[2])
+            # remove a specific container 
+            id = sys.argv[2]
+            container = client.containers.get(id)
+            
             try:
                 container.stop()
                 container.remove()
             except:...
 
-        elif sys.argv[2] in images:
-            if len(sys.argv) == 4 and sys.argv[3] != "-1":
-                rm_rand_containers(sys.argv[2], int(sys.argv[3]))
-            elif type(sys.argv[3]) == str:
-                ...
+        elif image in ["dns", "web", "api", "peer"] \
+            and len(sys.argv) == 4:
+            
+            # amount of containers to trash
+            amount = int(sys.argv[3])
+            
+            # remove N-1 containers
+            if amount == -1:
+                containers = client.containers.list(filters={
+                    "ancestor": f"gotify-{image}:latest"
+                })
+                rm_rand_containers(image, len(containers) - 1)
+            
+            # delete `amount` 
+            elif amount > 0:
+                rm_rand_containers(image, amount)
 
-    elif sys.argv[1] == "run":
+    elif command == "run":
         try:
-            for i in range(int(sys.argv[3])):
-                run_container(sys.argv[2], '0.0.0.0')
+            # amount of container to run
+            amount = int(sys.argv[3])
+            
+            for i in range(amount):
+                client.containers.run(
+                    image=f'gotify-{image}', 
+                    detach=True,
+                    auto_remove=True,
+                    init=True,
+                    network="gotify_default",
+                    hostname='0.0.0.0',
+                )
         except:
-            run_container(sys.argv[2], sys.argv[3])
+            # run a container with specific IP
+            ip = sys.argv[3]
+
+            client.containers.run(
+                image=f'gotify-{image}', 
+                detach=True,
+                auto_remove=True,
+                init=True,
+                network="gotify_default",
+                hostname=ip,
+            )
+
+    elif command == "list":
+
+        if image in ["dns", "web", "api", "peer"]:
+            containers = client.containers.list(filters={
+                "ancestor": f"gotify-{image}:latest"
+            })
+            for container in containers:
+                print(container)
