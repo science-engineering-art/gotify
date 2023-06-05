@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	MongoDbUri = "MongoDb://user:password@db:27017/?maxPoolSize=20&w=majority"
+	MongoDbUri = "mongodb://user:password@db:27017/?maxPoolSize=20&w=majority"
 )
 
 type MongoDb struct {

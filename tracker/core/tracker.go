@@ -41,7 +41,8 @@ func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songDataHash string
 	valueFullJsonData := getValueFullJsonData(jsonSongMetadata, songDataHash)
 
 	for _, hash := range hashesPowerSet {
-		id, err := t.FN.StoreValue(hash, valueFullJsonData)
+		// leandro_driguez: cambié el 2do parametro de StoreValue a []byte
+		id, err := t.FN.StoreValue(hash, []byte(valueFullJsonData))
 		if err != nil {
 			fmt.Println("Error when storing key:", id, err)
 		}

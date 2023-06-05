@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"crypto/sha1"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -52,37 +54,11 @@ func CreateSong(c *fiber.Ctx) error {
 	// keep in a buffer the file information
 	file.Read(buffer)
 
-	// peer.StoreValue()
+	hash := sha1.Sum(buffer)
+	key := base64.RawStdEncoding.EncodeToString(hash[:])
 
-	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	// defer cancel()
-
-	// stream, err := songClient.CreateSong(ctx)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// min := func(x, y int) int {
-	// 	if x > y {
-	// 		return y
-	// 	}
-	// 	return x
-	// }
-
-	// step := 1024
-	// for i := 0; i < len(buffer); i += step {
-	// 	init, end := i, min(i+step, len(buffer))
-
-	// 	err = stream.Send(&pb.RawSong{
-	// 		Init:   int32(init),
-	// 		End:    int32(end),
-	// 		Buffer: buffer[init:end],
-	// 	})
-
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+	fmt.Printf("Song ID Created: %s\n", key)
+	peer.StoreValue(key, buffer)
 
 	return c.Status(
 		http.StatusCreated).JSON(
@@ -98,8 +74,28 @@ func CreateSong(c *fiber.Ctx) error {
 // 	// get the song ID
 // 	songId := c.Params("songId")
 
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	defer cancel()
+// 	rangeHeader := c.Get("Range")
+
+// 	rangePattern := `bytes=(\d+)-(\d*)`
+// 	re := regexp.MustCompile(rangePattern)
+// 	matches := re.FindStringSubmatch(rangeHeader)
+
+// 	var start int
+// 	var endStr string
+
+// 	if len(matches) == 3 {
+// 		start, _ = strconv.Atoi(matches[1])
+// 		endStr = matches[2]
+// 	} else {
+// 		return errors.New("Invalid or missing Range header")
+// 	}
+
+// 	contentLength := 4 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// 	end := contentLength - 1
+
+// 	if endStr != "" {
+// 		end, _ = strconv.Atoi(endStr)
+// 	}
 
 // 	song, err := songClient.GetSongById(ctx, &pb.SongId{
 // 		Id: songId,

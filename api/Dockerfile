@@ -7,6 +7,9 @@ COPY ./ ./
 EXPOSE 80
 EXPOSE 53123/udp
 
+EXPOSE 8080
+EXPOSE 32140/udp
+
 CMD ["go", "run", "main.go"]
 
 # RUN go install github.com/cosmtrek/air@v1.43.0
