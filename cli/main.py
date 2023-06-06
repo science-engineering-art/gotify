@@ -116,7 +116,7 @@ if __name__ == '__main__':
     except:
         image = ""
 
-    if command == "start":
+    if command == "up":
 
         dns = run_container(
             image='dns'
@@ -159,16 +159,16 @@ if __name__ == '__main__':
             image='web'
         )
 
-    elif command == "kill":
-
-        if image == "all" and len(sys.argv) == 3:
-            for container in client.containers.list(all=True):
+    elif command == "down":
+        for container in client.containers.list(all=True):
                 try:
                     container.stop()
                     container.remove()
                 except:...
 
-        elif len(sys.argv) == 3:
+    elif command == "kill":
+
+        if len(sys.argv) == 3:
             # remove a specific container 
             id = sys.argv[2]
             container = client.containers.get(id)
