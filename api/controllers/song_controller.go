@@ -6,15 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/science-engineering-art/gotify/api/net"
 	"github.com/science-engineering-art/gotify/api/responses"
-	"github.com/science-engineering-art/gotify/peer/core"
 
 	"github.com/gofiber/fiber/v2"
-)
-
-var (
-	peer = core.NewPeer(os.Getenv("MONGODB_IP"), false)
-	// tracker, _ = tcore.NewTracker("0.0.0.0", 8080, 32141, false)
 )
 
 func CreateSong(c *fiber.Ctx) error {
@@ -73,7 +68,7 @@ func CreateSong(c *fiber.Ctx) error {
 
 	fmt.Printf("Before Store().. len(data): %d\n", len(buffer))
 
-	key, err := peer.Store(&buffer)
+	key, err := net.Peer.Store(&buffer)
 	if err != nil {
 		return c.Status(http.StatusCreated).
 			JSON(
@@ -113,6 +108,9 @@ func CreateSong(c *fiber.Ctx) error {
 }
 
 // func GetSongById(c *fiber.Ctx) error {
+// 	fmt.Println("==> INIT GetSongById()")
+// 	defer fmt.Println("==> EXIT GetSongById()")
+
 // 	// get the song ID
 // 	songId := c.Params("songId")
 
@@ -129,6 +127,7 @@ func CreateSong(c *fiber.Ctx) error {
 // 		start, _ = strconv.Atoi(matches[1])
 // 		endStr = matches[2]
 // 	} else {
+// 		fmt.Println("==> ERROR `Invalid or missing Range header`")
 // 		return errors.New("Invalid or missing Range header")
 // 	}
 
@@ -142,8 +141,8 @@ func CreateSong(c *fiber.Ctx) error {
 // 	song, err := songClient.GetSongById(ctx, &pb.SongId{
 // 		Id: songId,
 // 	})
-
 // 	if err != nil {
+// 		fmt.Printf("==> ERROR %s\n", err)
 // 		return nil
 // 	}
 
@@ -151,6 +150,7 @@ func CreateSong(c *fiber.Ctx) error {
 // 	requestId, ok := c.Context().UserValue("requestId").(uuid.UUID)
 // 	if !ok {
 // 		// Handle error if unique identifier cannot be obtained
+// 		fmt.Println("==> ERROR `unique identifier cannot be obtained`")
 // 		return fiber.NewError(fiber.StatusInternalServerError, "Unique identifier could not be obtained")
 // 	}
 
@@ -159,6 +159,7 @@ func CreateSong(c *fiber.Ctx) error {
 // 	os.WriteFile(fileName, song.RawSong.Buffer, 0600)
 // 	defer os.Remove(fileName)
 
+// 	fmt.Println("==> OKKK")
 // 	return c.SendFile(fileName, true)
 // }
 

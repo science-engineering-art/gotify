@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
-	github.com/science-engineering-art/kademlia-grpc v0.2.0
+	github.com/science-engineering-art/kademlia-grpc v0.3.0
 	go.mongodb.org/mongo-driver v1.11.6
 	google.golang.org/grpc v1.55.0
 )

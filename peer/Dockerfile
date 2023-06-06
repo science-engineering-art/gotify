@@ -4,8 +4,8 @@ WORKDIR /peer
 
 COPY ./ ./
 
-EXPOSE 8080
-EXPOSE 32140/udp
+# EXPOSE 8080
+# EXPOSE 32140/udp
 
 CMD [ "go", "run", "main.go" ]
 

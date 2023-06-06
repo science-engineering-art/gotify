@@ -51,8 +51,8 @@ github.com/savsgio/dictpool v0.0.0-20221023140959-7bf2e61cea94/go.mod h1:90zrgN3
 github.com/savsgio/gotils v0.0.0-20220530130905-52f3993e8d6d/go.mod h1:Gy+0tqhJvgGlqnTF8CVGP0AaGRjwBtXs/a5PA0Y3+A4=
 github.com/savsgio/gotils v0.0.0-20230208104028-c358bd845dee h1:8Iv5m6xEo1NR1AvpV+7XmhI4r39LGNzwUL4YpMuL5vk=
 github.com/savsgio/gotils v0.0.0-20230208104028-c358bd845dee/go.mod h1:qwtSXrKuJh/zsFQ12yEE89xfCrGKK63Rr7ctU/uCo4g=
-github.com/science-engineering-art/kademlia-grpc v0.2.0 h1:itU0gtkgDN8XrUoXFpb0hitEMn3IiQR83rJUlyZh/zg=
-github.com/science-engineering-art/kademlia-grpc v0.2.0/go.mod h1:IN3FBSms50qVxpZPMRJBgIaQMIqA1Fx2yuCjdLUL1IA=
+github.com/science-engineering-art/kademlia-grpc v0.3.0 h1:j9TffzaAFAnlIvfDxCgN7pzXLAknwkjzBne5NiLrRog=
+github.com/science-engineering-art/kademlia-grpc v0.3.0/go.mod h1:IN3FBSms50qVxpZPMRJBgIaQMIqA1Fx2yuCjdLUL1IA=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.3 h1:RP3t2pwF7cMEbC1dqtB6poj3niw/9gnV4Cjg5oW5gtY=

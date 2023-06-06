@@ -7,6 +7,6 @@ COPY ./ ./
 # RUN npm i
 
 EXPOSE 80
-EXPOSE 41234/udp
+# EXPOSE 41234/udp
 
 CMD ["npm", "run", "dev"]

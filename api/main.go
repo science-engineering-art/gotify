@@ -8,6 +8,10 @@ import (
 	"github.com/science-engineering-art/gotify/api/routes"
 )
 
+func init() {
+	net.InitPeer()
+}
+
 func main() {
 	// Fiber instance
 	app := fiber.New(fiber.Config{
