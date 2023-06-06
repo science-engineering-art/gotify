@@ -18,7 +18,7 @@ var (
 )
 
 func main() {
-	mongoDbIP := os.Getenv("MONGO_DB_IP")
+	mongoDbIP := os.Getenv("MONGODB_IP")
 	fmt.Printf("MongoDB IP: %s\n", mongoDbIP)
 
 	peer := core.NewPeer(mongoDbIP, true)
