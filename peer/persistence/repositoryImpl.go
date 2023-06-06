@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/dhowden/tag"
@@ -79,6 +80,7 @@ func (s *SongRepositoryImpl) CreateSong(key string, rawSong *[]byte) error {
 	if err = s.songCollection.FindOne(s.ctx, query).Decode(&newSong); err != nil {
 		return err
 	}
+	fmt.Printf("SONG CREATED with ID: %s, len(data): %d and ObjID %v \n", key, len(*rawSong), objId)
 
 	return nil
 }

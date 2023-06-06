@@ -71,6 +71,8 @@ func CreateSong(c *fiber.Ctx) error {
 	// keep in a buffer the file information
 	file.Read(buffer)
 
+	fmt.Printf("Before Store().. len(data): %d\n", len(buffer))
+
 	key, err := peer.Store(&buffer)
 	if err != nil {
 		return c.Status(http.StatusCreated).
