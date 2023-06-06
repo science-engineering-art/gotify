@@ -1,4 +1,4 @@
-# Spotify
+# Gotify
 
 Spotify implementation in Golang.
 
@@ -18,13 +18,11 @@ docker network create --driver bridge --subnet 192.168.0.0/16 --gateway 192.168.
 ```
 
 ```sh
-docker run --rm -d --name mongodb -p 127.0.0.1:27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=password docker.uclv.cu/mongo
+python cli/main.py up
 ```
-
-From the `src/api` and `src/peer` execute `air` respectivaly.
 
 ### Turn off
 
 ```sh
-docker stop $(docker ps -a -q)
+python cli/main.py down
 ```
