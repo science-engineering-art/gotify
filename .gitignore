@@ -18,3 +18,5 @@ src/api/tmp/build-errors.log
 tmp
 sota
 data
+
+__pycache__
