@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/science-engineering-art/gotify/api/models"
 	"github.com/science-engineering-art/gotify/api/net"
 	"github.com/science-engineering-art/gotify/api/responses"
 
@@ -251,53 +253,51 @@ func CreateSong(c *fiber.Ctx) error {
 // 	)
 // }
 
-// func FilterSongs(c *fiber.Ctx) error {
+func FilterSongs(c *fiber.Ctx) error {
 
-// 	query := new(pb.SongMetadata)
+	query := new(models.SongsQuery)
 
-// 	if err := c.BodyParser(query); err != nil {
-// 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-// 			"errors": err.Error(),
-// 		})
-// 	}
+	if err := c.BodyParser(query); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"errors": err.Error(),
+		})
+	}
 
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	defer cancel()
+	queryString := convertQueryToString(*query)
+	songsList := net.Tracker.GetSongList(queryString)
 
-// 	stream, err := songClient.FilterSongs(ctx, query)
-// 	if err != nil {
-// 		return err
-// 	}
+	var songsResponse []models.SongsFilterResponse
 
-// 	var songs []models.SongDTO
+	for _, song := range songsList {
+		songResponse := convertStringToResponse(song)
+		songsResponse = append(songsResponse, songResponse)
+	}
 
-// 	for {
-// 		song, err := stream.Recv()
-// 		if err != nil && err != io.EOF {
-// 			return err
-// 		}
-// 		if song == nil {
-// 			break
-// 		}
+	return c.Status(http.StatusOK).JSON(
+		responses.SongResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    &fiber.Map{"songs": songsResponse},
+		},
+	)
+}
 
-// 		objID, err := primitive.ObjectIDFromHex(song.Id.Id)
-// 		if err != nil {
-// 			return err
-// 		}
+func convertQueryToString(query models.SongsQuery) string {
+	jsonBytes, err := json.Marshal(query)
+	if err != nil {
+		fmt.Println("error:", err)
+		return "{}"
+	}
+	jsonString := string(jsonBytes)
+	return jsonString
+}
 
-// 		songs = append(songs, models.SongDTO{
-// 			Artist: *song.Metadata.Artist,
-// 			Id:     objID,
-// 			Title:  *song.Metadata.Title,
-// 			Year:   int(*song.Metadata.Year),
-// 		})
-// 	}
-
-// 	return c.Status(http.StatusOK).JSON(
-// 		responses.SongResponse{
-// 			Status:  http.StatusOK,
-// 			Message: "success",
-// 			Data:    &fiber.Map{"songs": songs},
-// 		},
-// 	)
-// }
+func convertStringToResponse(queryString string) models.SongsFilterResponse {
+	songData := []byte(queryString)
+	var response models.SongsFilterResponse
+	err := json.Unmarshal(songData, &response)
+	if err != nil {
+		fmt.Println("Error while Unmarshaling")
+	}
+	return response
+}

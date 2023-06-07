@@ -8,23 +8,24 @@ import (
 	"github.com/science-engineering-art/gotify/tracker/persistence"
 	"github.com/science-engineering-art/gotify/tracker/utils"
 	"github.com/science-engineering-art/kademlia-grpc/core"
+	kademlia "github.com/science-engineering-art/kademlia-grpc/core"
 )
 
 type Tracker struct {
-	FN core.FullNode
+	kademlia.FullNode
 }
 
 func NewTracker(ip string, port int, bootPort int, isBoot bool) (*Tracker, error) {
 	metadataStorage := persistence.NewMetadataStorage()
 	fn := core.NewFullNode(ip, port, bootPort, metadataStorage, isBoot)
-	tracker := &Tracker{FN: *fn}
+	tracker := &Tracker{FullNode: *fn}
 	return tracker, nil
 }
 
 func (t *Tracker) GetSongList(key string) []string {
 	songList := []string{}
 
-	flatArray, err := t.FN.GetValue(key)
+	flatArray, err := t.FullNode.GetValue(key)
 	if err != nil {
 		fmt.Println("Error when retrieving data:", err)
 		return songList
@@ -43,7 +44,7 @@ func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songDataHash string
 	for _, hash := range hashesPowerSet {
 		// leandro_driguez: cambié el 2do parametro de StoreValue a []byte
 		data := []byte(valueFullJsonData)
-		_, err := t.FN.StoreValue(hash, &data)
+		_, err := t.FullNode.StoreValue(hash, &data)
 		if err != nil {
 			fmt.Println("Error when storing key:", hash, err)
 		}

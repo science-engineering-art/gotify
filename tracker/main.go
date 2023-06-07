@@ -49,7 +49,7 @@ func main() {
 			ip := getIpFromHost()
 			grpcServerAddress = ip + ":" + strconv.FormatInt(int64(port), 10)
 			tracker, _ = trackerCore.NewTracker(ip, port, bPort, isB)
-			go CreateGRPCServerFromFullNode(tracker.FN)
+			go CreateGRPCServerFromFullNode(tracker.FullNode)
 
 			fmt.Println("Node running at:", ip, ":", port)
 
@@ -77,7 +77,7 @@ func main() {
 			}
 			fmt.Println("The retrived value is:", songList)
 		case "dht":
-			tracker.FN.PrintRoutingTable()
+			tracker.FullNode.PrintRoutingTable()
 		}
 	}
 }
