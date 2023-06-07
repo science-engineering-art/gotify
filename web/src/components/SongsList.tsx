@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ListRenderer } from "../layouts/ListRenderer";
 import { SongItem } from "./SongItem";
+import React from "react";
 
 type SongDTO = {
   id: string;
@@ -9,7 +10,7 @@ type SongDTO = {
   year: number;
 }
 
-export const SongsList = () => {
+export const SongsList: React.FC = () => {
   const [songs, setSongs ]= useState<SongDTO[]>();
 
   const getSongs = async () => {

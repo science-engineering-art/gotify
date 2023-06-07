@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { client } from '../api/client'
+import { Metadata } from '../app/metadata';
 
 const initialState: {
   Id: string,
@@ -28,8 +29,17 @@ export const songsSlice = createSlice({
 
 export const uploadSong = createAsyncThunk('songs/uploadSong', async (song: File) => {
   var form = new FormData();
-  form.append("file", song);  
+  form.append('file', song);  
   client.post('song', form);
+});
+
+export const songFilter = createAsyncThunk('songs/songFilter', async (filter: Metadata) => {
+  client.post('songs', {
+    'title': filter.title,
+    'artist': filter.artist,
+    'album': filter.album,
+    'genre': filter.genre
+  });
 });
 
 export const { selectedSongId, selectedSongURL } = songsSlice.actions

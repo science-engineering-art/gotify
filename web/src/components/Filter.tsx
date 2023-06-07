@@ -38,15 +38,15 @@ const MusicFilter: React.FC = () => {
   };
 
   return (
-    <div>
+  <div>
       <div>
         <label htmlFor="title">Name:</label>
-        <input type="text" value={title} onChange={handleSearchChange_title} />
+        <input type="text" placeholder="Name" value={title} onChange={handleSearchChange_title} />
       </div>
 
       <div>
         <label htmlFor="title"> Artist:</label>
-        <input type="text" value={artist} onChange={handleSearchChange_art} />
+        <input type="text" placeholder="Bruno Mars" value={artist} onChange={handleSearchChange_art} />
       </div>
 
       <div>
