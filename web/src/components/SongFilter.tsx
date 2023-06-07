@@ -18,10 +18,10 @@ export const SongFilter: React.FC = () => {
       return;
     
     dispatch(songFilter({
-      title: title,
       artist: artist,
       album: album,
-      genre: genre
+      genre: genre,
+      title: title,
     }));
   }
 

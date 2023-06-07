@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/science-engineering-art/gotify/api/models"
 	"github.com/science-engineering-art/gotify/api/net"
 	"github.com/science-engineering-art/gotify/api/responses"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -251,53 +253,82 @@ func CreateSong(c *fiber.Ctx) error {
 // 	)
 // }
 
-// func FilterSongs(c *fiber.Ctx) error {
+func SongFilter(c *fiber.Ctx) error {
+	query := new(models.SongQuery)
 
-// 	query := new(pb.SongMetadata)
+	if err := c.BodyParser(query); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"errors": err.Error(),
+		})
+	}
 
-// 	if err := c.BodyParser(query); err != nil {
-// 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-// 			"errors": err.Error(),
-// 		})
-// 	}
+	fmt.Println(query)
 
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// defer cancel()
 
-// 	stream, err := songClient.FilterSongs(ctx, query)
-// 	if err != nil {
-// 		return err
-// 	}
+	// stream, err := songClient.SongFilter(ctx, query)
+	// if err != nil {
+	// 	return err
+	// }
 
-// 	var songs []models.SongDTO
+	// var songs []models.SongDTO
 
-// 	for {
-// 		song, err := stream.Recv()
-// 		if err != nil && err != io.EOF {
-// 			return err
-// 		}
-// 		if song == nil {
-// 			break
-// 		}
+	// for {
+	// 	song, err := stream.Recv()
+	// 	if err != nil && err != io.EOF {
+	// 		return err
+	// 	}
+	// 	if song == nil {
+	// 		break
+	// 	}
 
-// 		objID, err := primitive.ObjectIDFromHex(song.Id.Id)
-// 		if err != nil {
-// 			return err
-// 		}
+	// 	objID, err := primitive.ObjectIDFromHex(song.Id.Id)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-// 		songs = append(songs, models.SongDTO{
-// 			Artist: *song.Metadata.Artist,
-// 			Id:     objID,
-// 			Title:  *song.Metadata.Title,
-// 			Year:   int(*song.Metadata.Year),
-// 		})
-// 	}
+	// 	songs = append(songs, models.SongDTO{
+	// 		Artist: *song.Metadata.Artist,
+	// 		Id:     objID,
+	// 		Title:  *song.Metadata.Title,
+	// 		Year:   int(*song.Metadata.Year),
+	// 	})
+	// }
 
-// 	return c.Status(http.StatusOK).JSON(
-// 		responses.SongResponse{
-// 			Status:  http.StatusOK,
-// 			Message: "success",
-// 			Data:    &fiber.Map{"songs": songs},
-// 		},
-// 	)
-// }
+	songs := []models.SongDTO{
+		{
+			Id:     primitive.NewObjectID(),
+			Artist: "Artist1",
+			Title:  "Title1",
+		},
+		{
+			Id:     primitive.NewObjectID(),
+			Artist: "Artist2",
+			Title:  "Title2",
+		},
+		{
+			Id:     primitive.NewObjectID(),
+			Artist: "Artist3",
+			Title:  "Title3",
+		},
+		{
+			Id:     primitive.NewObjectID(),
+			Artist: "Artist4",
+			Title:  "Title4",
+		},
+		{
+			Id:     primitive.NewObjectID(),
+			Artist: "Artist5",
+			Title:  "Title5",
+		},
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.SongResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    &fiber.Map{"songs": songs},
+		},
+	)
+}

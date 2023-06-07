@@ -34,12 +34,22 @@ export const uploadSong = createAsyncThunk('songs/uploadSong', async (song: File
 });
 
 export const songFilter = createAsyncThunk('songs/songFilter', async (filter: Metadata) => {
-  client.post('songs', {
-    'title': filter.title,
+  const data = {
     'artist': filter.artist,
     'album': filter.album,
-    'genre': filter.genre
-  });
+    'genre': filter.genre,
+    'title': filter.title,
+  }
+  // client.post('songs', JSON.stringify(data));
+  
+  fetch('http://api.gotify.com/songs', {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(res => res.json())
+    .catch(e => console.log(e))
 });
 
 export const { selectedSongId, selectedSongURL } = songsSlice.actions

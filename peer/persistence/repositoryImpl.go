@@ -128,7 +128,7 @@ func (s *SongRepositoryImpl) RemoveSongById(objID *primitive.ObjectID) error {
 	return nil
 }
 
-func (s *SongRepositoryImpl) FilterSongs(query *bson.M) ([]*models.Song, error) {
+func (s *SongRepositoryImpl) SongFilter(query *bson.M) ([]*models.Song, error) {
 
 	opt := options.FindOptions{}
 

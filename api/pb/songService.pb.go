@@ -535,12 +535,12 @@ var file_songService_proto_depIdxs = []int32{
 	0,  // 5: songs.SongService.CreateSong:input_type -> songs.RawSong
 	4,  // 6: songs.SongService.UpdateSong:input_type -> songs.UpdatedSong
 	2,  // 7: songs.SongService.GetSongById:input_type -> songs.SongId
-	1,  // 8: songs.SongService.FilterSongs:input_type -> songs.SongMetadata
+	1,  // 8: songs.SongService.SongFilter:input_type -> songs.SongMetadata
 	2,  // 9: songs.SongService.RemoveSongById:input_type -> songs.SongId
 	5,  // 10: songs.SongService.CreateSong:output_type -> songs.Response
 	5,  // 11: songs.SongService.UpdateSong:output_type -> songs.Response
 	3,  // 12: songs.SongService.GetSongById:output_type -> songs.Song
-	3,  // 13: songs.SongService.FilterSongs:output_type -> songs.Song
+	3,  // 13: songs.SongService.SongFilter:output_type -> songs.Song
 	5,  // 14: songs.SongService.RemoveSongById:output_type -> songs.Response
 	10, // [10:15] is the sub-list for method output_type
 	5,  // [5:10] is the sub-list for method input_type
