@@ -25,7 +25,7 @@ type SongServiceClient interface {
 	CreateSong(ctx context.Context, opts ...grpc.CallOption) (SongService_CreateSongClient, error)
 	UpdateSong(ctx context.Context, in *UpdatedSong, opts ...grpc.CallOption) (*Response, error)
 	GetSongById(ctx context.Context, in *SongId, opts ...grpc.CallOption) (*Song, error)
-	FilterSongs(ctx context.Context, in *SongMetadata, opts ...grpc.CallOption) (SongService_FilterSongsClient, error)
+	SongFilter(ctx context.Context, in *SongMetadata, opts ...grpc.CallOption) (SongService_SongFilterClient, error)
 	RemoveSongById(ctx context.Context, in *SongId, opts ...grpc.CallOption) (*Response, error)
 }
 
@@ -89,12 +89,12 @@ func (c *songServiceClient) GetSongById(ctx context.Context, in *SongId, opts ..
 	return out, nil
 }
 
-func (c *songServiceClient) FilterSongs(ctx context.Context, in *SongMetadata, opts ...grpc.CallOption) (SongService_FilterSongsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &SongService_ServiceDesc.Streams[1], "/songs.SongService/FilterSongs", opts...)
+func (c *songServiceClient) SongFilter(ctx context.Context, in *SongMetadata, opts ...grpc.CallOption) (SongService_SongFilterClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SongService_ServiceDesc.Streams[1], "/songs.SongService/SongFilter", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &songServiceFilterSongsClient{stream}
+	x := &songServiceSongFilterClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -104,16 +104,16 @@ func (c *songServiceClient) FilterSongs(ctx context.Context, in *SongMetadata, o
 	return x, nil
 }
 
-type SongService_FilterSongsClient interface {
+type SongService_SongFilterClient interface {
 	Recv() (*Song, error)
 	grpc.ClientStream
 }
 
-type songServiceFilterSongsClient struct {
+type songServiceSongFilterClient struct {
 	grpc.ClientStream
 }
 
-func (x *songServiceFilterSongsClient) Recv() (*Song, error) {
+func (x *songServiceSongFilterClient) Recv() (*Song, error) {
 	m := new(Song)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -137,7 +137,7 @@ type SongServiceServer interface {
 	CreateSong(SongService_CreateSongServer) error
 	UpdateSong(context.Context, *UpdatedSong) (*Response, error)
 	GetSongById(context.Context, *SongId) (*Song, error)
-	FilterSongs(*SongMetadata, SongService_FilterSongsServer) error
+	SongFilter(*SongMetadata, SongService_SongFilterServer) error
 	RemoveSongById(context.Context, *SongId) (*Response, error)
 	mustEmbedUnimplementedSongServiceServer()
 }
@@ -155,8 +155,8 @@ func (UnimplementedSongServiceServer) UpdateSong(context.Context, *UpdatedSong) 
 func (UnimplementedSongServiceServer) GetSongById(context.Context, *SongId) (*Song, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSongById not implemented")
 }
-func (UnimplementedSongServiceServer) FilterSongs(*SongMetadata, SongService_FilterSongsServer) error {
-	return status.Errorf(codes.Unimplemented, "method FilterSongs not implemented")
+func (UnimplementedSongServiceServer) SongFilter(*SongMetadata, SongService_SongFilterServer) error {
+	return status.Errorf(codes.Unimplemented, "method SongFilter not implemented")
 }
 func (UnimplementedSongServiceServer) RemoveSongById(context.Context, *SongId) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveSongById not implemented")
@@ -236,24 +236,24 @@ func _SongService_GetSongById_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SongService_FilterSongs_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _SongService_SongFilter_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(SongMetadata)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(SongServiceServer).FilterSongs(m, &songServiceFilterSongsServer{stream})
+	return srv.(SongServiceServer).SongFilter(m, &songServiceSongFilterServer{stream})
 }
 
-type SongService_FilterSongsServer interface {
+type SongService_SongFilterServer interface {
 	Send(*Song) error
 	grpc.ServerStream
 }
 
-type songServiceFilterSongsServer struct {
+type songServiceSongFilterServer struct {
 	grpc.ServerStream
 }
 
-func (x *songServiceFilterSongsServer) Send(m *Song) error {
+func (x *songServiceSongFilterServer) Send(m *Song) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -302,8 +302,8 @@ var SongService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "FilterSongs",
-			Handler:       _SongService_FilterSongs_Handler,
+			StreamName:    "SongFilter",
+			Handler:       _SongService_SongFilter_Handler,
 			ServerStreams: true,
 		},
 	},

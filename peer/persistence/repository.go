@@ -11,5 +11,5 @@ type SongRepository interface {
 	GetSongById(objID *primitive.ObjectID) (*models.Song, error)
 	UpdateSong(objID *primitive.ObjectID, updatedSong *bson.M) error
 	RemoveSongById(objID *primitive.ObjectID) error
-	FilterSongs(query *bson.M) ([]*models.Song, error)
+	SongFilter(query *bson.M) ([]*models.Song, error)
 }

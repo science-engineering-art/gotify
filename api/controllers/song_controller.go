@@ -253,9 +253,9 @@ func CreateSong(c *fiber.Ctx) error {
 // 	)
 // }
 
-func FilterSongs(c *fiber.Ctx) error {
+func SongFilter(c *fiber.Ctx) error {
 
-	query := new(models.SongsQuery)
+	query := new(models.SongQuery)
 
 	if err := c.BodyParser(query); err != nil {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
@@ -282,7 +282,7 @@ func FilterSongs(c *fiber.Ctx) error {
 	)
 }
 
-func convertQueryToString(query models.SongsQuery) string {
+func convertQueryToString(query models.SongQuery) string {
 	jsonBytes, err := json.Marshal(query)
 	if err != nil {
 		fmt.Println("error:", err)
