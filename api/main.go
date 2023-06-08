@@ -1,15 +1,22 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/google/uuid"
 	"github.com/science-engineering-art/gotify/api/net"
 	"github.com/science-engineering-art/gotify/api/routes"
+	"github.com/science-engineering-art/gotify/api/utils"
+)
+
+var (
+	ip = utils.GetIpFromHost()
 )
 
 func init() {
-	net.InitPeer()
+	net.InitPeer(ip, 8080)
 }
 
 func main() {
@@ -50,5 +57,6 @@ func main() {
 	go net.Broadcast(53123)
 
 	// Enable port for listening
-	app.Listen("0.0.0.0:80")
+	addr := fmt.Sprintf("%s:%d", ip, 80)
+	app.Listen(addr)
 }

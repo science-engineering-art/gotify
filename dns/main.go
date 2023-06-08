@@ -25,6 +25,7 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		domain := msg.Question[0].Name
 		fmt.Println(domain)
 		IP, err := h.broadcast(broadcastPort[domain])
+		fmt.Println("IP Found:", IP)
 		if err == nil {
 			msg.Answer = append(msg.Answer, &dns.A{
 				Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 60},

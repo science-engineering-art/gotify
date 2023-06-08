@@ -13,9 +13,9 @@ type MongoPeer struct {
 	kademlia.FullNode
 }
 
-func NewMongoPeer(mongoDbIP string, isBootstrapNode bool) *MongoPeer {
+func NewMongoPeer(ip, mongoDbIP string, isBootstrapNode bool) *MongoPeer {
 	db := persistence.NewMongoDb("admin", "songs", mongoDbIP)
-	newPeer := kademlia.NewFullNode("0.0.0.0", 8080, 32140, db, isBootstrapNode)
+	newPeer := kademlia.NewFullNode(ip, 8080, 32140, db, isBootstrapNode)
 
 	return &MongoPeer{*newPeer}
 }

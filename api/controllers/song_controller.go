@@ -21,6 +21,7 @@ import (
 )
 
 func CreateSong(c *fiber.Ctx) error {
+	fmt.Println("Init CreateSong()")
 	// get file from the multipart-form
 	fileForm, err := c.FormFile("file")
 	if err != nil {

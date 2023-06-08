@@ -6,18 +6,19 @@ import (
 	"net"
 
 	"github.com/science-engineering-art/gotify/peer/core"
+	"github.com/science-engineering-art/gotify/peer/utils"
 	"github.com/science-engineering-art/kademlia-grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 var (
-	ip   = "0.0.0.0"
+	ip   = utils.GetIpFromHost()
 	port = 8080
 )
 
 func main() {
-	peer := core.NewRedisPeer(true)
+	peer := core.NewRedisPeer(ip, true)
 
 	grpcServer := grpc.NewServer()
 

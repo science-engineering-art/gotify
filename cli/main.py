@@ -1,4 +1,5 @@
 import sys
+import os
 from pprint import pprint
 from container import *
 
@@ -62,6 +63,8 @@ if __name__ == '__main__':
                 container.stop()
                 container.remove()
             except:...
+        
+        os.system("docker rmi $(docker images | grep '<none>' | awk '{print $3}')")
 
     elif command == "up":
 
@@ -69,38 +72,38 @@ if __name__ == '__main__':
             image='dns'
         )
         
-        dockerIp = getDockerIPAvailable()
-        db = run_container(
-            image='mongo',
-            ip=dockerIp,
-            env={
-                'MONGO_INITDB_ROOT_USERNAME': 'user',
-                'MONGO_INITDB_ROOT_PASSWORD': 'password'
-            },
-            # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/peer/data:/data/db']
-        )
+        # dockerIp = getDockerIPAvailable()
+        # db = run_container(
+        #     image='mongo',
+        #     ip=dockerIp,
+        #     env={
+        #         'MONGO_INITDB_ROOT_USERNAME': 'user',
+        #         'MONGO_INITDB_ROOT_PASSWORD': 'password'
+        #     },
+        #     # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/peer/data:/data/db']
+        # )
         peer = run_container(
             image='peer',
-            env={
-                'MONGODB_IP': dockerIp
-            },
+            # env={
+            #     'MONGODB_IP': dockerIp
+            # },
         )
 
-        dockerIp = getDockerIPAvailable()
-        db = run_container(
-            image='mongo',
-            ip=dockerIp,
-            env={
-                'MONGO_INITDB_ROOT_USERNAME': 'user',
-                'MONGO_INITDB_ROOT_PASSWORD': 'password'
-            },
-            # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/api/data:/data/db']
-        )
+        # dockerIp = getDockerIPAvailable()
+        # db = run_container(
+        #     image='mongo',
+        #     ip=dockerIp,
+        #     env={
+        #         'MONGO_INITDB_ROOT_USERNAME': 'user',
+        #         'MONGO_INITDB_ROOT_PASSWORD': 'password'
+        #     },
+        #     # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/api/data:/data/db']
+        # )
         api = run_container(
             image='api',
-            env={
-                'MONGODB_IP': dockerIp
-            },
+            # env={
+            #     'MONGODB_IP': dockerIp
+            # },
         )
 
         web = run_container(
