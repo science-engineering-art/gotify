@@ -77,13 +77,13 @@ if __name__ == '__main__':
                 'MONGO_INITDB_ROOT_USERNAME': 'user',
                 'MONGO_INITDB_ROOT_PASSWORD': 'password'
             },
+            # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/peer/data:/data/db']
         )
         peer = run_container(
             image='peer',
             env={
                 'MONGODB_IP': dockerIp
             },
-            # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/data:/data/db']
         )
 
         dockerIp = getDockerIPAvailable()
@@ -94,6 +94,7 @@ if __name__ == '__main__':
                 'MONGO_INITDB_ROOT_USERNAME': 'user',
                 'MONGO_INITDB_ROOT_PASSWORD': 'password'
             },
+            # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/api/data:/data/db']
         )
         api = run_container(
             image='api',

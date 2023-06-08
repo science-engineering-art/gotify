@@ -2,11 +2,10 @@ package utils
 
 import (
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math"
-
-	b58 "github.com/jbenet/go-base58"
 )
 
 func GetHashesPowerSet(jsonData string) []string {
@@ -32,7 +31,7 @@ func GetHashesPowerSet(jsonData string) []string {
 		}
 		jsonHash := sha1.Sum(jsonFromMap)
 		resultHash := jsonHash[:]
-		hash := b58.Encode(resultHash)
+		hash := base64.RawStdEncoding.EncodeToString(resultHash)
 		hashesPowerSet = append(hashesPowerSet, hash)
 	}
 
