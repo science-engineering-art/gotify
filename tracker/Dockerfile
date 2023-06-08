@@ -1,6 +1,6 @@
 FROM docker.uclv.cu/golang:1.20-alpine
 
-WORKDIR /peer
+WORKDIR /tracker
 
 COPY ./ ./
 

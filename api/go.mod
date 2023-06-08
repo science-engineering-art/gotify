@@ -51,7 +51,7 @@ require (
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/science-engineering-art/gotify/peer v0.0.0
+	github.com/science-engineering-art/gotify/peer v0.0.0-00010101000000-000000000000
 	github.com/science-engineering-art/gotify/tracker v0.0.0-00010101000000-000000000000
 )
 

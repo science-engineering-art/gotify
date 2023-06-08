@@ -26,10 +26,11 @@ func GetHashesPowerSet(jsonData string) []string {
 			subJson[key] = data[key]
 		}
 		jsonFromMap, _ := json.Marshal(subJson)
+		jsonStrFromMap := string(jsonFromMap)
 		if err != nil {
 			fmt.Printf("could not marshal map: %s\n", err)
 		}
-		jsonHash := sha1.Sum(jsonFromMap)
+		jsonHash := sha1.Sum([]byte(jsonStrFromMap))
 		resultHash := jsonHash[:]
 		hash := base64.RawStdEncoding.EncodeToString(resultHash)
 		hashesPowerSet = append(hashesPowerSet, hash)

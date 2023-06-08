@@ -94,7 +94,7 @@ func CreateSong(c *fiber.Ctx) error {
 	jsonMap["title"] = c.FormValue("title")
 	jsonMap["author"] = c.FormValue("author")
 	jsonMap["album"] = c.FormValue("album")
-	jsonMap["gender"] = c.FormValue("gender")
+	jsonMap["genre"] = c.FormValue("genre")
 
 	jsonString, _ := json.Marshal(jsonMap)
 

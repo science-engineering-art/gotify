@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	trackerCore "github.com/science-engineering-art/gotify/tracker/core"
+	trackerUtils "github.com/science-engineering-art/gotify/tracker/utils"
 	kademliaCore "github.com/science-engineering-art/kademlia-grpc/core"
 	"github.com/science-engineering-art/kademlia-grpc/pb"
 	"google.golang.org/grpc"
@@ -71,11 +72,12 @@ func main() {
 				continue
 			}
 			key := input[1]
-			songList := tracker.GetSongList(key)
+			keyHash := trackerUtils.GetJsonMetadataKeyHash(key)
+			songList := tracker.GetSongList(keyHash)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
-			fmt.Println("The retrived value is:", songList)
+			fmt.Println("The retrieved value is:", songList)
 		case "dht":
 			tracker.FullNode.PrintRoutingTable()
 		}

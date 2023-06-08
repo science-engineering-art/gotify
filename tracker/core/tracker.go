@@ -77,7 +77,7 @@ func getStringSliceFromByteArray(array [][]byte) []string {
 }
 
 func getValueFullJsonData(jsonSongMetadata string, songDataHash string) string {
-	var data map[string]interface{}
+	var data map[string]string
 	fullJsonData := ""
 
 	err := json.Unmarshal([]byte(jsonSongMetadata), &data)
