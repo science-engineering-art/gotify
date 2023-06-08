@@ -24,6 +24,7 @@ require (
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
+	gopkg.in/readline.v1 v1.0.0-20160726135117-62c6fe619375 // indirect
 )
 
 require (
@@ -47,7 +48,7 @@ require (
 
 require (
 	github.com/science-engineering-art/gotify/peer v0.0.0
-	github.com/science-engineering-art/kademlia-grpc v0.3.0
+	github.com/science-engineering-art/kademlia-grpc v0.4.4
 )
 
 replace github.com/science-engineering-art/gotify/peer => ../peer
