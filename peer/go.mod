@@ -4,10 +4,11 @@ go 1.20
 
 require (
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
-	
 	go.mongodb.org/mongo-driver v1.11.6
 	google.golang.org/grpc v1.55.0
 )
+
+require github.com/science-engineering-art/kademlia-grpc v0.4.5
 
 require (
 	github.com/golang/protobuf v1.5.3 // indirect

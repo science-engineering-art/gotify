@@ -16,6 +16,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/science-engineering-art/kademlia-grpc v0.4.5 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.1 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
@@ -46,9 +47,6 @@ require (
 	google.golang.org/grpc v1.55.0
 )
 
-require (
-	github.com/science-engineering-art/gotify/peer v0.0.0
-	github.com/science-engineering-art/kademlia-grpc v0.4.4
-)
+require github.com/science-engineering-art/gotify/peer v0.0.0
 
 replace github.com/science-engineering-art/gotify/peer => ../peer

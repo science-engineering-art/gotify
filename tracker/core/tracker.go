@@ -25,7 +25,7 @@ func NewTracker(ip string, port int, bootPort int, isBoot bool) (*Tracker, error
 func (t *Tracker) GetSongList(key string) []string {
 	songList := []string{}
 
-	flatArray, err := t.FullNode.GetValue(key)
+	flatArray, err := t.FullNode.GetValue(key, 0, 0)
 	if err != nil {
 		fmt.Println("Error when retrieving data:", err)
 		return songList

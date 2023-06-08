@@ -59,7 +59,7 @@ func (s *MongoDb) Create(key []byte, data *[]byte) error {
 	return nil
 }
 
-func (s *MongoDb) Read(key []byte) (data *[]byte, err error) {
+func (s *MongoDb) Read(key []byte, start int32, end int32) (data *[]byte, err error) {
 	b64 := base64.RawStdEncoding.EncodeToString(key)
 
 	objID, err := primitive.ObjectIDFromHex(b64)
@@ -71,8 +71,8 @@ func (s *MongoDb) Read(key []byte) (data *[]byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return &song.RawSong, nil
+	response := song.RawSong[start:end]
+	return &response, nil
 }
 
 func (s *MongoDb) Delete(key []byte) error {
