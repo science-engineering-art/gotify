@@ -3,7 +3,7 @@ module github.com/science-engineering-art/gotify/tracker
 go 1.20
 
 require (
-	github.com/science-engineering-art/kademlia-grpc v0.4.6
+	github.com/science-engineering-art/kademlia-grpc v0.4.7
 	google.golang.org/grpc v1.55.0
 	gopkg.in/readline.v1 v1.0.0-20160726135117-62c6fe619375
 )

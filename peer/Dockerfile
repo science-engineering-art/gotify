@@ -14,6 +14,8 @@ COPY --from=builder /build/main ./
 
 COPY ./start.sh ./
 
+EXPOSE 8080
+
 CMD [ "bash", "start.sh" ]
 
 # FROM docker.uclv.cu/golang:1.20-alpine
