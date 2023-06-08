@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 
 	"github.com/science-engineering-art/gotify/peer/core"
 	"github.com/science-engineering-art/kademlia-grpc/pb"
@@ -18,10 +17,7 @@ var (
 )
 
 func main() {
-	mongoDbIP := os.Getenv("MONGODB_IP")
-	fmt.Printf("MongoDB IP: %s\n", mongoDbIP)
-
-	peer := core.NewPeer(mongoDbIP, true)
+	peer := core.NewRedisPeer(true)
 
 	grpcServer := grpc.NewServer()
 

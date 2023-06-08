@@ -1,4 +1,4 @@
-package persistence
+package repository
 
 import (
 	"github.com/science-engineering-art/gotify/peer/models"
@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type SongRepository interface {
+type MongoRepository interface {
 	CreateSong(key string, rawSong *[]byte) error
 	GetSongById(objID *primitive.ObjectID) (*models.Song, error)
 	UpdateSong(objID *primitive.ObjectID, updatedSong *bson.M) error

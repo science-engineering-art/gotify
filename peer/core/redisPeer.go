@@ -9,18 +9,18 @@ import (
 	kademlia "github.com/science-engineering-art/kademlia-grpc/core"
 )
 
-type Peer struct {
+type RedisPeer struct {
 	kademlia.FullNode
 }
 
-func NewPeer(mongoDbIP string, isBootstrapNode bool) *Peer {
-	db := persistence.NewMongoDb("admin", "songs", mongoDbIP)
+func NewRedisPeer(isBootstrapNode bool) *RedisPeer {
+	db := persistence.NewRedisDb()
 	newPeer := kademlia.NewFullNode("0.0.0.0", 8080, 32140, db, isBootstrapNode)
 
-	return &Peer{*newPeer}
+	return &RedisPeer{*newPeer}
 }
 
-func (p *Peer) Store(data *[]byte) (string, error) {
+func (p *RedisPeer) Store(data *[]byte) (string, error) {
 
 	hash := sha1.Sum(*data)
 	key := base64.RawStdEncoding.EncodeToString(hash[:])

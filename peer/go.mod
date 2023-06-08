@@ -4,12 +4,15 @@ go 1.20
 
 require (
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/science-engineering-art/kademlia-grpc v0.4.6
 	go.mongodb.org/mongo-driver v1.11.7
 	google.golang.org/grpc v1.55.0
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect

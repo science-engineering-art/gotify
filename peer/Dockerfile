@@ -1,13 +1,31 @@
-FROM docker.uclv.cu/golang:1.20-alpine
+FROM golang:1.20-alpine as builder
 
-WORKDIR /peer
+WORKDIR /build
 
 COPY ./ ./
 
-# EXPOSE 8080
-# EXPOSE 32140/udp
+RUN go build -o main
 
-CMD [ "go", "run", "main.go" ]
+FROM redis:latest
+
+WORKDIR /peer
+
+COPY --from=builder /build/main ./
+
+COPY ./start.sh ./
+
+CMD [ "bash", "start.sh" ]
+
+# FROM docker.uclv.cu/golang:1.20-alpine
+
+# WORKDIR /peer
+
+# COPY ./ ./
+
+# # EXPOSE 8080
+# # EXPOSE 32140/udp
+
+# CMD [ "go", "run", "main.go" ]
 
 # RUN go install github.com/cosmtrek/air@v1.43.0
 

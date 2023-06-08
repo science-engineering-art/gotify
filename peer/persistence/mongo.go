@@ -10,10 +10,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+
+	"github.com/science-engineering-art/gotify/peer/repository"
 )
 
 type MongoDb struct {
-	repository SongRepository
+	repository repository.MongoRepository
 }
 
 func NewMongoDb(database, collection, mongoDbIP string) (s *MongoDb) {
@@ -40,7 +42,7 @@ func NewMongoDb(database, collection, mongoDbIP string) (s *MongoDb) {
 	// Collections
 	songCollection := client.Database(database).Collection(collection)
 
-	songRepo := NewSongRepository(songCollection)
+	songRepo := repository.NewMongoRepository(songCollection)
 
 	newMongo := MongoDb{}
 	newMongo.repository = songRepo

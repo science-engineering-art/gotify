@@ -1,4 +1,4 @@
-package persistence
+package repository
 
 import (
 	"bytes"
@@ -16,19 +16,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type SongRepositoryImpl struct {
+type MongoRepositoryImpl struct {
 	songCollection *mongo.Collection
 	ctx            context.Context
 }
 
-func NewSongRepository(songCollection *mongo.Collection) (s SongRepository) {
-	newRepo := SongRepositoryImpl{}
+func NewMongoRepository(songCollection *mongo.Collection) (s MongoRepository) {
+	newRepo := MongoRepositoryImpl{}
 	newRepo.songCollection = songCollection
 	newRepo.ctx = context.TODO()
 	return &newRepo
 }
 
-func (s *SongRepositoryImpl) CreateSong(key string, rawSong *[]byte) error {
+func (s *MongoRepositoryImpl) CreateSong(key string, rawSong *[]byte) error {
 	songBytes := bytes.NewReader(*rawSong)
 
 	m, err := tag.ReadFrom(songBytes)
@@ -85,7 +85,7 @@ func (s *SongRepositoryImpl) CreateSong(key string, rawSong *[]byte) error {
 	return nil
 }
 
-func (s *SongRepositoryImpl) GetSongById(objID *primitive.ObjectID) (*models.Song, error) {
+func (s *MongoRepositoryImpl) GetSongById(objID *primitive.ObjectID) (*models.Song, error) {
 
 	query := bson.M{"_id": objID}
 
@@ -102,7 +102,7 @@ func (s *SongRepositoryImpl) GetSongById(objID *primitive.ObjectID) (*models.Son
 	return song, nil
 }
 
-func (s *SongRepositoryImpl) UpdateSong(objID *primitive.ObjectID, updatedSong *bson.M) error {
+func (s *MongoRepositoryImpl) UpdateSong(objID *primitive.ObjectID, updatedSong *bson.M) error {
 
 	query := bson.M{"_id": objID}
 	update := bson.M{"$set": updatedSong}
@@ -112,7 +112,7 @@ func (s *SongRepositoryImpl) UpdateSong(objID *primitive.ObjectID, updatedSong *
 	return res.Err()
 }
 
-func (s *SongRepositoryImpl) RemoveSongById(objID *primitive.ObjectID) error {
+func (s *MongoRepositoryImpl) RemoveSongById(objID *primitive.ObjectID) error {
 
 	query := bson.M{"_id": objID}
 
@@ -128,7 +128,7 @@ func (s *SongRepositoryImpl) RemoveSongById(objID *primitive.ObjectID) error {
 	return nil
 }
 
-func (s *SongRepositoryImpl) SongFilter(query *bson.M) ([]*models.Song, error) {
+func (s *MongoRepositoryImpl) SongFilter(query *bson.M) ([]*models.Song, error) {
 
 	opt := options.FindOptions{}
 
