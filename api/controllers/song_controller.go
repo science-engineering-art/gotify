@@ -1,12 +1,18 @@
 package controllers
 
 import (
+	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
+	"strconv"
 
+	"github.com/gofrs/uuid"
 	"github.com/science-engineering-art/gotify/api/models"
 	"github.com/science-engineering-art/gotify/api/net"
 	"github.com/science-engineering-art/gotify/api/responses"
@@ -82,20 +88,20 @@ func CreateSong(c *fiber.Ctx) error {
 			)
 	}
 
-	// // Store metadata section
-	// jsonMap := make(map[string]string)
-	// jsonMap["title"] = c.FormValue("title")
-	// jsonMap["author"] = c.FormValue("author")
-	// jsonMap["album"] = c.FormValue("album")
-	// jsonMap["gender"] = c.FormValue("gender")
+	// Store metadata section
+	jsonMap := make(map[string]string)
+	jsonMap["title"] = c.FormValue("title")
+	jsonMap["author"] = c.FormValue("author")
+	jsonMap["album"] = c.FormValue("album")
+	jsonMap["gender"] = c.FormValue("gender")
 
-	// jsonString, _ := basicJson.Marshal(jsonMap)
+	jsonString, _ := json.Marshal(jsonMap)
 
-	// // Get datahash
-	// hash := sha1.Sum(buffer)
-	// songDataHash := base64.RawStdEncoding.EncodeToString(hash[:])
+	// Get datahash
+	hash := sha1.Sum(buffer)
+	songDataHash := base64.RawStdEncoding.EncodeToString(hash[:])
 
-	// tracker.StoreSongMetadata(string(jsonString), songDataHash)
+	net.Tracker.StoreSongMetadata(string(jsonString), songDataHash)
 
 	fmt.Printf("Song ID Created: %s\n", key)
 
@@ -109,61 +115,59 @@ func CreateSong(c *fiber.Ctx) error {
 		)
 }
 
-// func GetSongById(c *fiber.Ctx) error {
-// 	fmt.Println("==> INIT GetSongById()")
-// 	defer fmt.Println("==> EXIT GetSongById()")
+func GetSongById(c *fiber.Ctx) error {
+	fmt.Println("==> INIT GetSongById()")
+	defer fmt.Println("==> EXIT GetSongById()")
 
-// 	// get the song ID
-// 	songId := c.Params("songId")
+	// get the song ID
+	songId := c.Params("songId")
 
-// 	rangeHeader := c.Get("Range")
+	rangeHeader := c.Get("Range")
 
-// 	rangePattern := `bytes=(\d+)-(\d*)`
-// 	re := regexp.MustCompile(rangePattern)
-// 	matches := re.FindStringSubmatch(rangeHeader)
+	rangePattern := `bytes=(\d+)-(\d*)`
+	re := regexp.MustCompile(rangePattern)
+	matches := re.FindStringSubmatch(rangeHeader)
 
-// 	var start int
-// 	var endStr string
+	var start int
+	var endStr string
 
-// 	if len(matches) == 3 {
-// 		start, _ = strconv.Atoi(matches[1])
-// 		endStr = matches[2]
-// 	} else {
-// 		fmt.Println("==> ERROR `Invalid or missing Range header`")
-// 		return errors.New("Invalid or missing Range header")
-// 	}
+	if len(matches) == 3 {
+		start, _ = strconv.Atoi(matches[1])
+		endStr = matches[2]
+	} else {
+		fmt.Println("==> ERROR `Invalid or missing Range header`")
+		return errors.New("invalid or missing range header")
+	}
 
-// 	contentLength := 4 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// 	end := contentLength - 1
+	contentLength := 4 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	end := contentLength - 1
 
-// 	if endStr != "" {
-// 		end, _ = strconv.Atoi(endStr)
-// 	}
+	if endStr != "" {
+		end, _ = strconv.Atoi(endStr)
+	}
 
-// 	song, err := songClient.GetSongById(ctx, &pb.SongId{
-// 		Id: songId,
-// 	})
-// 	if err != nil {
-// 		fmt.Printf("==> ERROR %s\n", err)
-// 		return nil
-// 	}
+	song, err := net.Peer.GetValue(songId, int32(start), int32(end))
+	if err != nil {
+		fmt.Printf("==> ERROR %s\n", err)
+		return nil
+	}
 
-// 	// Get the unique identifier from the request context
-// 	requestId, ok := c.Context().UserValue("requestId").(uuid.UUID)
-// 	if !ok {
-// 		// Handle error if unique identifier cannot be obtained
-// 		fmt.Println("==> ERROR `unique identifier cannot be obtained`")
-// 		return fiber.NewError(fiber.StatusInternalServerError, "Unique identifier could not be obtained")
-// 	}
+	// Get the unique identifier from the request context
+	requestId, ok := c.Context().UserValue("requestId").(uuid.UUID)
+	if !ok {
+		// Handle error if unique identifier cannot be obtained
+		fmt.Println("==> ERROR `unique identifier cannot be obtained`")
+		return fiber.NewError(fiber.StatusInternalServerError, "Unique identifier could not be obtained")
+	}
 
-// 	fileName := fmt.Sprintf("./tmp_%s.mp3", requestId.String())
+	fileName := fmt.Sprintf("./tmp_%s.mp3", requestId.String())
 
-// 	os.WriteFile(fileName, song.RawSong.Buffer, 0600)
-// 	defer os.Remove(fileName)
+	os.WriteFile(fileName, song, 0600)
+	defer os.Remove(fileName)
 
-// 	fmt.Println("==> OKKK")
-// 	return c.SendFile(fileName, true)
-// }
+	fmt.Println("==> OKKK")
+	return c.SendFile(fileName, true)
+}
 
 // func UpdateSong(c *fiber.Ctx) error {
 
