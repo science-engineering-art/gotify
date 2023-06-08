@@ -6,8 +6,3 @@ vendor:
 
 protoc:
 	cd proto && protoc --go_out=../api/pb --go_opt=paths=source_relative --go-grpc_out=../api/pb --go-grpc_opt=paths=source_relative *.proto && cd ..
-
-update:
-	cd api && go get github.com/science-engineering-art/kademlia-grpc@latest
-	cd peer && go get github.com/science-engineering-art/kademlia-grpc@latest
-	cd tracker && go get github.com/science-engineering-art/kademlia-grpc@latest
