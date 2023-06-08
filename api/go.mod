@@ -13,10 +13,11 @@ require (
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/science-engineering-art/kademlia-grpc v0.4.5 // indirect
+	github.com/science-engineering-art/kademlia-grpc v0.0.0-00010101000000-000000000000 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.1 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
@@ -25,7 +26,6 @@ require (
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
-	gopkg.in/readline.v1 v1.0.0-20160726135117-62c6fe619375 // indirect
 )
 
 require (
@@ -47,6 +47,13 @@ require (
 	google.golang.org/grpc v1.55.0
 )
 
-require github.com/science-engineering-art/gotify/peer v0.0.0
+require (
+	github.com/science-engineering-art/gotify/peer v0.0.0
+	github.com/science-engineering-art/gotify/tracker v0.0.0-00010101000000-000000000000
+)
 
 replace github.com/science-engineering-art/gotify/peer => ../peer
+
+replace github.com/science-engineering-art/gotify/tracker => ../tracker
+
+replace github.com/science-engineering-art/kademlia-grpc => ../../kademlia-grpc
