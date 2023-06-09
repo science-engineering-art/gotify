@@ -7,7 +7,6 @@ import (
 
 	"github.com/science-engineering-art/gotify/tracker/persistence"
 	"github.com/science-engineering-art/gotify/tracker/utils"
-	"github.com/science-engineering-art/kademlia-grpc/core"
 	kademlia "github.com/science-engineering-art/kademlia-grpc/core"
 )
 
@@ -17,7 +16,7 @@ type Tracker struct {
 
 func NewTracker(ip string, port int, bootPort int, isBoot bool) (*Tracker, error) {
 	metadataStorage := persistence.NewMetadataStorage()
-	fn := core.NewFullNode(ip, port, bootPort, metadataStorage, isBoot)
+	fn := kademlia.NewFullNode(ip, port, bootPort, metadataStorage, isBoot)
 	tracker := &Tracker{FullNode: *fn}
 	return tracker, nil
 }
@@ -32,7 +31,12 @@ func (t *Tracker) GetSongList(key string) []string {
 	}
 
 	formatedArray := getFormatedArray(flatArray)
+
+	fmt.Printf("\nGetSongList(%s) => FormatedArray: %v\n\n", key, formatedArray)
+
 	songList = getStringSliceFromByteArray(formatedArray)
+
+	fmt.Printf("\nGetSongList(%s) => SongList: %v", key, songList)
 
 	return songList
 }
@@ -62,10 +66,10 @@ func getFormatedArray(flatArray []byte) [][]byte {
 	lenght := len(flatArray)
 
 	for i := 0; i < lenght; {
-		elemLen := int32(binary.LittleEndian.Uint32(flatArray[i : i+4]))
-		elem := flatArray[i+4 : i+4+int(elemLen)]
+		elemLen := int(binary.LittleEndian.Uint32(flatArray[i : i+4]))
+		elem := flatArray[i+4 : i+4+elemLen]
 		result = append(result, elem)
-		i += i + 4 + int(elemLen)
+		i += 4 + elemLen
 	}
 
 	return result

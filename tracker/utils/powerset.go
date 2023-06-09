@@ -18,9 +18,12 @@ func GetHashesPowerSet(jsonData string) []string {
 	}
 
 	keys := getKeys(data)
+	fmt.Printf("\nKeys %v \n\n", keys)
+
 	keysPowerSet := getKeysPowerSet(keys)
 
 	for _, keysSet := range keysPowerSet {
+
 		subJson := make(map[string]interface{})
 		for _, key := range keysSet {
 			subJson[key] = data[key]
@@ -33,6 +36,9 @@ func GetHashesPowerSet(jsonData string) []string {
 		jsonHash := sha1.Sum([]byte(jsonStrFromMap))
 		resultHash := jsonHash[:]
 		hash := base64.RawStdEncoding.EncodeToString(resultHash)
+
+		fmt.Printf("\nKeySet: %v\nHash: %s\n\n", keysSet, hash)
+
 		hashesPowerSet = append(hashesPowerSet, hash)
 	}
 

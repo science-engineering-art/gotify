@@ -18,6 +18,7 @@ import (
 	"github.com/science-engineering-art/gotify/api/models"
 	"github.com/science-engineering-art/gotify/api/net"
 	"github.com/science-engineering-art/gotify/api/responses"
+	trackerUtils "github.com/science-engineering-art/gotify/tracker/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -283,9 +284,16 @@ func SongFilter(c *fiber.Ctx) error {
 			"errors": err.Error(),
 		})
 	}
+	fmt.Println("Query", query)
 
 	queryString := convertQueryToString(*query)
-	songsList := net.Tracker.GetSongList(queryString)
+	fmt.Println("QueryString", queryString)
+
+	keyHash := trackerUtils.GetJsonMetadataKeyHash(queryString)
+	songsList := net.Tracker.GetSongList(keyHash)
+
+	// songsList := net.Tracker.GetSongList(queryString)
+	fmt.Println("SongList", songsList)
 
 	var songsResponse []models.SongsFilterResponse
 
@@ -293,6 +301,7 @@ func SongFilter(c *fiber.Ctx) error {
 		songResponse := convertStringToResponse(song)
 		songsResponse = append(songsResponse, songResponse)
 	}
+	fmt.Println("SongResponse", songsResponse)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.SongResponse{

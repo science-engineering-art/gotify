@@ -20,10 +20,9 @@ func NewMetadataStorage() *MetadataStorage {
 func (s *MetadataStorage) Create(key []byte, data *[]byte) error {
 	id := base64.RawStdEncoding.EncodeToString(key)
 
-	_, exists := s.KV[id]
-	if exists {
-		return errors.New("the key already exists")
-	}
+	// _, exists := s.KV[id]
+	// if !exists {
+	// }
 
 	s.KV[id] = append(s.KV[id], *data)
 	//fmt.Println(s.KV[id])
