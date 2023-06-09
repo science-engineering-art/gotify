@@ -18,7 +18,7 @@ func GetHashesPowerSet(jsonData string) []string {
 	}
 
 	keys := getKeys(data)
-	fmt.Printf("\nKeys %v \n\n", keys)
+	// fmt.Printf("\nKeys %v \n\n", keys)
 
 	keysPowerSet := getKeysPowerSet(keys)
 
@@ -37,7 +37,7 @@ func GetHashesPowerSet(jsonData string) []string {
 		resultHash := jsonHash[:]
 		hash := base64.RawStdEncoding.EncodeToString(resultHash)
 
-		fmt.Printf("\nKeySet: %v\nHash: %s\n\n", keysSet, hash)
+		// fmt.Printf("\nKeySet: %v\nHash: %s\n\n", keysSet, hash)
 
 		hashesPowerSet = append(hashesPowerSet, hash)
 	}

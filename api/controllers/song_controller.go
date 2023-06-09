@@ -25,6 +25,7 @@ import (
 
 func CreateSong(c *fiber.Ctx) error {
 	fmt.Println("Init CreateSong()")
+
 	// get file from the multipart-form
 	fileForm, err := c.FormFile("file")
 	if err != nil {
@@ -80,6 +81,7 @@ func CreateSong(c *fiber.Ctx) error {
 
 	fmt.Printf("Before Store().. len(data): %d\n", len(buffer))
 
+	fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\n")
 	key, err := net.Peer.Store(&buffer)
 	if err != nil {
 		return c.Status(http.StatusCreated).

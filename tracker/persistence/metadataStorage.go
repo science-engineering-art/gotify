@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
-	"fmt"
 )
 
 type MetadataStorage struct {
@@ -36,10 +35,10 @@ func (s *MetadataStorage) Read(key []byte, start int32, end int32) (data *[]byte
 	if !exists {
 		return nil, errors.New("the key is not found")
 	}
-	fmt.Println("Retrived v:", v)
+	// fmt.Println("Retrived v:", v)
 
 	flattenByteArray := getFlattenByteArray(v)
-	fmt.Println("Flatten array:", flattenByteArray)
+	// fmt.Println("Flatten array:", flattenByteArray)
 	return &flattenByteArray, nil
 }
 

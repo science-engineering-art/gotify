@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
 	github.com/redis/go-redis/v9 v9.0.5
-	github.com/science-engineering-art/kademlia-grpc v0.4.7
+	github.com/science-engineering-art/kademlia-grpc v0.0.0-00010101000000-000000000000
 	go.mongodb.org/mongo-driver v1.11.7
 	google.golang.org/grpc v1.55.0
 )
@@ -33,3 +33,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
+
+replace github.com/science-engineering-art/kademlia-grpc => ../../kademlia-grpc
