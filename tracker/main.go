@@ -29,6 +29,19 @@ func main() {
 	}
 	defer rl.Close()
 
+	port := 8081
+	bPort := 5555
+	isB := true
+
+	flag.Parse()
+
+	ip := getIpFromHost()
+	grpcServerAddress = ip + ":" + strconv.FormatInt(int64(port), 10)
+	tracker, _ = trackerCore.NewTracker(ip, port, bPort, isB)
+	go CreateGRPCServerFromFullNode(tracker.FullNode)
+
+	fmt.Println("Node running at:", ip, ":", port)
+
 	for {
 		line, err := rl.Readline()
 		if err != nil { // io.EOF, readline.ErrInterrupt
@@ -36,24 +49,6 @@ func main() {
 		}
 		input := strings.Split(line, " ")
 		switch input[0] {
-		case "node":
-			if len(input) != 4 {
-				displayHelp()
-				continue
-			}
-			port, _ := strconv.Atoi(input[1])
-			bPort, _ := strconv.Atoi(input[2])
-			isB, _ := strconv.ParseBool(input[3])
-
-			flag.Parse()
-
-			ip := getIpFromHost()
-			grpcServerAddress = ip + ":" + strconv.FormatInt(int64(port), 10)
-			tracker, _ = trackerCore.NewTracker(ip, port, bPort, isB)
-			go CreateGRPCServerFromFullNode(tracker.FullNode)
-
-			fmt.Println("Node running at:", ip, ":", port)
-
 		case "storeSong":
 			if len(input) != 3 {
 				displayHelp()

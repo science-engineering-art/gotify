@@ -56,7 +56,9 @@ if __name__ == '__main__':
         old_imgs = [img for img in client.images.list() if len(img.attrs['RepoTags']) == 0]
 
         for img in old_imgs:
-            client.images.remove(image=img.id)
+            try:
+                client.images.remove(image=img.id)
+            except: ...
 
         for container in client.containers.list(all=True):
             try:
