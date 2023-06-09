@@ -1,5 +1,7 @@
 package persistence
 
+import "errors"
+
 type Empty struct {
 }
 
@@ -12,7 +14,7 @@ func (e *Empty) Create(key []byte, data *[]byte) error {
 }
 
 func (e *Empty) Read(key []byte, start int32, end int32) (data *[]byte, err error) {
-	return nil, nil
+	return nil, errors.New("not found")
 }
 
 func (e *Empty) Delete(key []byte) error {

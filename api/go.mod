@@ -12,7 +12,6 @@ require (
 require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -50,6 +49,7 @@ require (
 )
 
 require (
+	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/science-engineering-art/gotify/peer v0.0.0-00010101000000-000000000000
 	github.com/science-engineering-art/gotify/tracker v0.0.0-00010101000000-000000000000

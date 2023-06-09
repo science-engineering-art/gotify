@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -22,26 +23,36 @@ func NewRedisDb() *RedisDb {
 }
 
 func (rdb *RedisDb) Create(key []byte, data *[]byte) error {
-	b64 := base64.RawStdEncoding.EncodeToString(key)
+	keyB64 := base64.RawStdEncoding.EncodeToString(key)
+	dataB64 := base64.RawStdEncoding.EncodeToString(*data)
 
-	err := rdb.Set(context.TODO(), b64, *data, time.Minute).Err()
+	err := rdb.Set(context.TODO(), keyB64, dataB64, time.Minute).Err()
 	if err != nil {
 		return err
 	}
+	fmt.Println("Store Data with key:", keyB64)
 
 	return nil
 }
 
-func (rdb *RedisDb) Read(key []byte, start int32, end int32) (data *[]byte, err error) {
-	b64 := base64.RawStdEncoding.EncodeToString(key)
+func (rdb *RedisDb) Read(key []byte, start int32, end int32) (*[]byte, error) {
+	keyB64 := base64.RawStdEncoding.EncodeToString(key)
 
-	val, err := rdb.Get(context.TODO(), b64).Result()
+	dataB64, err := rdb.Get(context.TODO(), keyB64).Result()
 	if err != nil {
 		return nil, err
 	}
+	data, err := base64.RawStdEncoding.DecodeString(dataB64)
 
-	*data, err = base64.RawStdEncoding.DecodeString(val)
-	return
+	if end == 0 || end > int32(len(data)) {
+		end = int32(len(data))
+	}
+
+	resp := data[start:end]
+
+	fmt.Println("The resquested data is", resp)
+
+	return &resp, err
 }
 
 func (rdb *RedisDb) Delete(key []byte) error {

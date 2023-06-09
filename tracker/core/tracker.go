@@ -39,11 +39,15 @@ func (t *Tracker) GetSongList(key string) []string {
 
 func (t *Tracker) StoreSongMetadata(jsonSongMetadata string, songDataHash string) []string {
 	hashesPowerSet := utils.GetHashesPowerSet(jsonSongMetadata)
+	fmt.Println("PowerSet", hashesPowerSet)
 	valueFullJsonData := getValueFullJsonData(jsonSongMetadata, songDataHash)
-
+	fmt.Println("ValueFullJsonData:", valueFullJsonData)
 	for _, hash := range hashesPowerSet {
 		// leandro_driguez: cambié el 2do parametro de StoreValue a []byte
 		data := []byte(valueFullJsonData)
+		fmt.Println("data", data)
+		fmt.Println("&data", &data)
+		fmt.Println("before crash", t.FullNode)
 		_, err := t.FullNode.StoreValue(hash, &data)
 		if err != nil {
 			fmt.Println("Error when storing key:", hash, err)

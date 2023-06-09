@@ -17,6 +17,7 @@ var (
 
 func init() {
 	net.InitPeer(ip, 8080)
+	net.InitTracker(ip, 8081, 5555, false)
 }
 
 func main() {

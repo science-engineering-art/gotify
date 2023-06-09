@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/dhowden/tag"
 	"github.com/gofrs/uuid"
 	"github.com/science-engineering-art/gotify/api/models"
 	"github.com/science-engineering-art/gotify/api/net"
@@ -89,15 +91,29 @@ func CreateSong(c *fiber.Ctx) error {
 			)
 	}
 
+	if net.Peer == nil {
+		fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\n")
+	}
+	// check if was correctly created
+	// bufferSong, _ := net.Peer.GetValue(key, 0, 0)
+	// os.WriteFile("received_song.mp3", bufferSong, 0600)
+
+	songBytes := bytes.NewReader(buffer)
+
+	m, err := tag.ReadFrom(songBytes)
+	if err != nil {
+		return err
+	}
+
 	// Store metadata section
 	jsonMap := make(map[string]string)
-	jsonMap["title"] = c.FormValue("title")
-	jsonMap["author"] = c.FormValue("author")
-	jsonMap["album"] = c.FormValue("album")
-	jsonMap["genre"] = c.FormValue("genre")
+	jsonMap["artist"] = m.Artist()
+	jsonMap["album"] = m.Album()
+	jsonMap["genre"] = m.Genre()
+	jsonMap["title"] = m.Title()
 
 	jsonString, _ := json.Marshal(jsonMap)
-
+	fmt.Println(string(jsonString))
 	// Get datahash
 	hash := sha1.Sum(buffer)
 	songDataHash := base64.RawStdEncoding.EncodeToString(hash[:])
