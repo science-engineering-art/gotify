@@ -23,8 +23,11 @@ export const UploadSong = () => {
     e.preventDefault();
     if (!song) return;
     dispatch(uploadSong(song));
-    dispatch(songFilter(filter));
     setModalVisible(false);
+    
+    setTimeout(()=>{
+      dispatch(songFilter(filter));
+    }, 500)
   }
 
   return (

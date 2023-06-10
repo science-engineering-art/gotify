@@ -15,19 +15,14 @@ type SongDTO = {
 }
 
 export const SongsList: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>()
+  const filter = useSelector((state: { songs: { filter: Metadata } }) => state.songs.filter);
+  
   const playlist = useSelector((state: { songs: { playlist: SongDTO[] } }) => state.songs.playlist);
-  // const dispatch = useDispatch<AppDispatch>()
   
-  // 
-  
-  // dispatch(songFilter(filter));
-
-
-  // const [songs, setSongs ]= useState<SongDTO[]>(playlist);
-
-  // useEffect(() => {
-  //   setSongs(playlist);
-  // }, [])
+  useEffect(() => {
+    dispatch(songFilter(filter));
+  }, [])
 
   return (
     <div className="w-full h-full p-10 bg-gray-500">
