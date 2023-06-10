@@ -1,11 +1,15 @@
 import { ChangeEvent, MouseEvent, useState } from 'react';
 import { Modal } from '../layouts/Modal';
-import { useDispatch } from 'react-redux';
-import { uploadSong } from '../features/songsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { songFilter, uploadSong } from '../features/songsSlice';
 import { AppDispatch } from '../app/store';
+import { Metadata } from '../app/metadata';
 
 export const UploadSong = () => {  
   const dispatch = useDispatch<AppDispatch>()
+
+  const filter = useSelector((state: { songs: { filter: Metadata } }) => state.songs.filter);
+
   const [song, setSong] = useState<File>();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -19,6 +23,7 @@ export const UploadSong = () => {
     e.preventDefault();
     if (!song) return;
     dispatch(uploadSong(song));
+    dispatch(songFilter(filter));
     setModalVisible(false);
   }
 

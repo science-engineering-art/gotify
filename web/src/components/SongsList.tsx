@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { ListRenderer } from "../layouts/ListRenderer";
 import { SongItem } from "./SongItem";
 import React from "react";
+import { songFilter } from '../features/songsSlice';
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../app/store";
+import { Metadata } from "../app/metadata";
 
 type SongDTO = {
   id: string;
@@ -11,28 +15,26 @@ type SongDTO = {
 }
 
 export const SongsList: React.FC = () => {
-  const [songs, setSongs ]= useState<SongDTO[]>();
-
-  const getSongs = async () => {
-    const resp = await fetch(`http://api.gotify.com/songs`, {
-      method: 'POST',
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({})
-    }).then(res => res.json())
-      .catch(e => console.log(e))
-    setSongs(resp.data.songs)
-  }
+  const playlist = useSelector((state: { songs: { playlist: SongDTO[] } }) => state.songs.playlist);
+  // const dispatch = useDispatch<AppDispatch>()
   
-  useEffect(() => {
-    getSongs();
-  }, [])
+  // 
+  
+  // dispatch(songFilter(filter));
+
+
+  // const [songs, setSongs ]= useState<SongDTO[]>(playlist);
+
+  // useEffect(() => {
+  //   setSongs(playlist);
+  // }, [])
 
   return (
     <div className="w-full h-full p-10 bg-gray-500">
-      {songs && <ListRenderer
+      {playlist && <ListRenderer
         ItemComponent={SongItem}
         resourceName="song"
-        items={songs}
+        items={playlist}
       />}
     </div>
   );
