@@ -6,7 +6,7 @@ COPY ./ ./
 
 RUN go build -o main
 
-FROM redis:latest
+FROM docker.uclv.cu/redis:latest
 
 WORKDIR /peer
 
