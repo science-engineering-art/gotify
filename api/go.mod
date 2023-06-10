@@ -18,7 +18,7 @@ require (
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/redis/go-redis/v9 v9.0.5 // indirect
-	github.com/science-engineering-art/kademlia-grpc v0.0.0-00010101000000-000000000000 // indirect
+	// indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
@@ -54,6 +54,8 @@ require (
 	github.com/science-engineering-art/gotify/peer v0.0.0-00010101000000-000000000000
 	github.com/science-engineering-art/gotify/tracker v0.0.0-00010101000000-000000000000
 )
+
+require github.com/science-engineering-art/kademlia-grpc v0.0.0-00010101000000-000000000000 // indirect
 
 replace github.com/science-engineering-art/gotify/peer => ../peer
 
