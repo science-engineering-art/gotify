@@ -50,7 +50,7 @@ require (
 
 require (
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
-	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6
 	github.com/science-engineering-art/gotify/peer v0.0.0-00010101000000-000000000000
 	github.com/science-engineering-art/gotify/tracker v0.0.0-00010101000000-000000000000
 )

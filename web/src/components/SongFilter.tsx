@@ -9,14 +9,14 @@ export const SongFilter: React.FC = () => {
   const [artist, setArtist] = useState<string>("");
   const [album, setAlbum]   = useState<string>("");
   const [genre, setGenre]   = useState<string>("");
-  
+
   const dispatch = useDispatch<AppDispatch>();
-  
+
   const handleSubmit = async (e: MouseEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (title=="" && artist == "" && album == "" && genre == "") 
       return;
-    
+
     dispatch(songFilter({
       artist: artist,
       album: album,

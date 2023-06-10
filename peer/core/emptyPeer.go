@@ -2,9 +2,9 @@ package core
 
 import (
 	"crypto/sha1"
-	"encoding/base64"
 	"fmt"
 
+	base58 "github.com/jbenet/go-base58"
 	"github.com/science-engineering-art/gotify/peer/persistence"
 	kademlia "github.com/science-engineering-art/kademlia-grpc/core"
 )
@@ -23,7 +23,7 @@ func NewEmptyPeer(ip string, isBootstrapNode bool) *EmptyPeer {
 func (p *EmptyPeer) Store(data *[]byte) (string, error) {
 
 	hash := sha1.Sum(*data)
-	key := base64.RawStdEncoding.EncodeToString(hash[:])
+	key := base58.Encode(hash[:])
 
 	fmt.Println("Before StoreValue()")
 	_, err := p.StoreValue(key, data)

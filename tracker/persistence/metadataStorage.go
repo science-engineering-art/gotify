@@ -1,10 +1,11 @@
 package persistence
 
 import (
-	"encoding/base64"
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/jbenet/go-base58"
 )
 
 type MetadataStorage struct {
@@ -18,7 +19,7 @@ func NewMetadataStorage() *MetadataStorage {
 }
 
 func (s *MetadataStorage) Create(key []byte, data *[]byte) error {
-	id := base64.RawStdEncoding.EncodeToString(key)
+	id := base58.Encode(key)
 
 	// _, exists := s.KV[id]
 	// if !exists {
@@ -30,7 +31,7 @@ func (s *MetadataStorage) Create(key []byte, data *[]byte) error {
 }
 
 func (s *MetadataStorage) Read(key []byte, start int32, end int32) (data *[]byte, err error) {
-	id := base64.RawStdEncoding.EncodeToString(key)
+	id := base58.Encode(key)
 
 	v, exists := s.KV[id]
 	if !exists {
@@ -44,7 +45,7 @@ func (s *MetadataStorage) Read(key []byte, start int32, end int32) (data *[]byte
 }
 
 func (s *MetadataStorage) Delete(key []byte) error {
-	id := base64.RawStdEncoding.EncodeToString(key)
+	id := base58.Encode(key)
 
 	_, exists := s.KV[id]
 	if !exists {

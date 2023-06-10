@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"log"
 
@@ -11,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
+	"github.com/jbenet/go-base58"
 	"github.com/science-engineering-art/gotify/peer/repository"
 )
 
@@ -51,7 +51,7 @@ func NewMongoDb(database, collection, mongoDbIP string) (s *MongoDb) {
 }
 
 func (s *MongoDb) Create(key []byte, data *[]byte) error {
-	b64 := base64.RawStdEncoding.EncodeToString(key)
+	b64 := base58.Encode(key)
 
 	err := s.repository.CreateSong(b64, data)
 	if err != nil {
@@ -62,7 +62,7 @@ func (s *MongoDb) Create(key []byte, data *[]byte) error {
 }
 
 func (s *MongoDb) Read(key []byte, start int32, end int32) (data *[]byte, err error) {
-	b64 := base64.RawStdEncoding.EncodeToString(key)
+	b64 := base58.Encode(key)
 
 	objID, err := primitive.ObjectIDFromHex(b64)
 	if err != nil {
@@ -78,7 +78,7 @@ func (s *MongoDb) Read(key []byte, start int32, end int32) (data *[]byte, err er
 }
 
 func (s *MongoDb) Delete(key []byte) error {
-	b64 := base64.RawStdEncoding.EncodeToString(key)
+	b64 := base58.Encode(key)
 
 	objID, err := primitive.ObjectIDFromHex(b64)
 	if err != nil {

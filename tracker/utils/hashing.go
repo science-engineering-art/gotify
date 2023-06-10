@@ -2,9 +2,10 @@ package utils
 
 import (
 	"crypto/sha1"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
+
+	"github.com/jbenet/go-base58"
 )
 
 func GetJsonMetadataKeyHash(key string) string {
@@ -22,6 +23,6 @@ func GetJsonMetadataKeyHash(key string) string {
 	}
 	jsonHash := sha1.Sum([]byte(jsonStrFromMap))
 	resultHash := jsonHash[:]
-	hash := base64.RawStdEncoding.EncodeToString(resultHash)
+	hash := base58.Encode(resultHash)
 	return hash
 }

@@ -42,7 +42,7 @@ export const songFilter = createAsyncThunk('songs/songFilter', async (filter: Me
   }
   // client.post('songs', JSON.stringify(data));
   
-  fetch('http://api.gotify.com/songs', {
+  const resp = await fetch('http://api.gotify.com/songs', {
     headers: {
       'Content-Type': 'application/json'
     },
@@ -50,6 +50,8 @@ export const songFilter = createAsyncThunk('songs/songFilter', async (filter: Me
     body: JSON.stringify(data)
   }).then(res => res.json())
     .catch(e => console.log(e))
+
+  console.log(resp)
 });
 
 export const { selectedSongId, selectedSongURL } = songsSlice.actions

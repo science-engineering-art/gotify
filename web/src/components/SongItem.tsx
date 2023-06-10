@@ -14,14 +14,16 @@ export type SongItemPropsType = {
 
 export const SongItem = ({ song }: SongItemPropsType) =>{
   const dispatch = useDispatch();
-  const songId = useSelector((state: { songs: { id: string } }) => state.songs.id);
+  const songId = useSelector((state: { songs: { Id: string } }) => state.songs.Id);
   const songUrl = useSelector((state: { songs: { url: string } }) => state.songs.url);
 
   const handleSelectedSong = async (_: MouseEvent<HTMLLIElement>) => {
-    console.log(song)
+    console.log(song.id)
     dispatch(selectedSongId(song.id))
     dispatch(selectedSongURL(`http://api.gotify.com/song/${song.id}`))
   }
+
+  console.log(`${songId} === ${song.id}?`)
 
   return (
     <li 
