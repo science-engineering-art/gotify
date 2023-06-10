@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -13,9 +14,10 @@ type RedisDb struct {
 	redis.Client
 }
 
-func NewRedisDb() *RedisDb {
+func NewRedisDb(ip string) *RedisDb {
+	addr := fmt.Sprintf("%s:6379", ip)
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     addr,
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
@@ -23,14 +25,25 @@ func NewRedisDb() *RedisDb {
 }
 
 func (rdb *RedisDb) Create(key []byte, data *[]byte) error {
+	fmt.Printf("INIT RedisDb.Create(): %v with len(data)=%d\n", key, len(*data))
+	defer fmt.Printf("EXIT RedisDb.Create(): %v\n", key)
+
 	keyB64 := base64.RawStdEncoding.EncodeToString(key)
 	dataB64 := base64.RawStdEncoding.EncodeToString(*data)
 
-	err := rdb.Set(context.TODO(), keyB64, dataB64, time.Minute).Err()
+	err := rdb.Set(context.TODO(), keyB64, dataB64, time.Hour).Err()
 	if err != nil {
+		fmt.Println("ERROR rdb.Set()")
 		return err
 	}
-	fmt.Println("Store Data with key:", keyB64)
+
+	saved, _ := rdb.Read(key, 0, 0)
+
+	if bytes.Equal(*data, *saved) {
+		fmt.Printf("OKKK rdb.Set(%v) & len(saved)=%d\n", key, len(*saved))
+	} else {
+		fmt.Println("ERROR rdb.Set()")
+	}
 
 	return nil
 }

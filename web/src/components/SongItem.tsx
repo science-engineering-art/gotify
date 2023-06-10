@@ -18,6 +18,7 @@ export const SongItem = ({ song }: SongItemPropsType) =>{
   const songUrl = useSelector((state: { songs: { url: string } }) => state.songs.url);
 
   const handleSelectedSong = async (_: MouseEvent<HTMLLIElement>) => {
+    console.log(song)
     dispatch(selectedSongId(song.id))
     dispatch(selectedSongURL(`http://api.gotify.com/song/${song.id}`))
   }

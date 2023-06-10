@@ -60,6 +60,10 @@ def getHostIPAvailable():
 
 
 def run_container(image: str, ip: str = '0.0.0.0', env: dict = None, vol: list = None, ports: dict= None):
+    
+    if ip == '0.0.0.0':
+        ip = getDockerIPAvailable()
+    
     def d(d: dict):
         if d == None:
             return {}

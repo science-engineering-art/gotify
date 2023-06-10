@@ -14,7 +14,7 @@ type RedisPeer struct {
 }
 
 func NewRedisPeer(ip string, isBootstrapNode bool) *RedisPeer {
-	db := persistence.NewRedisDb()
+	db := persistence.NewRedisDb(ip)
 	newPeer := kademlia.NewFullNode(ip, 8080, 32140, db, isBootstrapNode)
 
 	return &RedisPeer{*newPeer}

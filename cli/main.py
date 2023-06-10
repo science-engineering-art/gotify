@@ -70,47 +70,10 @@ if __name__ == '__main__':
 
     elif command == "up":
 
-        dns = run_container(
-            image='dns'
-        )
-        
-        # dockerIp = getDockerIPAvailable()
-        # db = run_container(
-        #     image='mongo',
-        #     ip=dockerIp,
-        #     env={
-        #         'MONGO_INITDB_ROOT_USERNAME': 'user',
-        #         'MONGO_INITDB_ROOT_PASSWORD': 'password'
-        #     },
-        #     # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/peer/data:/data/db']
-        # )
-        peer = run_container(
-            image='peer',
-            # env={
-            #     'MONGODB_IP': dockerIp
-            # },
-        )
-
-        # dockerIp = getDockerIPAvailable()
-        # db = run_container(
-        #     image='mongo',
-        #     ip=dockerIp,
-        #     env={
-        #         'MONGO_INITDB_ROOT_USERNAME': 'user',
-        #         'MONGO_INITDB_ROOT_PASSWORD': 'password'
-        #     },
-        #     # vol=['/home/leandro/go/src/github.com/science-engineering-art/gotify/api/data:/data/db']
-        # )
-        api = run_container(
-            image='api',
-            # env={
-            #     'MONGODB_IP': dockerIp
-            # },
-        )
-
-        web = run_container(
-            image='web'
-        )
+        dns = run_container(image='dns')
+        peer = run_container(image='peer')
+        api = run_container(image='api')
+        web = run_container(image='web')
 
     elif command == "down":
         for container in client.containers.list(all=True):
