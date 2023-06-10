@@ -92,7 +92,7 @@ func getValueFullJsonData(jsonSongMetadata string, songDataHash string) string {
 	if err != nil {
 		fmt.Printf("could not unmarshal json: %s\n", err)
 	}
-	data["datahash"] = songDataHash
+	data["id"] = songDataHash
 
 	jsonData, _ := json.Marshal(data)
 	if err != nil {
