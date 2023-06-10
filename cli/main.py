@@ -69,14 +69,15 @@ if __name__ == '__main__':
         os.system("docker rmi $(docker images | grep '<none>' | awk '{print $3}')")
 
     if command == "rebuild":
+        
         print("\nRebuild all dependencies\n")
         os.system("cd .. && make vendor && cd cli")
         
         print("\nRebuild Docker Images\n")
-        os.system("python main.py build")
+        os.system("python3 main.py build")
         
         print("\nNetworking UP\n")
-        os.system("python main.py up")
+        os.system("python3 main.py up")
         os.system("docker ps -a")
 
     elif command == "up":
