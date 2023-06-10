@@ -95,3 +95,16 @@ func (rdb *RedisDb) Delete(key []byte) error {
 
 	return err
 }
+
+func (rdb *RedisDb) GetKeys() [][]byte {
+	keys, err := rdb.Keys(context.TODO(), "*").Result()
+	result := [][]byte{}
+	if err != nil {
+		return result
+	}
+	for _, key := range keys {
+		keyBytes := base58.Decode(key)
+		result = append(result, keyBytes)
+	}
+	return result
+}

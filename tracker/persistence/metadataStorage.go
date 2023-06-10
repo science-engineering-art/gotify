@@ -56,6 +56,15 @@ func (s *MetadataStorage) Delete(key []byte) error {
 	return nil
 }
 
+func (s *MetadataStorage) GetKeys() [][]byte {
+	keys := [][]byte{}
+	for k := range s.KV {
+		keyStr := base58.Decode(k)
+		keys = append(keys, keyStr)
+	}
+	return keys
+}
+
 func getFlattenByteArray(data [][]byte) []byte {
 	flatByteArray := []byte{}
 
