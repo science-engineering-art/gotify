@@ -6,7 +6,7 @@ require (
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
 	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6
 	github.com/redis/go-redis/v9 v9.0.5
-	github.com/science-engineering-art/kademlia-grpc v0.5.1
+	github.com/science-engineering-art/kademlia-grpc v0.0.0-00010101000000-000000000000
 	go.mongodb.org/mongo-driver v1.11.7
 	google.golang.org/grpc v1.55.0
 )

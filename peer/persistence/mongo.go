@@ -92,3 +92,7 @@ func (s *MongoDb) Delete(key []byte) error {
 
 	return nil
 }
+
+func (rdb *MongoDb) GetKeys() [][]byte {
+	return nil
+}

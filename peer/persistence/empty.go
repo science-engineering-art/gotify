@@ -20,3 +20,7 @@ func (e *Empty) Read(key []byte, start int64, end int64) (data *[]byte, err erro
 func (e *Empty) Delete(key []byte) error {
 	return nil
 }
+
+func (rdb *Empty) GetKeys() [][]byte {
+	return nil
+}
