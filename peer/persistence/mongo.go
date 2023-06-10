@@ -61,7 +61,7 @@ func (s *MongoDb) Create(key []byte, data *[]byte) error {
 	return nil
 }
 
-func (s *MongoDb) Read(key []byte, start int32, end int32) (data *[]byte, err error) {
+func (s *MongoDb) Read(key []byte, start int64, end int64) (data *[]byte, err error) {
 	b64 := base58.Encode(key)
 
 	objID, err := primitive.ObjectIDFromHex(b64)

@@ -30,7 +30,7 @@ func (s *MetadataStorage) Create(key []byte, data *[]byte) error {
 	return nil
 }
 
-func (s *MetadataStorage) Read(key []byte, start int32, end int32) (data *[]byte, err error) {
+func (s *MetadataStorage) Read(key []byte, start int64, end int64) (data *[]byte, err error) {
 	id := base58.Encode(key)
 
 	v, exists := s.KV[id]

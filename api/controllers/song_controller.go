@@ -14,7 +14,7 @@ import (
 	"strconv"
 
 	"github.com/dhowden/tag"
-	base58 "github.com/jbenet/go-base58"
+	"github.com/jbenet/go-base58"
 	"github.com/science-engineering-art/gotify/api/models"
 	"github.com/science-engineering-art/gotify/api/net"
 	"github.com/science-engineering-art/gotify/api/responses"
@@ -80,9 +80,6 @@ func CreateSong(c *fiber.Ctx) error {
 	// keep in a buffer the file information
 	file.Read(buffer)
 
-	fmt.Printf("Before Store().. len(data): %d\n", len(buffer))
-
-	fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\n")
 	key, err := net.Peer.Store(&buffer)
 	if err != nil {
 		return c.Status(http.StatusCreated).
@@ -95,12 +92,12 @@ func CreateSong(c *fiber.Ctx) error {
 			)
 	}
 
-	if net.Peer == nil {
-		fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\n")
-	}
-	// check if was correctly created
-	bufferSong, _ := net.Peer.GetValue(key, 0, 0)
-	fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\nPeer Saved a value with len: %d?????\n?????\n?????\n?????\n?????\n?????\n?????\n", len(bufferSong))
+	// if net.Peer == nil {
+	// 	fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\n")
+	// }
+	// // check if was correctly created
+	// bufferSong, _ := net.Peer.GetValue(key, 0, 0)
+	// fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\nPeer Saved a value with len: %d?????\n?????\n?????\n?????\n?????\n?????\n?????\n", len(bufferSong))
 	// os.WriteFile("received_song.mp3", bufferSong, 0600)
 
 	songBytes := bytes.NewReader(buffer)
@@ -152,30 +149,39 @@ func GetSongById(c *fiber.Ctx) error {
 	re := regexp.MustCompile(rangePattern)
 	matches := re.FindStringSubmatch(rangeHeader)
 
-	var start int
-	var end int
+	var start int64
+	var end int64
 
 	if len(matches) == 3 {
-		start, _ = strconv.Atoi(matches[1])
-		end, _ = strconv.Atoi(matches[2])
+		start, _ = strconv.ParseInt(matches[1], 10, 64)
+		end, _ = strconv.ParseInt(matches[2], 10, 64)
 	} else {
 		fmt.Println("==> ERROR `Invalid or missing Range header`")
 		return errors.New("invalid or missing range header")
 	}
 
+	if end == 0 {
+		end = math.MaxInt64
+	}
 	fmt.Printf("Range of %s Start: %d <==> End: %d\n", songId, start, end)
 
 	song := []byte{}
 
-	for i := start; i < end; i += 1024 {
-		j := math.Min(float64(i+1024), float64(end))
+	for i := start; i < end; i += 1048576 {
+		j := math.Min(float64(i+1048576), float64(end))
 
-		songChunck, err := net.Peer.GetValue(songId, int32(i), int32(j))
+		fmt.Println("Before Peer.GetValue()")
+		songChunck, err := net.Peer.GetValue(songId, int64(i), int64(j))
 		if err != nil {
 			fmt.Printf("==> ERROR %s\n", err)
 			return nil
 		}
+		fmt.Printf("After Peer.GetValue(%s, %d, %d) and Received: %d\n", songId, i, int(j), len(songChunck))
 		song = append(song, songChunck...)
+
+		if int64(len(songChunck)) < int64(j)-i {
+			break
+		}
 	}
 
 	// // Get the unique identifier from the request context
@@ -186,13 +192,18 @@ func GetSongById(c *fiber.Ctx) error {
 	// 	return fiber.NewError(fiber.StatusInternalServerError, "Unique identifier could not be obtained")
 	// }
 
-	fileName := "./tmp.mp3"
+	// fileName := "./public/tmp.mp3"
 
-	os.WriteFile(fileName, song, 0600)
-	defer os.Remove(fileName)
+	// os.WriteFile(fileName, song, 0600)
+	// defer os.Remove(fileName)
 
-	fmt.Println("==> OKKK")
-	return c.SendFile(fileName, true)
+	// c.Response().Header.SetContentRange(start, end, len(song))
+	// c.Response().Header.SetContentLength(len(song))
+
+	// c.Context().SetStatusCode(fiber.StatusPartialContent)
+
+	fmt.Println("==> OKKK", len(song))
+	return c.Send(song)
 }
 
 // func UpdateSong(c *fiber.Ctx) error {

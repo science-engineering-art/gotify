@@ -13,7 +13,7 @@ func (e *Empty) Create(key []byte, data *[]byte) error {
 	return nil
 }
 
-func (e *Empty) Read(key []byte, start int32, end int32) (data *[]byte, err error) {
+func (e *Empty) Read(key []byte, start int64, end int64) (data *[]byte, err error) {
 	return nil, errors.New("not found")
 }
 
