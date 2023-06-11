@@ -3,7 +3,6 @@ package utils
 import (
 	"crypto/sha1"
 	"encoding/json"
-	"fmt"
 	"math"
 
 	"github.com/jbenet/go-base58"
@@ -15,11 +14,11 @@ func GetHashesPowerSet(jsonData string) []string {
 
 	err := json.Unmarshal([]byte(jsonData), &data)
 	if err != nil {
-		fmt.Printf("could not unmarshal json: %s\n", err)
+		//fmt.Printf("could not unmarshal json: %s\n", err)
 	}
 
 	keys := getKeys(data)
-	// fmt.Printf("\nKeys %v \n\n", keys)
+	// //fmt.Printf("\nKeys %v \n\n", keys)
 
 	keysPowerSet := getKeysPowerSet(keys)
 
@@ -32,13 +31,13 @@ func GetHashesPowerSet(jsonData string) []string {
 		jsonFromMap, _ := json.Marshal(subJson)
 		jsonStrFromMap := string(jsonFromMap)
 		if err != nil {
-			fmt.Printf("could not marshal map: %s\n", err)
+			//fmt.Printf("could not marshal map: %s\n", err)
 		}
 		jsonHash := sha1.Sum([]byte(jsonStrFromMap))
 		resultHash := jsonHash[:]
 		hash := base58.Encode(resultHash)
 
-		// fmt.Printf("\nKeySet: %v\nHash: %s\n\n", keysSet, hash)
+		// //fmt.Printf("\nKeySet: %v\nHash: %s\n\n", keysSet, hash)
 
 		hashesPowerSet = append(hashesPowerSet, hash)
 	}

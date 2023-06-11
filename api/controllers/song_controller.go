@@ -25,7 +25,7 @@ import (
 )
 
 func CreateSong(c *fiber.Ctx) error {
-	fmt.Println("Init CreateSong()")
+	//fmt.Println("Init CreateSong()")
 
 	// get file from the multipart-form
 	fileForm, err := c.FormFile("file")
@@ -80,7 +80,7 @@ func CreateSong(c *fiber.Ctx) error {
 	// keep in a buffer the file information
 	file.Read(buffer)
 
-	key, err := net.Peer.Store(&buffer)
+	_, err = net.Peer.Store(&buffer)
 	if err != nil {
 		return c.Status(http.StatusCreated).
 			JSON(
@@ -93,11 +93,11 @@ func CreateSong(c *fiber.Ctx) error {
 	}
 
 	// if net.Peer == nil {
-	// 	fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\n")
+	// 	//fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\n")
 	// }
 	// // check if was correctly created
 	// bufferSong, _ := net.Peer.GetValue(key, 0, 0)
-	// fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\nPeer Saved a value with len: %d?????\n?????\n?????\n?????\n?????\n?????\n?????\n", len(bufferSong))
+	// //fmt.Printf("?????\n?????\n?????\n?????\n?????\n?????\n?????\nPeer Saved a value with len: %d?????\n?????\n?????\n?????\n?????\n?????\n?????\n", len(bufferSong))
 	// os.WriteFile("received_song.mp3", bufferSong, 0600)
 
 	songBytes := bytes.NewReader(buffer)
@@ -115,14 +115,14 @@ func CreateSong(c *fiber.Ctx) error {
 	jsonMap["title"] = m.Title()
 
 	jsonString, _ := json.Marshal(jsonMap)
-	fmt.Println(string(jsonString))
+	//fmt.Println(string(jsonString))
 	// Get datahash
 	hash := sha1.Sum(buffer)
 	songDataHash := base58.Encode(hash[:])
 
 	net.Tracker.StoreSongMetadata(string(jsonString), songDataHash)
 
-	fmt.Printf("Song ID Created: %s\n", key)
+	//fmt.Printf("Song ID Created: %s\n", key)
 
 	return c.Status(http.StatusCreated).
 		JSON(
@@ -135,13 +135,13 @@ func CreateSong(c *fiber.Ctx) error {
 }
 
 func GetSongById(c *fiber.Ctx) error {
-	fmt.Println("==> INIT GetSongById()")
-	defer fmt.Println("==> EXIT GetSongById()")
+	//fmt.Println("==> INIT GetSongById()")
+	// defer //fmt.Println("==> EXIT GetSongById()")
 
 	// get the song ID
 	songId := c.Params("songId")
 
-	fmt.Println("SongId:", songId)
+	//fmt.Println("SongId:", songId)
 
 	rangeHeader := c.Get("Range")
 
@@ -156,27 +156,27 @@ func GetSongById(c *fiber.Ctx) error {
 		start, _ = strconv.ParseInt(matches[1], 10, 64)
 		end, _ = strconv.ParseInt(matches[2], 10, 64)
 	} else {
-		fmt.Println("==> ERROR `Invalid or missing Range header`")
+		//fmt.Println("==> ERROR `Invalid or missing Range header`")
 		return errors.New("invalid or missing range header")
 	}
 
 	if end == 0 {
 		end = math.MaxInt64
 	}
-	fmt.Printf("Range of %s Start: %d <==> End: %d\n", songId, start, end)
+	// fmt.Printf("Range of %s Start: %d <==> End: %d\n", songId, start, end)
 
 	song := []byte{}
 
 	for i := start; i < end; i += 1048576 {
 		j := math.Min(float64(i+1048576), float64(end))
 
-		fmt.Println("Before Peer.GetValue()")
+		//fmt.Println("Before Peer.GetValue()")
 		songChunck, err := net.Peer.GetValue(songId, int64(i), int64(j))
 		if err != nil {
-			fmt.Printf("==> ERROR %s\n", err)
+			//fmt.Printf("==> ERROR %s\n", err)
 			return nil
 		}
-		fmt.Printf("After Peer.GetValue(%s, %d, %d) and Received: %d\n", songId, i, int(j), len(songChunck))
+		//fmt.Printf("After Peer.GetValue(%s, %d, %d) and Received: %d\n", songId, i, int(j), len(songChunck))
 		song = append(song, songChunck...)
 
 		if int64(len(songChunck)) < int64(j)-i {
@@ -188,7 +188,7 @@ func GetSongById(c *fiber.Ctx) error {
 	// requestId, ok := c.Context().UserValue("requestId").(uuid.UUID)
 	// if !ok {
 	// 	// Handle error if unique identifier cannot be obtained
-	// 	fmt.Println("==> ERROR `unique identifier cannot be obtained`")
+	// 	//fmt.Println("==> ERROR `unique identifier cannot be obtained`")
 	// 	return fiber.NewError(fiber.StatusInternalServerError, "Unique identifier could not be obtained")
 	// }
 
@@ -197,12 +197,12 @@ func GetSongById(c *fiber.Ctx) error {
 	// os.WriteFile(fileName, song, 0600)
 	// defer os.Remove(fileName)
 
-	// c.Response().Header.SetContentRange(start, end, len(song))
+	// c.Response().Header.SetContentRange(int(start), int(end), len(song))
 	// c.Response().Header.SetContentLength(len(song))
 
 	// c.Context().SetStatusCode(fiber.StatusPartialContent)
 
-	fmt.Println("==> OKKK", len(song))
+	//fmt.Println("==> OKKK", len(song))
 	return c.Send(song)
 }
 
@@ -303,16 +303,16 @@ func SongFilter(c *fiber.Ctx) error {
 			"errors": err.Error(),
 		})
 	}
-	fmt.Println("Query", query)
+	//fmt.Println("Query", query)
 
 	queryString := convertQueryToString(*query)
-	fmt.Println("QueryString", queryString)
+	//fmt.Println("QueryString", queryString)
 
 	keyHash := trackerUtils.GetJsonMetadataKeyHash(queryString)
 	songsList := net.Tracker.GetSongList(keyHash)
 
 	// songsList := net.Tracker.GetSongList(queryString)
-	fmt.Println("SongList", songsList)
+	//fmt.Println("SongList", songsList)
 
 	var songsResponse []models.SongsFilterResponse
 
@@ -320,7 +320,7 @@ func SongFilter(c *fiber.Ctx) error {
 		songResponse := convertStringToResponse(song)
 		songsResponse = append(songsResponse, songResponse)
 	}
-	fmt.Println("SongResponse", songsResponse)
+	//fmt.Println("SongResponse", songsResponse)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.SongResponse{
@@ -334,7 +334,7 @@ func SongFilter(c *fiber.Ctx) error {
 func convertQueryToString(query models.SongQuery) string {
 	jsonBytes, err := json.Marshal(query)
 	if err != nil {
-		fmt.Println("error:", err)
+		//fmt.Println("error:", err)
 		return "{}"
 	}
 	jsonString := string(jsonBytes)
@@ -346,7 +346,7 @@ func convertStringToResponse(queryString string) models.SongsFilterResponse {
 	var response models.SongsFilterResponse
 	err := json.Unmarshal(songData, &response)
 	if err != nil {
-		fmt.Println("Error while Unmarshaling")
+		//fmt.Println("Error while Unmarshaling")
 	}
 	return response
 }

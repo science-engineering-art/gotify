@@ -1,8 +1,7 @@
 
 export function AudioPlayer(props: { src: string}) {
-  console.log(props.src)
   return (
-    <audio autoPlay={true} controls>
+    <audio id="audio" controls={true} autoPlay={true}>
       <source src={props.src} type="audio/mpeg" />
     </audio>
   );

@@ -12,11 +12,11 @@ type EmptyTracker struct {
 	kademlia.FullNode
 }
 
-func NewEmptyTracker(ip string, port int, bootPort int, isBoot bool) (*EmptyTracker, error) {
-	metadataStorage := persistence.NewMetadataStorage()
-	fn := kademlia.NewFullNode(ip, port, bootPort, metadataStorage, isBoot)
-	tracker := &EmptyTracker{FullNode: *fn}
-	return tracker, nil
+func NewEmptyTracker(ip string, port, bootPort int, isBootstrap bool) *EmptyTracker {
+	storage := persistence.NewEmpty()
+	newTracker := kademlia.NewFullNode(ip, port, bootPort, storage, isBootstrap)
+
+	return &EmptyTracker{FullNode: *newTracker}
 }
 
 func (t *EmptyTracker) GetSongList(key string) []string {

@@ -23,9 +23,9 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	case dns.TypeA:
 		msg.Authoritative = true
 		domain := msg.Question[0].Name
-		fmt.Println(domain)
+		//fmt.Println(domain)
 		IP, err := h.broadcast(broadcastPort[domain])
-		fmt.Println("IP Found:", IP)
+		//fmt.Println("IP Found:", IP)
 		if err == nil {
 			msg.Answer = append(msg.Answer, &dns.A{
 				Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 60},
@@ -74,12 +74,12 @@ func (h *handler) broadcast(port int) (net.IP, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("AcceptTCP Connection")
+	//fmt.Println("AcceptTCP Connection")
 	ip, err := utils.DeserializeMessage(tcpConn)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(ip)
+	//fmt.Println(ip)
 
 	return ip, nil
 }

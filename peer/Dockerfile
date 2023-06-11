@@ -14,7 +14,7 @@ COPY --from=builder /build/main ./
 
 COPY ./start.sh ./
 
-EXPOSE 8080
+# EXPOSE 8080
 
 CMD [ "bash", "start.sh" ]
 

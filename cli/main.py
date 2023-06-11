@@ -87,9 +87,9 @@ if __name__ == '__main__':
 
         dns = run_container(image='dns')
         peer = run_container(image='peer')
-        api = run_container(image='api')
-        web = run_container(image='web')
         tracker = run_container(image='tracker')
+        web = run_container(image='web')
+        api = run_container(image='api')
 
     elif command == "down":
         for container in client.containers.list(all=True):

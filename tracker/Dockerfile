@@ -4,7 +4,7 @@ WORKDIR /tracker
 
 COPY ./ ./
 
-EXPOSE 8081
+# EXPOSE 8081
 # EXPOSE 32141/udp
 
 CMD [ "go", "run", "main.go" ]

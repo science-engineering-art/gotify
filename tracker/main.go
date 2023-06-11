@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
 	"net"
 	"os/exec"
@@ -15,8 +15,10 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var tracker *trackerCore.Tracker
-var grpcServerAddress string
+var (
+	ip   = getIpFromHost()
+	port = 9090
+)
 
 func main() {
 	// Init CLI for using Full Node Methods
@@ -26,18 +28,14 @@ func main() {
 	// }
 	// defer rl.Close()
 
-	port := 8081
-	bPort := 5555
-	isB := true
+	tracker, _ := trackerCore.NewTracker(ip, port, 42140, true)
 
-	ip := getIpFromHost()
-	grpcServerAddress = ip + ":" + strconv.FormatInt(int64(port), 10)
-	tracker, _ = trackerCore.NewTracker(ip, port, bPort, isB)
 	grpcServer := grpc.NewServer()
 
 	pb.RegisterFullNodeServer(grpcServer, &tracker.FullNode)
 	reflection.Register(grpcServer)
 
+	grpcServerAddress := ip + ":" + strconv.FormatInt(int64(port), 10)
 	listener, err := net.Listen("tcp", grpcServerAddress)
 	if err != nil {
 		log.Fatal("cannot create grpc server: ", err)
@@ -49,7 +47,7 @@ func main() {
 		log.Fatal("cannot create grpc server: ", err)
 	}
 
-	fmt.Println("Node running at:", ip, ":", port)
+	//fmt.Println("Node running at:", ip, ":", port)
 
 	// for {
 	// 	line, err := rl.Readline()
@@ -94,7 +92,7 @@ func getIpFromHost() string {
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Error running docker inspect:", err)
+		//fmt.Println("Error running docker inspect:", err)
 		return ""
 	}
 	ip := strings.TrimSpace(out.String())
