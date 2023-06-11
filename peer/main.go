@@ -18,7 +18,7 @@ var (
 )
 
 func main() {
-	peer := core.NewRedisPeer(ip, true)
+	peer := core.NewRedisPeer(ip, port, 32140, true)
 
 	grpcServer := grpc.NewServer()
 

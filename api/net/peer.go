@@ -10,8 +10,8 @@ var (
 	Peer *core.EmptyPeer
 )
 
-func InitPeer(ip string, port int) {
-	Peer = core.NewEmptyPeer(ip, false)
+func InitPeer(ip string, port, bootPort int) {
+	Peer = core.NewEmptyPeer(ip, port, bootPort, false)
 	addr := fmt.Sprintf("%s:%d", ip, port)
 	go Peer.FullNode.CreateGRPCServer(addr)
 }

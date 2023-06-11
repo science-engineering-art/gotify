@@ -17,7 +17,7 @@ import (
 
 var (
 	ip   = getIpFromHost()
-	port = 8081
+	port = 9090
 )
 
 func main() {
@@ -28,10 +28,7 @@ func main() {
 	// }
 	// defer rl.Close()
 
-	bPort := 5555
-	isB := true
-
-	tracker, _ := trackerCore.NewTracker(ip, port, bPort, isB)
+	tracker, _ := trackerCore.NewTracker(ip, port, 42140, true)
 
 	grpcServer := grpc.NewServer()
 

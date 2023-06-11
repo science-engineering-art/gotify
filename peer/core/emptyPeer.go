@@ -12,9 +12,9 @@ type EmptyPeer struct {
 	kademlia.FullNode
 }
 
-func NewEmptyPeer(ip string, isBootstrapNode bool) *EmptyPeer {
+func NewEmptyPeer(ip string, port, bootPort int, isBootstrapNode bool) *EmptyPeer {
 	db := persistence.NewEmpty()
-	newPeer := kademlia.NewFullNode(ip, 8080, 32140, db, isBootstrapNode)
+	newPeer := kademlia.NewFullNode(ip, port, bootPort, db, isBootstrapNode)
 
 	return &EmptyPeer{*newPeer}
 }
