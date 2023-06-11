@@ -6,6 +6,9 @@ from container import *
 
 """
 python main.py [command] [args]
+
+                rebuild -- elimina las imagenes anteriores, prepara las imagenes e cada tipo
+                de node, luego levanta la red con un nodo de cada tipo
                 
                 build -- construye las imágenes de Docker correspondientes
                     a cada node de la red
