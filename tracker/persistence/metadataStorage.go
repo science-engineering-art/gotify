@@ -3,7 +3,6 @@ package persistence
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 
 	"github.com/jbenet/go-base58"
 )
@@ -26,7 +25,7 @@ func (s *MetadataStorage) Create(key []byte, data *[]byte) error {
 	// }
 
 	s.KV[id] = append(s.KV[id], *data)
-	fmt.Println(s.KV[id])
+	//fmt.Println(s.KV[id])
 	return nil
 }
 
@@ -37,10 +36,10 @@ func (s *MetadataStorage) Read(key []byte, start int64, end int64) (data *[]byte
 	if !exists {
 		return nil, errors.New("the key is not found")
 	}
-	//fmt.Println("Retrived v:", v)
+	////fmt.Println("Retrived v:", v)
 
 	flattenByteArray := getFlattenByteArray(v)
-	//fmt.Println("Flatten array:", flattenByteArray)
+	////fmt.Println("Flatten array:", flattenByteArray)
 	return &flattenByteArray, nil
 }
 

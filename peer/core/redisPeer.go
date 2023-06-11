@@ -2,7 +2,6 @@ package core
 
 import (
 	"crypto/sha1"
-	"fmt"
 
 	base58 "github.com/jbenet/go-base58"
 	"github.com/science-engineering-art/gotify/peer/persistence"
@@ -25,12 +24,12 @@ func (p *RedisPeer) Store(data *[]byte) (string, error) {
 	hash := sha1.Sum(*data)
 	key := base58.Encode(hash[:])
 
-	fmt.Println("Before StoreValue()")
+	//fmt.Println("Before StoreValue()")
 	_, err := p.StoreValue(key, data)
 	if err != nil {
 		return "", nil
 	}
-	fmt.Println("After StoreValue()")
+	//fmt.Println("After StoreValue()")
 
 	return key, nil
 }

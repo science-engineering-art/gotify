@@ -20,7 +20,7 @@ type MongoDb struct {
 
 func NewMongoDb(database, collection, mongoDbIP string) (s *MongoDb) {
 	mongoDbUri := fmt.Sprintf("mongodb://user:password@%s:27017/?maxPoolSize=20&w=majority", mongoDbIP)
-	fmt.Println("Trying to connect...", mongoDbIP)
+	//fmt.Println("Trying to connect...", mongoDbIP)
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoDbUri))
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +37,7 @@ func NewMongoDb(database, collection, mongoDbIP string) (s *MongoDb) {
 		panic(err)
 	}
 
-	fmt.Println("MongoDb successfully connected to", mongoDbIP)
+	//fmt.Println("MongoDb successfully connected to", mongoDbIP)
 
 	// Collections
 	songCollection := client.Database(database).Collection(collection)

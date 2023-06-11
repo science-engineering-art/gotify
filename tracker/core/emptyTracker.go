@@ -13,8 +13,8 @@ type EmptyTracker struct {
 }
 
 func NewEmptyTracker(ip string, port int, bootPort int, isBoot bool) (*EmptyTracker, error) {
-	metadataStorage := persistence.NewMetadataStorage()
-	fn := kademlia.NewFullNode(ip, port, bootPort, metadataStorage, isBoot)
+	storage := persistence.NewEmpty()
+	fn := kademlia.NewFullNode(ip, port, bootPort, storage, isBoot)
 	tracker := &EmptyTracker{FullNode: *fn}
 	return tracker, nil
 }
