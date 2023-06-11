@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	Tracker *core.Tracker
+	Tracker *core.EmptyTracker
 )
 
 func InitTracker(ip string, port int, bootPort int, isBoot bool) {
-	Tracker, _ = core.NewTracker(ip, port, bootPort, isBoot)
+	Tracker, _ = core.NewEmptyTracker(ip, port, bootPort, false)
 	addr := fmt.Sprintf("%s:%d", ip, port)
 	go Tracker.FullNode.CreateGRPCServer(addr)
 }

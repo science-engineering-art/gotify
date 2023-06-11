@@ -45,7 +45,7 @@ if __name__ == '__main__':
         for container in client.containers.list():
             container.stop()
 
-        for img in ["dns", "web", "api", "peer"]:
+        for img in ["dns", "web", "api", "peer", "tracker"]:
             client.images.build(
                 path=f"../{img}",
                 dockerfile="Dockerfile",
@@ -86,6 +86,7 @@ if __name__ == '__main__':
         peer = run_container(image='peer')
         api = run_container(image='api')
         web = run_container(image='web')
+        tracker = run_container(image='tracker')
 
     elif command == "down":
         for container in client.containers.list(all=True):
@@ -133,7 +134,7 @@ if __name__ == '__main__':
                 container.remove()
             except:...
 
-        elif image in ["dns", "web", "api", "peer"] \
+        elif image in ["dns", "web", "api", "peer", "tracker"] \
             and len(sys.argv) == 4:
             
             # amount of containers to trash
@@ -152,7 +153,7 @@ if __name__ == '__main__':
 
     elif command == "list":
 
-        if image in ["dns", "web", "api", "peer"]:
+        if image in ["dns", "web", "api", "peer", "tracker"]:
             containers = client.containers.list(filters={
                 "ancestor": f"{image}:latest"
             })
