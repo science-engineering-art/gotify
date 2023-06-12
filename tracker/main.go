@@ -4,19 +4,17 @@ import (
 	// "fmt"
 	"log"
 	"net"
-	"os/exec"
 	"strconv"
-	"strings"
 
 	trackerCore "github.com/science-engineering-art/gotify/tracker/core"
-	kademliaCore "github.com/science-engineering-art/kademlia-grpc/core"
+	"github.com/science-engineering-art/gotify/tracker/utils"
 	"github.com/science-engineering-art/kademlia-grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 var (
-	ip   = getIpFromHost()
+	ip   = utils.GetIpFromHost()
 	port = 9090
 )
 
@@ -84,21 +82,4 @@ func main() {
 	// 		tracker.FullNode.PrintRoutingTable()
 	// 	}
 	// }
-}
-
-func getIpFromHost() string {
-	cmd := exec.Command("hostname", "-i")
-	var out strings.Builder
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		//fmt.Println("Error running docker inspect:", err)
-		return ""
-	}
-	ip := strings.TrimSpace(out.String())
-	return ip
-}
-
-func CreateGRPCServerFromFullNode(fullNode kademliaCore.FullNode) {
-
 }
