@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6
-	google.golang.org/grpc v1.55.0
+	google.golang.org/grpc v1.55.0 // indirect
 )
 
 require github.com/science-engineering-art/kademlia-grpc v0.0.0-00010101000000-000000000000

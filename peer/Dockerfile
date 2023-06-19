@@ -12,6 +12,8 @@ WORKDIR /peer
 
 COPY --from=builder /build/main ./
 
+COPY ./cert ./cert
+
 COPY ./start.sh ./
 
 # EXPOSE 8080
