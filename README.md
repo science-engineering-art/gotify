@@ -1,7 +1,7 @@
 <h1 align="center">
+    <br> 
+    <img height="300" src="./docs/gopher.svg"> <br> <br>
     Spotify implementation in Golang
-    <br> <br>
-    <img height="300" src="./docs/gopher.svg"> <br>
 </h1>
 
 
