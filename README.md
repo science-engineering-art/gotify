@@ -1,6 +1,9 @@
-# Gotify
+<h1 align="center">
+    Spotify implementation in Golang
+    <br> <br>
+    <img height="300" src="./docs/gopher.svg"> <br>
+</h1>
 
-Spotify implementation in Golang.
 
 ## Documentation
 
